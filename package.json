@@ -1,0 +1,13 @@
+{
+  "name": "ficsit-together",
+  "private": true,
+  "workspaces": [
+    "ficlib",
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "build": "npm run build -ws",
+    "build:lib": "npm run build --workspace ficlib"
+  }
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "className": "Desc_OreIron_C",
+    "displayName": "Iron Ore",
+    "harvestableAmount": 92100
+  },
+  {
+    "className": "Desc_OreCopper_C",
+    "displayName": "Copper Ore",
+    "harvestableAmount": 35400
+  },
+  {
+    "className": "Desc_Stone_C",
+    "displayName": "LimeStone",
+    "harvestableAmount": 69900
+  },
+  {
+    "className": "Desc_Coal_C",
+    "displayName": "Coal",
+    "harvestableAmount": 41400
+  },
+  {
+    "className": "Desc_RawQuartz_C",
+    "displayName": "Raw Quartz",
+    "harvestableAmount": 13500
+  },
+  {
+    "className": "Desc_Sulfur_C",
+    "displayName": "Sulfur",
+    "harvestableAmount": 10800
+  },
+  {
+    "className": "Desc_OreGold_C",
+    "displayName": "Caterium Ore",
+    "harvestableAmount": 15000
+  },
+  {
+    "className": "Desc_OreBauxite_C",
+    "displayName": "Bauxite",
+    "harvestableAmount": 12300
+  },
+  {
+    "className": "Desc_OreUranium_C",
+    "displayName": "Uranium",
+    "harvestableAmount": 2100
+  },
+  {
+    "className": "Desc_Water_C",
+    "displayName": "Water",
+    "harvestableAmount": 0
+  },
+  {
+    "className": "Desc_LiquidOil_C",
+    "displayName": "Crude Oil",
+    "harvestableAmount": 9900
+  },
+  {
+    "className": "Desc_NitrogenGas_C",
+    "displayName": "Nitrogen Gas",
+    "harvestableAmount": 12000
+  },
+  {
+    "className": "Desc_SAM_C",
+    "displayName": "SAM",
+    "harvestableAmount": 10200
+  }
+]
