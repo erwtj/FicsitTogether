@@ -1,13 +1,29 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsx src/server.ts"
   },
+  "type": "module",
   "private": true,
   "dependencies": {
-    "ficlib": "*"
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.1",
+    "@types/ws": "^8.18.1",
+    "argon2": "^0.44.0",
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "express-oauth2-jwt-bearer": "^1.7.4",
+    "ficlib": "*",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "ws": "^8.19.0",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.29"
   },
   "keywords": [],
   "author": "",

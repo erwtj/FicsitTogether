@@ -1,0 +1,12 @@
+﻿/.idea
+/node_modules
+
+**.sqlite
+**.sqlite-shm
+**.sqlite-wal
+
+# Secrets
+**.env
+**.env.**
+**.key
+**.pem
