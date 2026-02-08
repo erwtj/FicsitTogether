@@ -232,7 +232,7 @@
     "powerConsumption": 2000.0,
     "powerProduction": 0.0,
     "fuel": [],
-    "area": 0,
+    "area": 1100,
     "somersloopsNeeded": 4
   },
   {
@@ -242,7 +242,7 @@
     "powerConsumption": 400.0,
     "powerProduction": 0.0,
     "fuel": [],
-    "area": 0,
+    "area": 256,
     "somersloopsNeeded": 2
   },
   {
@@ -254,5 +254,25 @@
     "fuel": [],
     "area": 912,
     "somersloopsNeeded": 4
+  },
+  {
+    "className": "Build_WaterPump_C",
+    "displayName": "Water Extractor",
+    "icon": "FactoryGame/Buildable/Factory/WaterPump/UI/Waterpump",
+    "powerConsumption": 20.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 390,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Desc_FrackingSmasher_C",
+    "displayName": "Resource Well Pressurizer",
+    "icon": "FactoryGame/Buildable/Factory/FrackingSmasher/UI/iconDesc_Smasher",
+    "powerConsumption": 150.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 400,
+    "somersloopsNeeded": -1
   }
 ]
