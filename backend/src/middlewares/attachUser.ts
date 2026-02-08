@@ -1,6 +1,8 @@
 ﻿import type {Request, Response, NextFunction} from "express";
 import {createUser, getUserByAuth0Id, type User} from "../repository/userRepository.js";
 import config from "../config/config.js";
+import {db} from "../repository/database.js";
+import {createDirectory} from "../repository/directoryRepository.js";
 
 declare module "express-serve-static-core" {
     interface Request {
@@ -21,10 +23,17 @@ export function attachUser(req: Request, res: Response, next: NextFunction) {
 
         // Auto-register if user doesn't exist
         if (!user) {
+            // get user info
             const userId = crypto.randomUUID();
             const username = req.auth?.payload[config.auth0Audience + '/username'] as string || `user_${userId.slice(0, 8)}`;
-
-            createUser(userId, username, auth0_id);
+            const rootDirectoryId = crypto.randomUUID();
+            
+            // TODO: Turn this into a transaction so we can rollback in case of an error
+            // create user data
+            createUser(userId, username, auth0_id, rootDirectoryId);
+            // create root directory for user
+            createDirectory(rootDirectoryId, rootDirectoryId, userId, "root");
+            
             user = getUserByAuth0Id(auth0_id);
         }
 

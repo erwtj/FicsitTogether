@@ -33,14 +33,14 @@ export function deleteDirectory(id: string) {
 }
 
 const getDirectoriesRecursiveQuery = db.prepare<string, Directory>(`
-    WITH RECURSIVE subdirs(id, name, parent_directory) AS (
-        SELECT id, name, parent_directory, owner FROM directories WHERE id = ?
+    WITH RECURSIVE subdirs(id, parent_directory, owner, name) AS (
+        SELECT id, parent_directory, owner, name FROM directories WHERE id = ?
     
         UNION
     
-        SELECT d.id, d.name, d.owner, d.parent_directory FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
+        SELECT d.id, d.parent_directory, d.owner, d.name FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
     )
-    SELECT id, name, owner, parent_directory as parentDirectoryId FROM subdirs;
+    SELECT id, parent_directory, owner, name as parentDirectoryId FROM subdirs;
 `);
 export function getDirectoriesRecursive(directoryId: string) {
     return getDirectoriesRecursiveQuery.all(directoryId);

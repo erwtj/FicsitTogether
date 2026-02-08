@@ -5,6 +5,7 @@ export const db: Database.Database = new Database('db.sqlite');
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// root_directory on user is not foreign key, this way we do not need to disable foreign keys before inserting user
 db.exec(`
     create table if not exists users
     (
@@ -17,6 +18,7 @@ db.exec(`
         auth0_id   text not null
             constraint users_pk_3
                 unique,
+        root_directory text not null,
         created_at DATETIME default CURRENT_TIMESTAMP
     );
     
