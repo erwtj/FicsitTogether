@@ -6,14 +6,19 @@ import type {Project} from "../repository/projectRepository.js";
 const emptyChart = {nodes: [], edges: [], viewport: {x: 0, y: 0, zoom: 1}};
 const emptyJson = JSON.stringify(emptyChart); 
 
+// TODO: Allow marking project's as public via url, that way you can share files with other people without them being able to edit and without needing their username
+// TODO: Add project importing / exporting
+
 export function createProject(req: Request, res: Response, next: NextFunction): void {
     try {
         const directoryId = req.body.directoryId as string;
-        const name = req.body.name as string || "";
-        const description = req.body.description as string || "";
+        const name = req.body.name as string;
+        const description = req.body.description as string;
         
         if (!directoryId || !name || !description) {
-            res.status(400).send("Missing parameters!");
+            const error: AppError = new Error('Missing parameters.');
+            error.status = 400;
+            return next(error);
         }
         
         const uuid = crypto.randomUUID();
