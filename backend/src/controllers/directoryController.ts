@@ -64,6 +64,19 @@ export function deleteDirectory(req: Request, res: Response, next: NextFunction)
     try {
         const id = req.params.directoryId as string;
 
+        const directory = directoryRepository.getDirectory(id);
+        if (!directory) {
+            const error: AppError = new Error('Directory not found');
+            error.status = 400;
+            return next(error);
+        }
+        
+        if (directory.parentDirectoryId === id) { // Someone's root directory 
+            const error: AppError = new Error('Can not delete root directory');
+            error.status = 400;
+            return next(error);
+        }
+        
         directoryRepository.deleteDirectory(id);
 
         res.sendStatus(200);
