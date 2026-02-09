@@ -2,31 +2,6 @@ import { useAuth0 } from '@auth0/auth0-react';
 import LoginButton from './components/buttons/LoginButton';
 import LogoutButton from './components/buttons/LogoutButton';
 import Profile from './components/Profile';
-import api from "./api/axiosInstance.ts";
-import {useState} from "react";
-
-function TestButton() {
-    const { getAccessTokenSilently } = useAuth0();
-    const [result, setResult] = useState<string>("");
-    
-    const onClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-
-        const token = await getAccessTokenSilently();
-        const response = await api.get("projects/hello", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        setResult(response.data.message);
-    }
-    
-    return (<div>
-        <button onClick={onClick}>Test hello!</button>    
-        <p>Result: <span>{result}</span></p>
-    </div>);
-}
 
 function App() {
     const { isAuthenticated, isLoading, error } = useAuth0();
@@ -74,8 +49,6 @@ function App() {
                             <Profile />
                         </div>
                         <LogoutButton />
-                        
-                        <TestButton />
                     </div>
                 ) : (
                     <div className="action-card">

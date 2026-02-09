@@ -13,6 +13,10 @@ createRoot(document.getElementById('root')!).render(
                 redirect_uri: window.location.origin,
                 audience: import.meta.env.VITE_AUTH0_AUDIENCE
             }}
+            
+            // TODO: Unsafe, only use in dev
+            useRefreshTokens={import.meta.env.DEV}
+            cacheLocation={import.meta.env.DEV ? "localstorage" : "memory"}
         >
             <App/>
         </Auth0Provider>
