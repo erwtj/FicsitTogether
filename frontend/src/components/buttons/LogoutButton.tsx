@@ -1,10 +1,17 @@
-﻿import { useAuth0 } from "@auth0/auth0-react";
+﻿import {Route} from "../../routes/__root.tsx";
+import './buttons.css';
 
 const LogoutButton = () => {
-    const { logout } = useAuth0();
+    const { auth } =  Route.useRouteContext()
+
+    if (!auth) {
+        return null; // or some fallback UI
+    }
+
+    const logout = auth.logout
     return (
         <button
-            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            onClick={() => logout()}
             className="button logout"
         >
             Log Out

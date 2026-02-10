@@ -11,8 +11,8 @@ export function getDirectory(req: Request, res: Response, next: NextFunction) {
         const directory = directoryRepository.getDirectory(directoryId);
 
         if (!directory) { // Should be impossible due to checkProjectAccess middleware
-            const error: AppError = new Error('Directory not found');
-            error.status = 404;
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
             return next(error);
         }
         

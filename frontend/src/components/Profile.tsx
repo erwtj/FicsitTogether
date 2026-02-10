@@ -1,7 +1,13 @@
-﻿import { useAuth0 } from "@auth0/auth0-react";
+﻿import {Route} from "../routes/__root.tsx";
 
 const Profile = () => {
-    const { user, isAuthenticated, isLoading } = useAuth0();
+    const { auth } = Route.useRouteContext();
+
+    if (!auth) {
+        return null; // or some fallback UI
+    }
+
+    const { user, isAuthenticated, isLoading } = auth;
 
     if (isLoading) {
         return <div className="loading-text">Loading profile...</div>;

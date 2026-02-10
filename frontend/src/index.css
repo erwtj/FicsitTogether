@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background-color: #1a1e27;
+  background: #212529;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -19,6 +19,7 @@ body {
   justify-content: center;
   align-items: center;
 }
+
 
 .app-container {
   display: flex;
@@ -121,45 +122,10 @@ body {
   font-weight: 400;
 }
 
-.button {
-  padding: 1.1rem 2.8rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  outline: none;
-}
 
-.button:focus {
-  box-shadow: 0 0 0 4px rgba(99, 179, 237, 0.5);
-}
 
-.button.login {
-  background-color: #63b3ed;
-  color: #1a1e27;
-}
 
-.button.login:hover {
-  background-color: #4299e1;
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
-}
 
-.button.logout {
-  background-color: #fc8181;
-  color: #1a1e27;
-}
-
-.button.logout:hover {
-  background-color: #e53e3e;
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
-}
 
 .logged-in-section {
   display: flex;

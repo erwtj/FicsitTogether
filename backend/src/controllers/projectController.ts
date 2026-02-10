@@ -41,8 +41,8 @@ export function getProject(req: Request, res: Response, next: NextFunction) {
         const project = repository.getProject(id);
 
         if (!project) { // Should be impossible due to checkProjectAccess middleware
-            const error: AppError = new Error('Project not found');
-            error.status = 404;
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
             return next(error);
         }
 
@@ -70,8 +70,8 @@ export function getChart(req: Request, res: Response, next: NextFunction) {
         const project = repository.getProjectChart(id);
 
         if (!project) { // Should be impossible due to checkProjectAccess middleware
-            const error: AppError = new Error('Project chart not found');
-            error.status = 404;
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
             return next(error);
         }
 

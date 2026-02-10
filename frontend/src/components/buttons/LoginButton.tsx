@@ -1,10 +1,17 @@
-﻿import { useAuth0 } from "@auth0/auth0-react";
+﻿import {Route} from "../../routes/__root.tsx";
+import './buttons.css';
 
 const LoginButton = () => {
-    const { loginWithRedirect } = useAuth0();
+    const { auth } = Route.useRouteContext();
+
+    if (!auth) {
+        return null;
+    }
+
+    const login = auth.login
     return (
         <button
-            onClick={() => loginWithRedirect()}
+            onClick={() => login()}
             className="button login"
         >
             Log In

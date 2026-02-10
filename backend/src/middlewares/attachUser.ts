@@ -13,9 +13,9 @@ declare module "express-serve-static-core" {
 export function attachUser(req: Request, res: Response, next: NextFunction) {
     try {
         const auth0_id = req.auth?.payload.sub; // From checkJwt middleware
-        
+
         if (!auth0_id) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({ message: 'Unauthorized' });
         }
 
         // Try to find existing user
