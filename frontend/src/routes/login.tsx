@@ -18,7 +18,7 @@ export const Route = createFileRoute('/login')({
 });
 
 const img_id = Math.floor(Math.random() * 3); // Make sure to update '3' when adding updating backgrounds
-const random_img = `public/media/login-backgrounds/${img_id}.webp`;
+const random_img = `/media/login-backgrounds/${img_id}.webp`;
 
 function LoginComponent() {
     return (
@@ -26,7 +26,7 @@ function LoginComponent() {
             <div id="background" className={"h-100 w-100 position-absolute"} style={{backgroundImage: `url(${random_img})`}}/>
             <Card bg='dark' id="login-card" className="mx-3 p-3">
                 <Card.Body className="text-center">
-                    <Card.Img className="mb-3" src='public/media/Ficsit_logo.webp'/>
+                    <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>
                     <Card.Title className="fs-2">Welcome to Ficsit Together</Card.Title>
                     <Card.Text  className="m-3">
                         Get started by signing in to your account
