@@ -1,6 +1,7 @@
 import { createRootRouteWithContext, redirect, Outlet, useRouterState} from '@tanstack/react-router';
 import {type RouterContext} from '../router';
 import {useEffect} from "react";
+import NavHeader from "../components/NavHeader.tsx";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
     beforeLoad: ({context, location}) => {
@@ -41,7 +42,7 @@ function RootComponent() {
 
     return (
         <div className="d-flex flex-column min-vh-100 m-0 flex-grow-1">
-            {showNav && <></>}
+            {showNav && <NavHeader/>}
             <Outlet/>
         </div>
     );
