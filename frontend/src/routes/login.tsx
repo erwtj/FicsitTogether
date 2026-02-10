@@ -22,8 +22,8 @@ const random_img = `/media/login-backgrounds/${img_id}.webp`;
 
 function LoginComponent() {
     return (
-        <div className="w-100 h-100 d-flex align-items-center justify-content-center">
-            <div id="background" className={"h-100 w-100 position-absolute"} style={{backgroundImage: `url(${random_img})`}}/>
+        <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-black">
+            <div id="background-img" className="h-100 w-100 position-absolute" style={{backgroundImage: `url(${random_img})`}}/>
             <Card bg='dark' id="login-card" className="mx-3 p-3">
                 <Card.Body className="text-center">
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>

@@ -21,10 +21,11 @@
     background: linear-gradient(90deg, #212529 50%, rgba(0, 0, 0, 0) 75%);
 }
 
-#background {
+#background-img {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
     
     filter: blur(2px);
+    opacity: 0.7;
 }
