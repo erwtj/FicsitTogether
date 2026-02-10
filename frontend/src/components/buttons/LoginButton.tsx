@@ -1,5 +1,6 @@
 ﻿import {Route} from "../../routes/__root.tsx";
 import './buttons.css';
+import Button from 'react-bootstrap/Button';
 
 const LoginButton = () => {
     const { auth } = Route.useRouteContext();
@@ -10,12 +11,9 @@ const LoginButton = () => {
 
     const login = auth.login
     return (
-        <button
-            onClick={() => login()}
-            className="button login"
-        >
-            Log In
-        </button>
+        <Button variant="primary" size="lg" onClick={() => login()}>
+            Login
+        </Button>
     );
 };
 

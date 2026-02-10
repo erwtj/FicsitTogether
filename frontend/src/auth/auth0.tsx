@@ -1,5 +1,5 @@
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react'
-import { createContext, useContext } from 'react'
+import { Auth0Context } from './useAuth0Context'
 import { User } from '@auth0/auth0-react'
 
 export interface Auth0ContextType  {
@@ -11,7 +11,6 @@ export interface Auth0ContextType  {
     getAccessTokenSilently?: () => Promise<string>
 }
 
-const Auth0Context = createContext<Auth0ContextType | undefined>(undefined)
 
 function Auth0ContextProvider({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, user, loginWithRedirect, logout, isLoading, getAccessTokenSilently } = useAuth0()
@@ -53,10 +52,3 @@ export function Auth0Wrapper({ children }: { children: React.ReactNode }) {
     )
 }
 
-export function useAuth0Context() {
-    const context = useContext(Auth0Context)
-    if (context === undefined) {
-        throw new Error('useAuth0Context must be used within Auth0Wrapper')
-    }
-    return context
-}

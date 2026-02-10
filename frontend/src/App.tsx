@@ -1,12 +1,11 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import LoginButton from './components/buttons/LoginButton';
-import LogoutButton from './components/buttons/LogoutButton';
-import Profile from './components/Profile';
+import { RouterProvider } from '@tanstack/react-router';
+import {useAuth0Context} from "./auth/useAuth0Context.ts";
+import {router} from "./router.tsx";
 
 function App() {
-    const { isAuthenticated, isLoading, error } = useAuth0();
+    const auth = useAuth0Context()
 
-    if (isLoading) {
+    if (auth.isLoading) {
         return (
             <div className="app-container">
                 <div className="loading-state">
@@ -16,49 +15,7 @@ function App() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="app-container">
-                <div className="error-state">
-                    <div className="error-title">Oops!</div>
-                    <div className="error-message">Something went wrong</div>
-                    <div className="error-sub-message">{error.message}</div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="app-container">
-            <div className="main-card-wrapper">
-                <img
-                    src="https://cdn.auth0.com/quantum-assets/dist/latest/logos/auth0/auth0-lockup-en-ondark.png"
-                    alt="Auth0 Logo"
-                    className="auth0-logo"
-                    onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                    }}
-                />
-                <h1 className="main-title">Welcome to Sample0</h1>
-
-                {isAuthenticated ? (
-                    <div className="logged-in-section">
-                        <div className="logged-in-message">✅ Successfully authenticated!</div>
-                        <h2 className="profile-section-title">Your Profile</h2>
-                        <div className="profile-card">
-                            <Profile />
-                        </div>
-                        <LogoutButton />
-                    </div>
-                ) : (
-                    <div className="action-card">
-                        <p className="action-text">Get started by signing in to your account</p>
-                        <LoginButton />
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+    return <RouterProvider router={router} context={{auth}}/>;
 }
 
 export default App;
