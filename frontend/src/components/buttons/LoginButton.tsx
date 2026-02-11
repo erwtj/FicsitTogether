@@ -2,7 +2,11 @@
 import './buttons.css';
 import Button from 'react-bootstrap/Button';
 
-const LoginButton = () => {
+interface LoginButtonProps {
+    className?: string;
+}
+
+const LoginButton = ({className}: LoginButtonProps) => {
     const { auth } = Route.useRouteContext();
 
     if (!auth) {
@@ -11,7 +15,7 @@ const LoginButton = () => {
 
     const login = auth.login
     return (
-        <Button variant="primary" size="lg" onClick={() => login()}>
+        <Button variant="primary" size="lg" className={className} onClick={() => login()}>
             Login
         </Button>
     );

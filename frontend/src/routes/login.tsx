@@ -24,14 +24,14 @@ function LoginComponent() {
     return (
         <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-black">
             <div id="background-img" className="h-100 w-100 position-absolute" style={{backgroundImage: `url(${random_img})`}}/>
-            <Card bg='dark' id="login-card" className="mx-3 p-3">
+            <Card bg='dark' id="login-card" className="mx-3 pb-3 pt-1 px-3">
                 <Card.Body className="text-center">
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>
                     <Card.Title className="fs-2">Welcome to Ficsit Together</Card.Title>
-                    <Card.Text  className="m-3">
+                    <Card.Text className="mb-4">
                         Get started by signing in to your account
                     </Card.Text>
-                    <LoginButton/>
+                    <LoginButton className="w-75"/>
                 </Card.Body>
             </Card>
         </div>
