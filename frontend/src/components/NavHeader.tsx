@@ -1,18 +1,15 @@
 import {Nav, Navbar} from "react-bootstrap";
 import {Link} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import {useState} from "react";
-import UserModal from "./modals/UserModal.tsx";
+import UserPopover from "./modals/UserPopover.tsx";
 
 function NavHeader() {
     const auth0Context = useAuth0Context();
     const {user}  = auth0Context;
 
-    const [showUserModal, setShowUserModal] = useState(false);
-
     return (
         <>
-            <Navbar bg="dark" className={"border-bottom p-2"} variant="dark">
+            <Navbar bg="dark" className={"border-bottom p-2"} variant="dark" style={{height: "60px"}}>
                 <Navbar.Brand>
                     <Link to={"/home"} className={"nav-link ms-2"}>Home</Link>
                 </Navbar.Brand>
@@ -21,19 +18,17 @@ function NavHeader() {
                     <Nav.Item className={"nav-link"}>Recipe Calculator</Nav.Item>
                     <Nav.Item className={"nav-link"}>RSP Factor Table</Nav.Item>
                 </Nav>
-                <Nav className="ms-auto">
-                    <div className="d-flex align-items-center">
+                <Nav className="ms-auto mh-100 me-2" style={{aspectRatio: 1}}>
+                    <UserPopover auth0Context={auth0Context}>
                         <img
                             src={user!.picture}
                             alt={user!.name}
                             className="rounded-circle"
-                            style={{ width: '30px', height: '30px', marginRight: '10px', cursor: 'pointer' }}
-                            onClick={() => setShowUserModal(true)}
+                            role="button"
                         />
-                    </div>
+                    </UserPopover>
                 </Nav>
             </Navbar>
-            <UserModal show={showUserModal} auth0Context={auth0Context} onClose={() => setShowUserModal(false)} />
         </>
     )
 }
