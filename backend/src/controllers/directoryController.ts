@@ -8,13 +8,7 @@ import {getUserByUsername} from "../repository/userRepository.js";
 export function getDirectory(req: Request, res: Response, next: NextFunction) {
     try {
         const directoryId = req.params.directoryId as string;
-        const directory = directoryRepository.getDirectory(directoryId);
-
-        if (!directory) { // Should be impossible due to checkProjectAccess middleware, or it is routing through getRootDirectory, which is also always valid
-            const error: AppError = new Error('Unauthorized');
-            error.status = 401;
-            return next(error);
-        }
+        const directory = directoryRepository.getDirectory(directoryId)!;
         
         const subDirectories = directoryRepository.getDirectories(directoryId);
         const projects = projectRepository.getProjectsInDirectory(directoryId); // I know this is technically wrong, and you shouldn't access two different repositories in one controller, but fuck that stupid rule
@@ -69,12 +63,7 @@ export function deleteDirectory(req: Request, res: Response, next: NextFunction)
     try {
         const id = req.params.directoryId as string;
 
-        const directory = directoryRepository.getDirectory(id);
-        if (!directory) {
-            const error: AppError = new Error('Unauthorized');
-            error.status = 401;
-            return next(error);
-        }
+        const directory = directoryRepository.getDirectory(id)!;
         
         if (directory.parentDirectoryId === id) { // Someone's root directory 
             const error: AppError = new Error('Can not delete root directory');
@@ -92,7 +81,7 @@ export function deleteDirectory(req: Request, res: Response, next: NextFunction)
 
 export function shareDirectory(req: Request, res: Response, next: NextFunction) {
     try {
-        const directoryId = req.body.directoryId as string; // body.directoryId is in this case the parent directory in which to create the directory
+        const directoryId = req.params.directoryId as string; // body.directoryId is in this case the parent directory in which to create the directory
         const username = req.body.user as string;
 
         if (!directoryId || !username) {
@@ -104,6 +93,14 @@ export function shareDirectory(req: Request, res: Response, next: NextFunction) 
         if (directoryId === req.user.root_directory) {
             const error: AppError = new Error('Not allowed to share root directory!');
             error.status = 400;
+            return next(error);
+        }
+        
+        const directory = directoryRepository.getDirectory(directoryId)!;
+        
+        if (directory.owner !== req.user.id) { // Only allowed to share if you are the owner, not if it was shared with you
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
             return next(error);
         }
 
@@ -121,27 +118,49 @@ export function shareDirectory(req: Request, res: Response, next: NextFunction) 
     }
 }
 
-// TODO: Repeated code segment
 export function unshareDirectory(req: Request, res: Response, next: NextFunction) {
     try {
-        const directoryId = req.body.directoryId as string; // body.directoryId is in this case the parent directory in which to create the directory
-        const username = req.body.user as string;
+        const directoryId = req.params.directoryId as string; // body.directoryId is in this case the parent directory in which to create the directory
+        const userId = req.body.userId as string;
 
-        if (!directoryId || !username) {
+        if (!directoryId || !userId) {
             const error: AppError = new Error('Missing parameters.');
             error.status = 400;
             return next(error);
         }
+        
+        const directory = directoryRepository.getDirectory(directoryId)!;
 
-        const user = getUserByUsername(username);
-        if (!user) {
-            const error: AppError = new Error('User does not exist.');
-            error.status = 404;
+        // Only allowed to unshare others if you are the owner, or if you are trying to unshare yourself
+        if (!(directory.owner === req.user.id || userId === req.user.id)) {
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
             return next(error);
         }
 
-        directoryRepository.unshareDirectory(user.id, directoryId);
+        directoryRepository.unshareDirectory(userId, directoryId);
         res.sendStatus(200);
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Check with who the directory is shared with
+export function getDirectorySharedWith(req: Request, res: Response, next: NextFunction) {
+    try {
+        const directoryId = req.params.directoryId as string;
+
+        const directory = directoryRepository.getDirectory(directoryId)!;
+
+        // Only allowed to view share status if you are the directory owner
+        if (directory.owner !== req.user.id) {
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
+            return next(error);
+        }
+
+        const sharedUsers = directoryRepository.getSharedWith(directoryId);
+        res.status(200).send(sharedUsers);
     } catch (error) {
         next(error);
     }

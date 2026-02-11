@@ -60,7 +60,7 @@ export function unshareDirectory(user: string, directory: string) {
     unshareDirectoryQuery.run(user, directory);
 }
 
-export type SharedDirectory = {
+type SharedDirectory = {
     id: string;
     name: string;
     parentDirectoryId: string;
@@ -83,4 +83,20 @@ const getSharedDirectoriesQuery = db.prepare<[string], SharedDirectory>(`
 `);
 export function getSharedDirectories(userId: string) {
     return getSharedDirectoriesQuery.all(userId);
+}
+
+type MinimalUserInfo = {
+    id: string;
+    username: string;
+}
+const getSharedWithQuery = db.prepare<[string], MinimalUserInfo>(`
+    SELECT u.id, u.username
+    FROM share_directories sd
+             JOIN users u ON sd.user = u.id
+             JOIN directories d ON sd.directory = d.id
+    WHERE sd.directory = ?
+      AND sd.user != d.owner; 
+`);
+export function getSharedWith(directoryId: string) {
+    return getSharedWithQuery.all(directoryId);
 }

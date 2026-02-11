@@ -1,7 +1,7 @@
 ﻿import type { Request, Response, NextFunction } from 'express';
 import {db} from "../repository/database.js";
 import type {User} from "../repository/userRepository.js";
-import {getProject, type Project} from "../repository/projectRepository.js";
+import {getProject} from "../repository/projectRepository.js";
 
 function hasDirectoryAccess(user: User, directoryId: string): boolean {
     // Check if this is the user's root directory
