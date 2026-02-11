@@ -2,12 +2,13 @@
   "name": "ficsit-together",
   "private": true,
   "workspaces": [
+    "dtolib",
     "ficlib",
     "frontend",
     "backend"
   ],
   "scripts": {
     "build": "npm run build -ws",
-    "build:lib": "npm run build --workspace ficlib"
+    "build:lib": "npm run build --workspace ficlib && npm run build --workspace dtolib"
   }
 }

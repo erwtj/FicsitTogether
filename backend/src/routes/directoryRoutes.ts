@@ -5,9 +5,10 @@ import {
     createDirectory,
     deleteDirectory,
     shareDirectory,
-    unshareDirectory, 
-    getRootDirectory, 
-    getSharedDirectories
+    unshareDirectory,
+    getRootDirectory,
+    getSharedDirectories, 
+    getDirectorySharedWith
 } from "../controllers/directoryController.js";
 
 const router = Router();
@@ -22,6 +23,6 @@ router.delete('/:directoryId', checkDirectoryAccess, deleteDirectory);
 
 router.post('/:directoryId/share', checkDirectoryAccess, shareDirectory); // share with someone
 router.delete('/:directoryId/share', checkDirectoryAccess, unshareDirectory); // unshare someone or yourself
-router.get('/:directoryId/share', checkDirectoryAccess, ); // check with who a directory is shared
+router.get('/:directoryId/share', checkDirectoryAccess, getDirectorySharedWith); // check with who a directory is shared
 
 export default router;

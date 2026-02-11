@@ -19,6 +19,7 @@
     "express": "^5.2.1",
     "express-oauth2-jwt-bearer": "^1.7.4",
     "ficlib": "*",
+    "dtolib": "*",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "ws": "^8.19.0",

@@ -2,8 +2,8 @@ import type {Request, Response, NextFunction} from "express";
 import * as directoryRepository from "../repository/directoryRepository.js";
 import * as projectRepository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
-import type {Directory} from "../repository/directoryRepository.js";
 import {getUserByUsername} from "../repository/userRepository.js";
+import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO} from "dtolib";
 
 export function getDirectory(req: Request, res: Response, next: NextFunction) {
     try {
@@ -17,7 +17,7 @@ export function getDirectory(req: Request, res: Response, next: NextFunction) {
             ...directory, 
             subDirectories: subDirectories,
             projects: projects,
-        });
+        } as DirectoryContentDTO);
     } catch (error) {
         next(error);
     }
@@ -53,7 +53,7 @@ export function createDirectory(req: Request, res: Response, next: NextFunction)
             name: name,
             owner: owner,
             parentDirectoryId: parentDirectoryId,
-        } as Directory)
+        } as DirectoryDTO)
     } catch (error) {
         next(error);
     }
@@ -160,7 +160,7 @@ export function getDirectorySharedWith(req: Request, res: Response, next: NextFu
         }
 
         const sharedUsers = directoryRepository.getSharedWith(directoryId);
-        res.status(200).send(sharedUsers);
+        res.status(200).send(sharedUsers as MinimalUserInfoDTO[]);
     } catch (error) {
         next(error);
     }
@@ -171,7 +171,7 @@ export function getSharedDirectories(req: Request, res: Response, next: NextFunc
         const userId = req.user.id;
         const sharedDirectories = directoryRepository.getSharedDirectories(userId);
         
-        res.status(200).send(sharedDirectories);
+        res.status(200).send(sharedDirectories as SharedDirectoryDTO[]);
     } catch (error) {
         next(error);
     }

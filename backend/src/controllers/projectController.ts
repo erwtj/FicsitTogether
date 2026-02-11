@@ -1,7 +1,7 @@
 ﻿import type {Request, Response, NextFunction} from "express";
 import * as repository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
-import type {Project} from "../repository/projectRepository.js";
+import type {ProjectDTO, ChartDTO} from "dtolib";
 
 const emptyChart = {nodes: [], edges: [], viewport: {x: 0, y: 0, zoom: 1}};
 const emptyJson = JSON.stringify(emptyChart); 
@@ -35,7 +35,7 @@ export function createProject(req: Request, res: Response, next: NextFunction): 
             name: name, 
             description: description,
             directoryId: directoryId,
-        } as Project)
+        } as ProjectDTO)
     } catch (error) {
         next(error);
     } 
@@ -52,7 +52,7 @@ export function getProject(req: Request, res: Response, next: NextFunction) {
             return next(error);
         }
 
-        res.status(200).send(project);
+        res.status(200).send(project as ProjectDTO);
     } catch (error) {
         next(error);
     }
@@ -73,15 +73,15 @@ export function deleteProject(req: Request, res: Response, next: NextFunction) {
 export function getChart(req: Request, res: Response, next: NextFunction) {
     try {
         const id = req.params.projectId as string; // won't even route if no id is included
-        const project = repository.getProjectChart(id);
+        const chart = repository.getProjectChart(id);
 
-        if (!project) { // Should be impossible due to checkProjectAccess middleware
+        if (!chart) { // Should be impossible due to checkProjectAccess middleware
             const error: AppError = new Error('Unauthorized');
             error.status = 401;
             return next(error);
         }
 
-        res.status(200).send(project);
+        res.status(200).send(chart as ChartDTO);
     } catch (error) {
         next(error);
     }
