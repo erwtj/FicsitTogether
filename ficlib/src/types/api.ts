@@ -28,7 +28,10 @@ export type Project = {
 }
 
 export type directoryDTO = {
-    Directory: Directory;
+    id: string;
+    parentDirectoryId: string;
+    owner: string;
+    name: string;
     subDirectories: Directory[];
     projects: Project[];
 }

@@ -145,6 +145,29 @@ export function unshareDirectory(req: Request, res: Response, next: NextFunction
     }
 }
 
+export function leaveDirectory(req: Request, res: Response, next: NextFunction) {
+    try {
+        const directoryId = req.params.directoryId as string; // body.directoryId is in this case the parent directory in which to create the directory
+        const userId = req.user.id;
+
+
+        if (!directoryId || !userId) {
+            const error: AppError = new Error('Missing parameters.');
+            error.status = 400;
+            return next(error);
+        }
+
+        directoryRepository.unshareDirectory(userId, directoryId);
+        res.sendStatus(200);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+
+
+
 // Check with who the directory is shared with
 export function getDirectorySharedWith(req: Request, res: Response, next: NextFunction) {
     try {

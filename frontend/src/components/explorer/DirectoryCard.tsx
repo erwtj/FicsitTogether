@@ -14,11 +14,12 @@ export type DirectoryInfo = {
 
 export type DirectoryCardProps = {
     directoryInfo: DirectoryInfo
-    deleteDirectory: (directory: DirectoryInfo) => void;
-    shareDirectory: (directory: DirectoryInfo) => void;
+    deleteDirectory?: (directory: DirectoryInfo) => void; // Callback for deleting the directory
+    shareDirectory?: (directory: DirectoryInfo) => void; // Callback for sharing the directory
+    leaveDirectory?: (directory: DirectoryInfo) => void; // Optional callback for leaving the directory
 }
 
-export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory}: DirectoryCardProps) => {
+export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, leaveDirectory}: DirectoryCardProps) => {
     const [showDropdown, setShowDropdown] = useState(false);
 
     return (
@@ -42,14 +43,22 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory}: 
                 <Dropdown className={"z-2"} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
                                      className={"border-0 p-0 bg-transparent no-arrow"}
-                                     id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}>
+                                     id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
+                    >
                         <ThreeDotsVertical size={20} className={"text-secondary ms-auto"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
-                    <Dropdown.Menu className={"position-fixed z-2"}>
-                        <Dropdown.Item href={"#"} className={"delete-option"}
-                                       onClick={() => deleteDirectory(directoryInfo)}>Delete</Dropdown.Item>
-                        <Dropdown.Item href={"#"} className={"share-option"}
-                                       onClick={() => shareDirectory(directoryInfo)}>Share</Dropdown.Item>
+                    <Dropdown.Menu className={"position-fixed z-2"} >
+                        {!directoryInfo.isShared ? (
+                            <>
+                                <Dropdown.Item href={"#"} className={"delete-option"}
+                                               onClick={() => deleteDirectory!(directoryInfo)}>Delete</Dropdown.Item>
+                                <Dropdown.Item href={"#"} className={"share-option"}
+                                               onClick={() => shareDirectory!(directoryInfo)}>Share</Dropdown.Item>
+                            </>
+                        ) : (
+                            <Dropdown.Item href={"#"} className={"delete-option"}
+                                           onClick={() => leaveDirectory?.(directoryInfo)}>Leave</Dropdown.Item>
+                        )}
                     </Dropdown.Menu>
                 </Dropdown>
             </div>

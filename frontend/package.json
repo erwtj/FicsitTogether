@@ -16,6 +16,7 @@
     "@tanstack/router-devtools": "^1.159.5",
     "axios": "^1.13.5",
     "ficlib": "*",
+    "dtolib": "*",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
