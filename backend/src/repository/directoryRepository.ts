@@ -59,3 +59,28 @@ const unshareDirectoryQuery = db.prepare<[string, string]>(`
 export function unshareDirectory(user: string, directory: string) {
     unshareDirectoryQuery.run(user, directory);
 }
+
+export type SharedDirectory = {
+    id: string;
+    name: string;
+    parentDirectoryId: string;
+    ownerUsername: string;
+    ownerId: string;
+}
+
+const getSharedDirectoriesQuery = db.prepare<[string], SharedDirectory>(`
+    SELECT
+        d.id,
+        d.name,
+        d.parent_directory as parentDirectoryId,
+        u.username as ownerUsername,
+        u.id as ownerId
+    FROM share_directories sd
+             JOIN directories d ON sd.directory = d.id
+             JOIN users u ON d.owner = u.id
+    WHERE sd.user = ?
+    ORDER BY d.name;
+`);
+export function getSharedDirectories(userId: string) {
+    return getSharedDirectoriesQuery.all(userId);
+}

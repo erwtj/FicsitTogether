@@ -21,6 +21,12 @@ export function createProject(req: Request, res: Response, next: NextFunction): 
             return next(error);
         }
         
+        if (directoryId === req.user.root_directory) {
+            const error: AppError = new Error('Not allowed to make projects in root directory!');
+            error.status = 400;
+            return next(error);
+        }
+        
         const uuid = crypto.randomUUID();
         repository.createProject(uuid, directoryId, name, description, emptyJson);
         

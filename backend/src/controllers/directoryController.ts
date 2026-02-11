@@ -3,14 +3,14 @@ import * as directoryRepository from "../repository/directoryRepository.js";
 import * as projectRepository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import type {Directory} from "../repository/directoryRepository.js";
-import {getUserById, getUserByUsername} from "../repository/userRepository.js";
+import {getUserByUsername} from "../repository/userRepository.js";
 
 export function getDirectory(req: Request, res: Response, next: NextFunction) {
     try {
         const directoryId = req.params.directoryId as string;
         const directory = directoryRepository.getDirectory(directoryId);
 
-        if (!directory) { // Should be impossible due to checkProjectAccess middleware
+        if (!directory) { // Should be impossible due to checkProjectAccess middleware, or it is routing through getRootDirectory, which is also always valid
             const error: AppError = new Error('Unauthorized');
             error.status = 401;
             return next(error);
@@ -27,6 +27,11 @@ export function getDirectory(req: Request, res: Response, next: NextFunction) {
     } catch (error) {
         next(error);
     }
+}
+
+export function getRootDirectory(req: Request, res: Response, next: NextFunction) {
+    req.params.directoryId = req.user.root_directory;
+    getDirectory(req, res, next);
 }
 
 export function createDirectory(req: Request, res: Response, next: NextFunction) {
@@ -66,8 +71,8 @@ export function deleteDirectory(req: Request, res: Response, next: NextFunction)
 
         const directory = directoryRepository.getDirectory(id);
         if (!directory) {
-            const error: AppError = new Error('Directory not found');
-            error.status = 400;
+            const error: AppError = new Error('Unauthorized');
+            error.status = 401;
             return next(error);
         }
         
@@ -92,6 +97,12 @@ export function shareDirectory(req: Request, res: Response, next: NextFunction) 
 
         if (!directoryId || !username) {
             const error: AppError = new Error('Missing parameters.');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (directoryId === req.user.root_directory) {
+            const error: AppError = new Error('Not allowed to share root directory!');
             error.status = 400;
             return next(error);
         }
@@ -131,6 +142,17 @@ export function unshareDirectory(req: Request, res: Response, next: NextFunction
 
         directoryRepository.unshareDirectory(user.id, directoryId);
         res.sendStatus(200);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export function getSharedDirectories(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user.id;
+        const sharedDirectories = directoryRepository.getSharedDirectories(userId);
+        
+        res.status(200).send(sharedDirectories);
     } catch (error) {
         next(error);
     }
