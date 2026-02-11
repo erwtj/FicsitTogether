@@ -8,7 +8,7 @@ export interface Auth0ContextType  {
     login: () => void
     logout: () => void
     isLoading: boolean
-    getAccessTokenSilently?: () => Promise<string>
+    getAccessTokenSilently: () => Promise<string>
 }
 
 

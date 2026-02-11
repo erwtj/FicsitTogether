@@ -26,7 +26,7 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
 
 
     const popover = (
-        <Popover id="user-popover">
+        <Popover id="user-popover" style={{maxWidth: 'none'}}>
             <Popover.Body className="text-center">
                 <img
                     src={user!.picture}
