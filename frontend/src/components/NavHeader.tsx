@@ -1,7 +1,7 @@
 import {Nav, Navbar} from "react-bootstrap";
 import {Link} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import UserPopover from "./modals/UserPopover.tsx";
+import UserPopover from "./popovers/UserPopover.tsx";
 import { Calculator, Table, House } from "react-bootstrap-icons";
 
 function NavHeader() {
@@ -12,7 +12,7 @@ function NavHeader() {
         <>
             <Navbar bg="dark" className={"border-bottom p-2"} variant="dark" style={{height: "60px"}}>
                 <Navbar.Brand>
-                    <img src={"media/Ficsit_inc.webp"} style={{width: "45px"}} className={"ms-3"} alt={""}/>
+                    <img src={"/media/Ficsit_inc.webp"} style={{width: "45px"}} className={"ms-3"} alt={""}/>
                 </Navbar.Brand>
                 <Nav className="mr-auto text-nowrap" style={{marginTop: "2px"}}>
                     <Nav.Item>

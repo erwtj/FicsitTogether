@@ -15,7 +15,7 @@ import {ChevronRight, House, Folder} from 'react-bootstrap-icons';
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import {DirectoryAddFolderCard} from "../components/explorer/DirectoryAddFolderCard.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
-import ConformationModal from "../components/modals/ConformationModal.tsx";
+import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import {ProjectCard, type ProjectInfo} from "../components/explorer/ProjectCard.tsx";
 import {AddProjectCard} from "../components/explorer/AddProjectCard.tsx";
 
@@ -179,12 +179,12 @@ function DirectoryPage() {
                     ))}
                 </Nav>
             </Navbar>
-            <div className="d-flex flex-row gap-3 ps-5 pt-5 mx-lg-5 align-items-center">
+            <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4">
                 <Folder size={32}/>
                 <h3 className="mb-0">{directoryName}</h3>
             </div>
             <div key={"explorer"} className="d-flex flex-column p-5 gap-3 mx-lg-5 pt-4">
-                <div key={"directory-list"} className={"d-flex flex-row flex-wrap gap-2 justify-content"}
+                <div key={"directory-list"} className={"d-flex flex-wrap gap-3 justify-content-center"}
                      style={{width: "100%"}}>
 
                     {subDirectories.map((directory) => {
@@ -205,7 +205,7 @@ function DirectoryPage() {
                     })}
                     <DirectoryAddFolderCard onSubmit={(s) => handleCreateDirectory(s)}/>
                 </div>
-                <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-2 pt-3 justify-content"}
+                <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>
 
                     {projects.map((project) => {
@@ -216,7 +216,7 @@ function DirectoryPage() {
                     <AddProjectCard onSubmit={(name) => handleCreateProject(name)}/>
                 </div>
             </div>
-            <ConformationModal
+            <ConfirmationModal
                 show={showDeleteModal}
                 title={`Delete '${selectedDirectory ? selectedDirectory.name : selectedProject?.name}'?`}
                 message={`Are you sure you want to delete this ${selectedDirectory ? "folder" : "project"}?`}
