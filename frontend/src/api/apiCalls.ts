@@ -1,6 +1,7 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import type {SharedDirectoryDTO, DirectoryContentDTO, DirectoryDTO, MinimalUserInfoDTO} from "dtolib"
+import {type DirectoryDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO} from "dtolib"
+
 
 // API calls
 export async function fetchRoot(auth: Auth0ContextType): Promise<DirectoryContentDTO> {
@@ -14,6 +15,16 @@ export async function fetchRoot(auth: Auth0ContextType): Promise<DirectoryConten
 
     return response?.data as DirectoryContentDTO
 }
+export async function fetchDirectoryContent(auth: Auth0ContextType, dirID: string): Promise<DirectoryContentDTO> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.get(`directories/${dirID}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response?.data as DirectoryContentDTO;
+}
 export async function fetchSharedDirectories(auth: Auth0ContextType): Promise<SharedDirectoryDTO[]> {
     const token = await auth.getAccessTokenSilently();
 
@@ -24,6 +35,8 @@ export async function fetchSharedDirectories(auth: Auth0ContextType): Promise<Sh
     });
     return response?.data as SharedDirectoryDTO[]
 }
+
+// Directory management
 export async function createDirectory(auth: Auth0ContextType, parentID: string, name: string): Promise<DirectoryDTO> {
     const token = await auth.getAccessTokenSilently();
 
@@ -57,10 +70,39 @@ export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Pr
             Authorization: `Bearer ${token}`
         }
     });
-
     return response?.data as MinimalUserInfoDTO[]
 }
 
+// Project management
+export async function createProject(auth: Auth0ContextType, parentFolderID: string, name: string): Promise<ProjectDTO> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.post(`projects/`, {
+        name: name,
+        description: 'A new project',
+        directoryId: parentFolderID,
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response?.data as ProjectDTO;
+}
+export async function deleteProject(auth: Auth0ContextType, projID: string): Promise<boolean> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.delete(`projects/${projID}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response?.status === 200;
+}
+
+
+// Sharing and unsharing
 export async function shareDirectory(auth: Auth0ContextType, dirID: string, username: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
@@ -92,7 +134,6 @@ export async function unshareDirectory(auth: Auth0ContextType, dirID: string, us
 
     return response?.status === 200;
 }
-
 export async function leaveDirectory(auth: Auth0ContextType, dirID: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
@@ -103,4 +144,18 @@ export async function leaveDirectory(auth: Auth0ContextType, dirID: string): Pro
     });
 
     return response?.status === 200;
+}
+
+
+
+export async function fetchUser(auth: Auth0ContextType): Promise<FullUserInfoDTO> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.get(`users/me`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response?.data as FullUserInfoDTO;
 }

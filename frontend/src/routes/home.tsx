@@ -14,6 +14,7 @@ import {
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
 import "./home.tsx.css";
+import {Spinner} from "react-bootstrap";
 
 export const Route = createFileRoute('/home')({
     beforeLoad: ({context}) => {
@@ -33,9 +34,11 @@ export const Route = createFileRoute('/home')({
 function HomePage() {
     const auth = useAuth0Context()
     const [rootId, setRootId] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+
     const [ownedDirectories, setOwnedDirectories] = useState<DirectoryInfo[]>([]);
     const [sharedDirectories, setSharedDirectories] = useState<DirectoryInfo[]>([]);
-
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -62,6 +65,11 @@ function HomePage() {
 
         ownedDir.then(owned => setOwnedDirectories(owned))
         sharedDir.then(shared => setSharedDirectories(shared))
+        Promise.all([ownedDir, sharedDir]).then(() => setIsLoading(false))
+        .catch(err => {
+            console.error('Error fetching directories:', err);
+            setIsLoading(false);
+        });
     }, [auth]);
     const handleCreateDirectory = (name: string) => {
         createDirectory(auth, rootId, name)
@@ -122,6 +130,21 @@ function HomePage() {
     const handleShareDirectory = (directory: DirectoryInfo) => {
         setSelectedDirectory(directory);
         setShowShareModal(true);
+    }
+
+    if (isLoading) {
+        return (
+            <div
+                className="d-flex flex-column align-items-center justify-content-center"
+                style={{
+                    position: "fixed",
+                    inset: 0
+                }}
+            >
+                <Spinner animation="border" style={{ width: "4rem", height: "4rem" }} />
+                <small className="text-muted mt-3">Loading Home...</small>
+            </div>
+        );
     }
 
     return (

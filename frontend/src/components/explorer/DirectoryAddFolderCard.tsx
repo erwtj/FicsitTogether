@@ -32,7 +32,7 @@ export const DirectoryAddFolderCard = ({onSubmit}: {onSubmit: (value: string) =>
                     className={folderName.length === 0 ? "text-muted" : ""}
                 />
 
-                <div className={"d-flex flex-column align-items-start justify-content-center"}>
+                <div className={"d-flex flex-column align-items-start justify-content-center user-select-none"}>
                     <h5 className={"text-truncate mb-0"} style={{width: "10rem"}}>
                         <input
                             type="text"

@@ -24,7 +24,6 @@ router.delete('/:directoryId', checkDirectoryAccess, deleteDirectory);
 router.post('/:directoryId/share', checkDirectoryAccess, shareDirectory); // share with someone
 router.delete('/:directoryId/share', checkDirectoryAccess, unshareDirectory); // unshare someone or yourself
 router.get('/:directoryId/share', checkDirectoryAccess, getDirectorySharedWith); // check with who a directory is shared
-
 router.get('/:directoryId/leave', checkDirectoryAccess, leaveDirectory); // leave a shared directory (unshare yourself)
 
 
