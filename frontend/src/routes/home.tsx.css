@@ -1,0 +1,9 @@
+﻿@media (min-width: 992px) {
+    .split-view-left {
+        border-right: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+    }
+
+    .split-view-right {
+        border-left: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+    }
+}

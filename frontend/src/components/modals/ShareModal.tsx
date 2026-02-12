@@ -36,13 +36,19 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
         })
     }
 
+    const onSubmit = (e: React.SubmitEvent) => {
+        e.preventDefault();
+        shareWithUser(usernameToShare);
+        setUsernameToShare("");
+    }
+
     return (
         <Modal show={show} onHide={onClose} centered size={'lg'}>
             <Modal.Header>
-                <Modal.Title className="justify-content-between d-flex w-100">
-                    <>Sharing {directoryName}</>
+                <Modal.Title className="justify-content-between d-flex w-100 text-truncate">
+                    <span>Sharing "<i className="d-inline-block w-50 text-truncate align-bottom">{directoryName}</i>"</span>
                     <div className="d-flex">
-                        <Form className="d-flex align-items-center me-2">
+                        <Form className="d-flex align-items-center me-2" onSubmit={onSubmit}>
                             <InputGroup>
                                 <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
                                 <Form.Control
@@ -51,25 +57,12 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
                                     aria-describedby="basic-addon1"
                                     value={usernameToShare}
                                     onChange={(e) => setUsernameToShare(e.target.value.toLowerCase())}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            shareWithUser(usernameToShare);
-                                            setUsernameToShare("");
-                                        }
-                                    }}
                                 />
+                                <Button type="submit" variant="primary">
+                                    Share
+                                </Button>
                             </InputGroup>
                         </Form>
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                shareWithUser(usernameToShare);
-                                setUsernameToShare("");
-                            }}
-                        >
-                            Share
-                        </Button>
                     </div>
                 </Modal.Title>
             </Modal.Header>
@@ -89,4 +82,3 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
 }
 
 export default ShareModal;
-

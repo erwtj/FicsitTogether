@@ -1,11 +1,10 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import {type Directory, type directoryDTO, type SharedDirectoryDTO} from "ficlib"
+import type {SharedDirectoryDTO, DirectoryContentDTO, DirectoryDTO, MinimalUserInfoDTO} from "dtolib"
 
 // API calls
-export async function fetchRoot(auth: Auth0ContextType): Promise<directoryDTO> {
+export async function fetchRoot(auth: Auth0ContextType): Promise<DirectoryContentDTO> {
     const token = await auth.getAccessTokenSilently();
-    console.log(token)
 
     const response = await api.get("directories/root", {
         headers: {
@@ -13,7 +12,7 @@ export async function fetchRoot(auth: Auth0ContextType): Promise<directoryDTO> {
         }
     });
 
-    return response?.data as directoryDTO
+    return response?.data as DirectoryContentDTO
 }
 export async function fetchSharedDirectories(auth: Auth0ContextType): Promise<SharedDirectoryDTO[]> {
     const token = await auth.getAccessTokenSilently();
@@ -25,7 +24,7 @@ export async function fetchSharedDirectories(auth: Auth0ContextType): Promise<Sh
     });
     return response?.data as SharedDirectoryDTO[]
 }
-export async function createDirectory(auth: Auth0ContextType, parentID: string, name: string): Promise<Directory> {
+export async function createDirectory(auth: Auth0ContextType, parentID: string, name: string): Promise<DirectoryDTO> {
     const token = await auth.getAccessTokenSilently();
 
     const response = await api.post(`directories/`, {
@@ -37,8 +36,7 @@ export async function createDirectory(auth: Auth0ContextType, parentID: string, 
         }
     });
 
-
-    return response?.data as Directory;
+    return response?.data as DirectoryDTO;
 }
 export async function deleteDirectory(auth: Auth0ContextType, dirID: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
@@ -51,7 +49,7 @@ export async function deleteDirectory(auth: Auth0ContextType, dirID: string): Pr
 
     return response?.status === 200;
 }
-export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Promise<{id: string, username: string}[]> {
+export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Promise<MinimalUserInfoDTO[]> {
     const token = await auth.getAccessTokenSilently();
 
     const response = await api.get(`directories/${dirID}/share`, {
@@ -59,9 +57,10 @@ export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Pr
             Authorization: `Bearer ${token}`
         }
     });
-    console.log(response);
-    return response?.data as {id: string, username: string}[]
+
+    return response?.data as MinimalUserInfoDTO[]
 }
+
 export async function shareDirectory(auth: Auth0ContextType, dirID: string, username: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
@@ -75,6 +74,7 @@ export async function shareDirectory(auth: Auth0ContextType, dirID: string, user
 
     return response?.status === 200;
 }
+
 export async function unshareDirectory(auth: Auth0ContextType, dirID: string, userId: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 

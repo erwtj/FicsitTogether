@@ -1,7 +1,7 @@
 import {Nav, Navbar} from "react-bootstrap";
 import {Link} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import UserPopover from "./modals/UserPopover.tsx";
+import UserPopover from "./popovers/UserPopover.tsx";
 
 function NavHeader() {
     const auth0Context = useAuth0Context();
@@ -13,7 +13,7 @@ function NavHeader() {
                 <Navbar.Brand>
                     <Link to={"/home"} className={"nav-link ms-2"}>Home</Link>
                 </Navbar.Brand>
-                <Nav className="mr-auto" style={{marginTop: "2px"}}>
+                <Nav className="mr-auto text-nowrap" style={{marginTop: "2px"}}>
                     <Nav.Item><Link to="/login" params={{ dir: 'root' }} className={"nav-link"}>Projects</Link></Nav.Item>
                     <Nav.Item className={"nav-link"}>Recipe Calculator</Nav.Item>
                     <Nav.Item className={"nav-link"}>RSP Factor Table</Nav.Item>

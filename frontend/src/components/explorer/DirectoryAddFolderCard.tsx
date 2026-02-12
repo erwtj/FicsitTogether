@@ -16,19 +16,18 @@ export const DirectoryAddFolderCard = ({onSubmit}: {onSubmit: (value: string) =>
 
     return (
         <Card
-            className={"clickable-card py-2 px-3 d-flex align-items-center justify-content-center"}
+            className={"py-2 px-3 d-flex align-items-center justify-content-center position-relative border-1 "}
             style={{
                 width: "18rem",
                 minHeight: "4rem",
-                position: "relative",
-                border: "1px dashed var(--bs-border-color)"
+                border: "dashed var(--bs-border-color)"
             }}
             key={"DirectoryAddFolderCard.id"}
         >
             <div className={"d-flex flex-row gap-3 align-items-center justify-content-center w-100"}>
                 <FolderPlus
                     size={26}
-                    style={{cursor: "pointer"}}
+                    role="button"
                     onClick={handleCreate}
                     className={folderName.length === 0 ? "text-muted" : ""}
                 />

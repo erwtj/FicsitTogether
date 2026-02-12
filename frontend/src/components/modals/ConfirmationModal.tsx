@@ -1,6 +1,6 @@
 import { Modal, Button } from 'react-bootstrap';
 
-type ConformationModalProps = {
+type ConfirmationModalProps = {
     show: boolean;
     title: string;
     message: string;
@@ -8,7 +8,7 @@ type ConformationModalProps = {
     onCancel: () => void;
 }
 
-function ConformationModal({ show, title, message, onConfirm, onCancel }: ConformationModalProps) {
+function ConfirmationModal({ show, title, message, onConfirm, onCancel }: ConfirmationModalProps) {
     return (
         <Modal show={show} onHide={onCancel} centered>
             <Modal.Header closeButton>
@@ -27,4 +27,4 @@ function ConformationModal({ show, title, message, onConfirm, onCancel }: Confor
     );
 }
 
-export default ConformationModal;
+export default ConfirmationModal;

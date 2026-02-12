@@ -95,6 +95,12 @@ export function shareDirectory(req: Request, res: Response, next: NextFunction) 
             error.status = 400;
             return next(error);
         }
+
+        if (username === req.user.username){
+            const error: AppError = new Error('Not allowed to share with yourself!');
+            error.status = 400;
+            return next(error);
+        }
         
         const directory = directoryRepository.getDirectory(directoryId)!;
         
