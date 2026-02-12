@@ -16,7 +16,7 @@ function NavHeader() {
                 </Navbar.Brand>
                 <Nav className="mr-auto text-nowrap" style={{marginTop: "2px"}}>
                     <Nav.Item>
-                        <Link to="/login" params={{ dir: 'root' }} className={"nav-link d-flex align-items-center"}>
+                        <Link to="/home" params={{ dir: 'root' }} className={"nav-link d-flex align-items-center"}>
                             <House className="me-2" size={16} />Home
                         </Link>
                     </Nav.Item>
