@@ -39,7 +39,7 @@ export const DirectoryAddFolderCard = ({onSubmit}: {onSubmit: (value: string) =>
                             value={folderName}
                             onChange={(e) => setFolderName(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                            placeholder="New folder name"
+                            placeholder="Directory name"
                             className={"border-0 border-bottom mb-0"}
                             style={{
                                 outline: "none",

@@ -125,11 +125,11 @@ function HomePage() {
     }
 
     return (
-        <div className="container h-100 mw-100 p-4">
+        <div className="container h-100 mw-100">
             <div className="row gap-4 gap-lg-0 h-100">
-                <div className="col-12 col-lg-6 split-view-left">
+                <div className="col-12 col-lg-6 p-4" id="split-view-left">
                     {/* Owned directories */}
-                    <h4 className="d-flex align-items-center gap-2 justify-content-center">
+                    <h4 className="d-flex align-items-center gap-2 justify-content-center mb-3">
                         <Folder/> My Directories
                     </h4>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
@@ -145,13 +145,9 @@ function HomePage() {
                     </div>
                 </div>
 
-                <div className="col-12 d-lg-none">
-                    <hr/>
-                </div>
-
-                <div className="col-12 col-lg-6 split-view-right">
+                <div className="col-12 col-lg-6 p-4" id="split-view-right">
                     {/* Shared directories */}
-                    <h4 className="d-flex align-items-center gap-2 justify-content-center">
+                    <h4 className="d-flex align-items-center gap-2 justify-content-center mb-3">
                         <People/> Shared With Me
                     </h4>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">

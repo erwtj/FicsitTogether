@@ -64,15 +64,18 @@ export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Pr
 export async function shareDirectory(auth: Auth0ContextType, dirID: string, username: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
-    const response = await api.post(`directories/${dirID}/share`, {
-        user: username
-    }, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-
-    return response?.status === 200;
+    try {
+        await api.post(`directories/${dirID}/share`, {
+            user: username
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return true;
+    } catch (err) {
+        return Promise.reject(err);
+    }
 }
 
 export async function unshareDirectory(auth: Auth0ContextType, dirID: string, userId: string): Promise<boolean> {

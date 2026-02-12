@@ -1,9 +1,11 @@
-﻿@media (min-width: 992px) {
-    .split-view-left {
-        border-right: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
-    }
+﻿#split-view-left {
+    border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+    border-right: none;
+}
 
-    .split-view-right {
-        border-left: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+@media (min-width: 992px) {
+    #split-view-left {
+        border-right: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+        border-bottom: none;
     }
 }

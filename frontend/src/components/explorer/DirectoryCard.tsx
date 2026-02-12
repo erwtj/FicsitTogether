@@ -26,7 +26,7 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
         <Card
             onMouseLeave={() => setShowDropdown(false)}
             className={"clickable-card py-2 px-3 d-flex align-items-center justify-content-center"}
-            style={{width: "18rem", minHeight: "4rem", position: "relative", zIndex: showDropdown ? 2000 : 1}}
+            style={{width: "18rem", minHeight: "4rem", position: "relative", zIndex: showDropdown ? 2 : 1}}
             key={directoryInfo.id}
         >
             <div className={"d-flex flex-row gap-3 align-items-center justify-content-center w-100"}>
