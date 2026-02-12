@@ -7,6 +7,11 @@ export type Directory = {
     name: string;
 }
 
+export type DirectoryMinimalInfo = {
+    id: string;
+    name: string;
+}
+
 const createDirectoryQuery = db.prepare('INSERT INTO directories (id, parent_directory, owner, name) VALUES (?, ?, ?, ?)');
 export function createDirectory(id: string, parentDirectoryId: string, owner: string, name: string) {
     createDirectoryQuery.run(id, parentDirectoryId, owner, name);
@@ -99,4 +104,46 @@ const getSharedWithQuery = db.prepare<[string], MinimalUserInfo>(`
 `);
 export function getSharedWith(directoryId: string) {
     return getSharedWithQuery.all(directoryId);
+}
+
+// TODO make the query more efficient
+const getDirectoryTreeQuery = db.prepare<[string, string, string], DirectoryMinimalInfo>(`
+    WITH RECURSIVE parent_dirs(id, parent_directory, owner, name) AS (
+        SELECT id, parent_directory, owner, name
+        FROM directories
+        WHERE id = ?
+
+        UNION
+
+        SELECT d.id, d.parent_directory, d.owner, d.name
+        FROM directories d
+                 INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
+    ),
+                   accessible_parents AS (
+                    
+                       SELECT DISTINCT pd.id, pd.parent_directory, pd.owner, pd.name
+                       FROM parent_dirs pd
+                       WHERE EXISTS (
+                           WITH RECURSIVE check_access(id, parent_directory, owner) AS (
+                           SELECT id, parent_directory, owner
+                           FROM directories
+                           WHERE id = pd.id
+
+                           UNION
+
+                           SELECT d.id, d.parent_directory, d.owner
+                           FROM directories d
+                                    INNER JOIN check_access ca ON d.id = ca.parent_directory
+                       )
+                                 SELECT 1
+                                 FROM check_access ca
+                                 LEFT JOIN share_directories sd ON sd.directory = ca.id AND sd.user = ?
+                                 WHERE ca.owner = ? OR sd.user IS NOT NULL
+                                 )
+                   )
+    SELECT id, parent_directory, owner, name
+    FROM accessible_parents WHERE id != parent_directory
+`);
+export function getDirectoryTree(directoryId: string, userId: string) {
+    return getDirectoryTreeQuery.all(directoryId, userId, userId).reverse();
 }

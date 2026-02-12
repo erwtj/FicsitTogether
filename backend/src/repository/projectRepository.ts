@@ -65,3 +65,5 @@ const deleteProjectQuery = db.prepare<string>('DELETE FROM projects WHERE id = ?
 export function deleteProject(id: string) {
     deleteProjectQuery.run(id);
 }
+
+

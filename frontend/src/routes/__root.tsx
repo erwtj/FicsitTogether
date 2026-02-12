@@ -16,7 +16,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             });
         }
 
-        if (context.auth && context.auth.isAuthenticated && location.pathname !== '/home') {
+        if (context.auth && context.auth.isAuthenticated && location.pathname === '/') {
             throw redirect({
                 to: '/home',
                 replace: true,

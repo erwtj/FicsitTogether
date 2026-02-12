@@ -16,7 +16,7 @@ export const DirectoryAddFolderCard = ({onSubmit}: {onSubmit: (value: string) =>
 
     return (
         <Card
-            className={"clickable-card py-2 px-3 d-flex align-items-center justify-content-center"}
+            className={"py-2 px-3 d-flex align-items-center justify-content-center"}
             style={{
                 width: "18rem",
                 minHeight: "4rem",
@@ -33,7 +33,7 @@ export const DirectoryAddFolderCard = ({onSubmit}: {onSubmit: (value: string) =>
                     className={folderName.length === 0 ? "text-muted" : ""}
                 />
 
-                <div className={"d-flex flex-column align-items-start justify-content-center"}>
+                <div className={"d-flex flex-column align-items-start justify-content-center user-select-none"}>
                     <h5 className={"text-truncate mb-0"} style={{width: "10rem"}}>
                         <input
                             type="text"

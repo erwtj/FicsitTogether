@@ -3,6 +3,7 @@ import {Dropdown} from "react-bootstrap";
 import {useState} from "react";
 import {Card} from "react-bootstrap";
 import "./explorerComponents.css"
+import {Link} from "@tanstack/react-router";
 
 export type DirectoryInfo = {
     id: string;
@@ -29,6 +30,7 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
             style={{width: "18rem", minHeight: "4rem", position: "relative", zIndex: showDropdown ? 2000 : 1}}
             key={directoryInfo.id}
         >
+            <Link to={"/directories/$dir"} params={{ dir: directoryInfo.id }} className={"stretched-link"}></Link>
             <div className={"d-flex flex-row gap-3 align-items-center justify-content-center w-100"}>
                 <Folder size={26} className={""}/>
 
@@ -48,16 +50,17 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
                         <ThreeDotsVertical size={20} className={"text-secondary ms-auto"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
                     <Dropdown.Menu className={"position-fixed z-2"} >
-                        {!directoryInfo.isShared ? (
-                            <>
-                                <Dropdown.Item href={"#"} className={"delete-option"}
-                                               onClick={() => deleteDirectory!(directoryInfo)}>Delete</Dropdown.Item>
-                                <Dropdown.Item href={"#"} className={"share-option"}
-                                               onClick={() => shareDirectory!(directoryInfo)}>Share</Dropdown.Item>
-                            </>
-                        ) : (
+                        {deleteDirectory && !directoryInfo.isShared && (
                             <Dropdown.Item href={"#"} className={"delete-option"}
-                                           onClick={() => leaveDirectory?.(directoryInfo)}>Leave</Dropdown.Item>
+                                           onClick={() => deleteDirectory(directoryInfo)}>Delete</Dropdown.Item>
+                        )}
+                        {shareDirectory && !directoryInfo.isShared && (
+                            <Dropdown.Item href={"#"} className={"share-option"}
+                                           onClick={() => shareDirectory(directoryInfo)}>Share</Dropdown.Item>
+                        )}
+                        {leaveDirectory && directoryInfo.isShared && (
+                            <Dropdown.Item href={"#"} className={"delete-option"}
+                                           onClick={() => leaveDirectory(directoryInfo)}>Leave</Dropdown.Item>
                         )}
                     </Dropdown.Menu>
                 </Dropdown>

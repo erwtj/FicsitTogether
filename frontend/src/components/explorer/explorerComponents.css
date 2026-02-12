@@ -52,3 +52,16 @@
     margin-top: 1.5rem;
     height: auto;
 }
+
+.project-description {
+    line-height: 1.4;
+    max-height: calc(1.4em * 4);
+    padding-bottom: 0.2em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}

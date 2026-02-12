@@ -11,6 +11,12 @@ export type ChartDTO = {
     chart: string;
 }
 
+export type DirectoryTreeDTO = {
+    id: string;
+    name: string;
+}
+
+
 // Contains directory info, including contents of directory
 export type DirectoryContentDTO = {
     id: string,
@@ -19,6 +25,7 @@ export type DirectoryContentDTO = {
     parentDirectoryId: string, 
     subDirectories: DirectoryDTO[],
     projects: ProjectDTO[],
+    directoryTree: DirectoryTreeDTO[],
 }
 
 // Singular directory info

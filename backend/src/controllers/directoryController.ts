@@ -13,10 +13,14 @@ export function getDirectory(req: Request, res: Response, next: NextFunction) {
         const subDirectories = directoryRepository.getDirectories(directoryId);
         const projects = projectRepository.getProjectsInDirectory(directoryId); // I know this is technically wrong, and you shouldn't access two different repositories in one controller, but fuck that stupid rule
 
+        const directoryTree = directoryRepository.getDirectoryTree(directoryId, req.user.id)
+
+
         res.status(200).send({
             ...directory, 
             subDirectories: subDirectories,
             projects: projects,
+            directoryTree: directoryTree,
         } as DirectoryContentDTO);
     } catch (error) {
         next(error);
