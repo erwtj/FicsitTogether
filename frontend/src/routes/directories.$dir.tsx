@@ -1,7 +1,7 @@
-import {createFileRoute, Link, useNavigate} from '@tanstack/react-router'
+import {createFileRoute, useNavigate} from '@tanstack/react-router'
 import {redirect} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import {useEffect, useState, Fragment} from "react";
+import {useEffect, useState} from "react";
 import {
     createDirectory,
     createProject,
@@ -10,14 +10,15 @@ import {
     fetchUser,
 } from "../api/apiCalls.ts";
 import {type DirectoryDTO, type ProjectDTO, type DirectoryTreeDTO} from "dtolib";
-import {Spinner, Navbar, Nav} from "react-bootstrap";
-import {ChevronRight, House, Folder} from 'react-bootstrap-icons';
+import {Spinner} from "react-bootstrap";
+import {Folder} from 'react-bootstrap-icons';
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import {ProjectCard, type ProjectInfo} from "../components/explorer/ProjectCard.tsx";
 import {AddProjectCard} from "../components/explorer/AddProjectCard.tsx";
+import DirectoryTree from "../components/explorer/DirectoryTree.tsx";
 
 export const Route = createFileRoute('/directories/$dir')({
     component: DirectoryPage,
@@ -157,28 +158,7 @@ function DirectoryPage() {
 
     return (
         <>
-            <Navbar bg="dark" className="border-bottom p-2" variant="dark" style={{ height: "40px" }}>
-                <Nav className="d-flex align-items-center ms-3">
-                    <Nav.Item>
-                        <Link to="/login" params={{ dir: 'root' }} className={"nav-link d-flex align-items-center"}>
-                            <House className="me-0" size={16} />
-                        </Link>
-                    </Nav.Item>
-                    <ChevronRight size={16} className="text-muted"/>
-                    {dirTree.map((dir, index) => (
-                        <Fragment key={dir.id}>
-                            <Nav.Item className={"nav-link d-flex align-items-center"}>
-                                <Link to={"/directories/$dir"} params={{ dir: dir.id }}
-                                      className={`nav-link d-flex align-items-center ps-0 pe-0 ${index === dirTree.length - 1 ? "active" : ""}`}
-                                >
-                                    {dir.name}
-                                </Link>
-                            </Nav.Item>
-                            {index < dirTree.length - 1 && <ChevronRight size={16} className="text-muted"/>}
-                        </Fragment>
-                    ))}
-                </Nav>
-            </Navbar>
+            <DirectoryTree dirTree={dirTree}/>
             <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4">
                 <Folder size={32}/>
                 <h3 className="mb-0">{directoryName}</h3>
