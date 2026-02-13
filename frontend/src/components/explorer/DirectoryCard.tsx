@@ -27,7 +27,7 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
         <Card
             onMouseLeave={() => setShowDropdown(false)}
             className={"clickable-card py-2 px-3 d-flex align-items-center justify-content-center"}
-            style={{width: "18rem", minHeight: "4rem", position: "relative", zIndex: showDropdown ? 2 : 1}}
+            style={{width: "18rem", minHeight: "4rem", position: "relative"}}
             key={directoryInfo.id}
         >
             <Link to={"/directories/$dir"} params={{ dir: directoryInfo.id }} className={"stretched-link"}></Link>

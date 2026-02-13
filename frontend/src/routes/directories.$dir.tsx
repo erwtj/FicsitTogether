@@ -218,7 +218,7 @@ function DirectoryPage() {
             </div>
             <ConfirmationModal
                 show={showDeleteModal}
-                title={`Delete '${selectedDirectory ? selectedDirectory.name : selectedProject?.name}'?`}
+                title={`Delete "${selectedDirectory ? selectedDirectory.name : selectedProject?.name}"?`}
                 message={`Are you sure you want to delete this ${selectedDirectory ? "folder" : "project"}?`}
                 onConfirm={() => handleDeleteConfirm(true)}
                 onCancel={() => handleDeleteConfirm(false)}

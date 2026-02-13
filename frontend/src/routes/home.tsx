@@ -188,14 +188,14 @@ function HomePage() {
 
             <ConfirmationModal
                 show={showDeleteModal}
-                title={`Delete '${selectedDirectory?.name}'?`}
+                title={`Delete "${selectedDirectory?.name}"?`}
                 message={"Are you sure you want to delete this folder?"}
                 onConfirm={() => handleDeleteConfirm(true)}
                 onCancel={() => handleDeleteConfirm(false)}
             />
             <ConfirmationModal
                 show={showLeaveModal}
-                title={`Leave '${selectedDirectory?.name}' `}
+                title={`Leave "${selectedDirectory?.name}" `}
                 message={"Are you sure you want to leave this folder?"}
                 onConfirm={() => handleLeaveConfirm(true)}
                 onCancel={() => handleLeaveConfirm(false)}

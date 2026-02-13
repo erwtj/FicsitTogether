@@ -39,7 +39,7 @@ export const AddProjectCard = ({onSubmit}: {onSubmit: (value: string) => void}) 
                     onChange={(e) => setProjectName(e.target.value.trimStart())}
                     placeholder="Project name"
                     className={"border-0 border-bottom mb-0 fs-5"}
-                    maxLength={20}
+                    maxLength={35}
                     style={{
                         outline: "none",
                         width: "12rem",
