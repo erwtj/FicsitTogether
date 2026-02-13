@@ -13,7 +13,7 @@ import {type DirectoryDTO, type ProjectDTO, type DirectoryTreeDTO} from "dtolib"
 import {Spinner, Navbar, Nav} from "react-bootstrap";
 import {ChevronRight, House, Folder} from 'react-bootstrap-icons';
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
-import {DirectoryAddFolderCard} from "../components/explorer/DirectoryAddFolderCard.tsx";
+import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import {ProjectCard, type ProjectInfo} from "../components/explorer/ProjectCard.tsx";
@@ -203,7 +203,7 @@ function DirectoryPage() {
                             />
                         )
                     })}
-                    <DirectoryAddFolderCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                    <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
                 </div>
                 <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>

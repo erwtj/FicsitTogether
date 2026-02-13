@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import { Folder, People } from "react-bootstrap-icons";
-import {DirectoryAddFolderCard} from "../components/explorer/DirectoryAddFolderCard.tsx";
+import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
 import {useState, useEffect} from "react";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 import {
@@ -164,7 +164,7 @@ function HomePage() {
                                 shareDirectory={(dir) => handleShareDirectory(dir)}
                             />
                         ))}
-                        <DirectoryAddFolderCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                        <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
                     </div>
                 </div>
 

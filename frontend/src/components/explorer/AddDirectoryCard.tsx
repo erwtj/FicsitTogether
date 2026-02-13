@@ -1,17 +1,19 @@
-import { useState } from "react";
-import { Card } from "react-bootstrap";
-import { FileEarmarkPlus } from "react-bootstrap-icons";
+import {FolderPlus} from "react-bootstrap-icons";
+import {Card} from "react-bootstrap";
+import {useState} from "react";
+import "./explorerComponents.css"
 
-export const AddProjectCard = ({onSubmit}: {onSubmit: (value: string) => void}) => {
-    const [projectName, setProjectName] = useState("");
+
+export const AddDirectoryCard = ({onSubmit}: {onSubmit: (value: string) => void}) => {
+    const [directoryName, setDirectoryName] = useState("");
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const trimmed = projectName.trim();
+        const trimmed = directoryName.trim();
         if (trimmed !== "") {
             onSubmit(trimmed);
-            setProjectName("");
+            setDirectoryName("");
         }
     }
 
@@ -23,21 +25,21 @@ export const AddProjectCard = ({onSubmit}: {onSubmit: (value: string) => void}) 
                 minHeight: "4rem",
                 border: "dashed var(--bs-border-color)"
             }}
-            key={"addProjectCard.id"}
+            key={"AddDirectoryCard.id"}
         >
             <form className={"d-flex flex-row gap-2 w-100"} onSubmit={handleSubmit}>
-                <button className="d-inline bg-transparent border-0 p-0 m-0" type="submit" disabled={projectName.length === 0}>
-                    <FileEarmarkPlus
+                <button className="d-inline bg-transparent border-0 p-0 m-0" type="submit" disabled={directoryName.length === 0}>
+                    <FolderPlus
                         size={26}
-                        className={projectName.length === 0 ? "text-muted" : ""}
+                        className={directoryName.length === 0 ? "text-muted" : ""}
                     />
                 </button>
 
                 <input
                     type="text"
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value.trimStart())}
-                    placeholder="Project name"
+                    value={directoryName}
+                    onChange={(e) => setDirectoryName(e.target.value.trimStart())}
+                    placeholder="Directory name"
                     className={"border-0 border-bottom mb-0 fs-5"}
                     maxLength={20}
                     style={{
@@ -49,5 +51,5 @@ export const AddProjectCard = ({onSubmit}: {onSubmit: (value: string) => void}) 
                 />
             </form>
         </Card>
-    )
+    );
 }
