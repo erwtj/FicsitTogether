@@ -9,7 +9,7 @@ function App() {
         return (
             <div className="app-container">
                 <div className="loading-state">
-                    <div className="loading-text">Loading...</div>
+                    <div className="loading-text"></div>
                 </div>
             </div>
         );

@@ -42,6 +42,12 @@ export function createDirectory(req: Request, res: Response, next: NextFunction)
             error.status = 400;
             return next(error);
         }
+
+        if (name.length > 20) {
+            const error: AppError = new Error('Directory name exceeds max length (20).');
+            error.status = 400;
+            return next(error);
+        }
         
         // The owner of the parent directory is also the owner of this directory, just because you make a directory in a shared directory doesn't make you the owner
         const parentDirectory = directoryRepository.getDirectory(parentDirectoryId)!;
@@ -96,6 +102,12 @@ export function shareDirectory(req: Request, res: Response, next: NextFunction) 
 
         if (directoryId === req.user.root_directory) {
             const error: AppError = new Error('Not allowed to share root directory!');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (username === req.user.username){
+            const error: AppError = new Error('Not allowed to share with yourself!');
             error.status = 400;
             return next(error);
         }

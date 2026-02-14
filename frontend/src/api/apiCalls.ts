@@ -1,6 +1,7 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import {type DirectoryDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type FullUserInfoDTO, type ProjectDTO} from "dtolib"
+import {type DirectoryDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO} from "dtolib"
+
 
 // API calls
 export async function fetchRoot(auth: Auth0ContextType): Promise<DirectoryContentDTO> {
@@ -48,7 +49,6 @@ export async function createDirectory(auth: Auth0ContextType, parentID: string, 
         }
     });
 
-
     return response?.data as DirectoryDTO;
 }
 export async function deleteDirectory(auth: Auth0ContextType, dirID: string): Promise<boolean> {
@@ -62,7 +62,7 @@ export async function deleteDirectory(auth: Auth0ContextType, dirID: string): Pr
 
     return response?.status === 200;
 }
-export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Promise<{id: string, username: string}[]> {
+export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Promise<MinimalUserInfoDTO[]> {
     const token = await auth.getAccessTokenSilently();
 
     const response = await api.get(`directories/${dirID}/share`, {
@@ -70,7 +70,7 @@ export async function fetchSharedWith(auth: Auth0ContextType, dirID: string): Pr
             Authorization: `Bearer ${token}`
         }
     });
-    return response?.data as {id: string, username: string}[]
+    return response?.data as MinimalUserInfoDTO[]
 }
 
 // Project management
@@ -106,16 +106,20 @@ export async function deleteProject(auth: Auth0ContextType, projID: string): Pro
 export async function shareDirectory(auth: Auth0ContextType, dirID: string, username: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
-    const response = await api.post(`directories/${dirID}/share`, {
-        user: username
-    }, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-
-    return response?.status === 200;
+    try {
+        await api.post(`directories/${dirID}/share`, {
+            user: username
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return true;
+    } catch (err) {
+        return Promise.reject(err);
+    }
 }
+
 export async function unshareDirectory(auth: Auth0ContextType, dirID: string, userId: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 

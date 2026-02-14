@@ -22,7 +22,7 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
             })
             .catch(err => console.error('Error getting access token:', err));
         }
-    }, [auth0Context]);
+    }, [auth0Context, user]);
 
 
     const popover = (
@@ -35,10 +35,10 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
                     style={{ width: '80px', height: '80px' }}
                 />
 
-                <hr/>
-                <p className="text-muted mb-1 fs-7">@{username}</p>
+                <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
+                <p className="text-muted mb-1 fs-6">@{username}</p>
                 <h6 className="mb-3">{user!.email}</h6>
-                <hr/>
+                <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
 
                 <Button variant="danger" className="w-100" size="sm" onClick={auth0Context.logout}>
                     Log out

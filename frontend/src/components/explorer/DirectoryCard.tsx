@@ -27,24 +27,26 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
         <Card
             onMouseLeave={() => setShowDropdown(false)}
             className={"clickable-card py-2 px-3 d-flex align-items-center justify-content-center"}
-            style={{width: "18rem", minHeight: "4rem", position: "relative", zIndex: showDropdown ? 2000 : 1}}
+            style={{width: "18rem", minHeight: "4rem", position: "relative"}}
             key={directoryInfo.id}
         >
             <Link to={"/directories/$dir"} params={{ dir: directoryInfo.id }} className={"stretched-link"}></Link>
-            <div className={"d-flex flex-row gap-3 align-items-center justify-content-center w-100"}>
+            <div className={"d-flex flex-row gap-2 align-items-center justify-content-center w-100"}>
                 <Folder size={26} className={""}/>
 
                 <div className={"d-flex flex-column align-items-start justify-content-center"}>
-                    <h5 className={"text-truncate mb-0"} style={{width: "10rem"}}>
-                        {directoryInfo.name}
-                    </h5>
+                    {directoryInfo.name.length === 0 ?
+                        <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem"}} key="title">No name</h5> :
+                        <h5 className={"text-truncate mb-0"} style={{width: "12rem"}} key="title">{directoryInfo.name}</h5>
+                    }
+
                     {directoryInfo.isShared && directoryInfo.sharedBy && (
                         <small className={"text-muted"}>Shared by: {directoryInfo.sharedBy}</small>
                     )}
                 </div>
-                <Dropdown className={"z-2"} show={showDropdown}>
+                <Dropdown className={"z-2 ms-auto"} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
-                                     className={"border-0 p-0 bg-transparent no-arrow"}
+                                     className={"border-0 p-0 bg-transparent no-arrow align-top"}
                                      id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
                     >
                         <ThreeDotsVertical size={20} className={"text-secondary ms-auto"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />

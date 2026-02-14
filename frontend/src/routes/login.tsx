@@ -35,6 +35,5 @@ function LoginComponent() {
                 </Card.Body>
             </Card>
         </div>
-        
     );
 }

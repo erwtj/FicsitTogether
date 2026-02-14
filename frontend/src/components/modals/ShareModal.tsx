@@ -5,6 +5,27 @@ import {fetchSharedWith, shareDirectory, unshareDirectory} from "../../api/apiCa
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
+import {isAxiosError} from 'axios';
+import "./ShareModal.tsx.css"
+import { X } from "react-bootstrap-icons";
+
+
+type RemoveUserCardProps = {
+    userId: string;
+    username: string;
+    onRemove: (userId: string) => void;
+}
+
+function RemoveUserCard({userId, username, onRemove}: RemoveUserCardProps) {
+    return (
+        <div className="d-inline-flex border px-2 py-1 fs-6 rounded-3 bg-body-tertiary">
+            <span>@{username}</span>
+            <button className="border-0 bg-transparent p-0 ms-2 rounded-1 unshare-button" onClick={() => onRemove(userId)}>
+                <X size={20} className="align-text-bottom"/>
+            </button>
+        </div>
+    );
+}
 
 type ShareModalProps = {
     show: boolean;
@@ -16,7 +37,8 @@ type ShareModalProps = {
 function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProps) {
     const auth = useAuth0Context();
     const [sharedWith, setSharedWith] = useState<{id: string, username: string}[]>([]);
-    const [usernameToShare, setUsernameToShare] = useState<string>("");
+    const [username, setUsername] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
 
     useEffect(() => {
         if (directoryId.length === 0) return;
@@ -27,7 +49,17 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
         shareDirectory(auth, directoryId, username).then(success => {
             if (!success) return;
             fetchSharedWith(auth, directoryId).then(users => setSharedWith(users));
-        })
+        }).catch(err => {
+            if (isAxiosError(err)) {
+                if (err.status === 404) {
+                    setErrorMessage("User not found");
+                } else {
+                    console.error(err.message);
+                }
+            } 
+        }).finally(() => {
+            setUsername("");
+        });
     }
     const removeShareWithUser = (userId: string) => {
         unshareDirectory(auth, directoryId, userId).then(success => {
@@ -36,52 +68,53 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
         })
     }
 
+    const onSubmit = (e: React.SubmitEvent) => {
+        e.preventDefault();
+        shareWithUser(username);
+    }
+    
+    const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=> {
+        const cleanUsername = e.target.value.toLowerCase().replace(/ /g,'')
+        setUsername(cleanUsername);
+        
+        if (cleanUsername.length > 0) 
+            setErrorMessage("");
+    }
+
     return (
-        <Modal show={show} onHide={onClose} centered size={'lg'}>
-            <Modal.Header>
-                <Modal.Title className="justify-content-between d-flex w-100">
-                    <>Sharing {directoryName}</>
-                    <div className="d-flex">
-                        <Form className="d-flex align-items-center me-2">
-                            <InputGroup>
-                                <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
-                                <Form.Control
-                                    placeholder="Username"
-                                    aria-label="Username"
-                                    aria-describedby="basic-addon1"
-                                    value={usernameToShare}
-                                    onChange={(e) => setUsernameToShare(e.target.value.toLowerCase())}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            shareWithUser(usernameToShare);
-                                            setUsernameToShare("");
-                                        }
-                                    }}
-                                />
-                            </InputGroup>
-                        </Form>
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                shareWithUser(usernameToShare);
-                                setUsernameToShare("");
-                            }}
-                        >
-                            Share
-                        </Button>
-                    </div>
+        <Modal show={show} onHide={() => {setErrorMessage(""); setUsername(""); onClose();}} centered>
+            <Modal.Header className="flex-column gap-2">
+                <Modal.Title className="w-100">
+                    Sharing "<span style={{maxWidth: "75%"}} className="text-truncate d-inline-block align-bottom">{directoryName}</span>"
                 </Modal.Title>
+                <div className="d-flex w-100">
+                    <Form className="d-flex align-items-center me-2 w-100" onSubmit={onSubmit}>
+                        <InputGroup>
+                            <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
+                            <Form.Control
+                                placeholder={errorMessage ? errorMessage : 'Username'}
+                                aria-label="Username"
+                                aria-describedby="basic-addon1"
+                                value={username.trim()}
+                                onChange={onChange}
+                                className={errorMessage !== "" ? "error" : ""}
+                            />
+                            <Button disabled={username===""} type="submit" variant="primary">
+                                Share
+                            </Button>
+                        </InputGroup>
+                    </Form>
+                </div>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body className="overflow-y-auto" style={{maxHeight: "40vh"}}>
                 <h5>Shared With:</h5>
                 {sharedWith.length === 0 && <p>This directory is not shared with anyone.</p>}
                 {sharedWith.length > 0 &&
-                    <ul>
+                    <div className="d-flex flex-wrap gap-1">
                         {sharedWith.map(user => (
-                            <li key={user.id}>@{user.username} <button onClick={() => removeShareWithUser(user.id)}> X </button> </li>
+                            <RemoveUserCard userId={user.id} username={user.username} onRemove={removeShareWithUser} key={user.id} />
                         ))}
-                    </ul>
+                    </div>
                 }
             </Modal.Body>
         </Modal>
@@ -89,4 +122,3 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
 }
 
 export default ShareModal;
-

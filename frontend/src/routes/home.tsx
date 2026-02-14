@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import { Folder, People } from "react-bootstrap-icons";
-import {DirectoryAddFolderCard} from "../components/explorer/DirectoryAddFolderCard.tsx";
+import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
 import {useState, useEffect} from "react";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 import {
@@ -11,8 +11,9 @@ import {
     deleteDirectory,
     leaveDirectory
 } from "../api/apiCalls.ts";
-import ConformationModal from "../components/modals/ConformationModal.tsx";
+import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
+import "./home.tsx.css";
 import {Spinner} from "react-bootstrap";
 
 export const Route = createFileRoute('/home')({
@@ -147,46 +148,54 @@ function HomePage() {
     }
 
     return (
-        <div className="d-flex flex-row h-100">
-            <div className="w-50 p-3 border-end">
-                {/* Owned directories */}
-                <h4 className="d-flex align-items-center gap-2">
-                    <Folder /> My Directories
-                </h4>
-                <div className="d-flex flex-wrap gap-3">
-                    {ownedDirectories.map(dirInfo => (
-                        <DirectoryCard
-                            key={dirInfo.id}
-                            directoryInfo={dirInfo}
-                            deleteDirectory={(dir) => handleDeleteDirectory(dir)}
-                            shareDirectory={(dir) => handleShareDirectory(dir)}
-                        />
-                    ))}
-                    <DirectoryAddFolderCard onSubmit={(s) => handleCreateDirectory(s)}/>
+        <div className="container h-100 mw-100">
+            <div className="row gap-4 gap-lg-0 h-100">
+                <div className="col-12 col-lg-6 p-4" id="split-view-left">
+                    {/* Owned directories */}
+                    <h4 className="d-flex align-items-center gap-2 justify-content-center mb-3">
+                        <Folder/> My Directories
+                    </h4>
+                    <div className="d-flex flex-wrap gap-3 justify-content-center">
+                        {ownedDirectories.map(dirInfo => (
+                            <DirectoryCard
+                                key={dirInfo.id}
+                                directoryInfo={dirInfo}
+                                deleteDirectory={(dir) => handleDeleteDirectory(dir)}
+                                shareDirectory={(dir) => handleShareDirectory(dir)}
+                            />
+                        ))}
+                        <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                    </div>
+                </div>
+
+                <div className="col-12 col-lg-6 p-4" id="split-view-right">
+                    {/* Shared directories */}
+                    <h4 className="d-flex align-items-center gap-2 justify-content-center mb-3">
+                        <People/> Shared With Me
+                    </h4>
+                    <div className="d-flex flex-wrap gap-3 justify-content-center">
+                        {sharedDirectories.length > 0 ?
+                            sharedDirectories.map(dirInfo => (
+                                <DirectoryCard key={dirInfo.id} directoryInfo={dirInfo}
+                                               leaveDirectory={(dir) => handleLeaveDirectory(dir)}/>
+                            ))
+                            :
+                            <p className="text-muted fs-5">No one shared a directory with you :(</p>
+                        }
+                    </div>
                 </div>
             </div>
 
-            <div className="w-50 p-3">
-                {/* Shared directories */}
-                <h4 className="d-flex align-items-center gap-2">
-                    <People /> Shared With Me
-                </h4>
-                <div className="d-flex flex-wrap gap-3">
-                    {sharedDirectories.map(dirInfo => (
-                        <DirectoryCard key={dirInfo.id} directoryInfo={dirInfo} leaveDirectory={(dir) => handleLeaveDirectory(dir)}  />
-                    ))}
-                </div>
-            </div>
-            <ConformationModal
+            <ConfirmationModal
                 show={showDeleteModal}
-                title={`Delete '${selectedDirectory?.name}'?`}
+                title={`Delete "${selectedDirectory?.name}"?`}
                 message={"Are you sure you want to delete this folder?"}
                 onConfirm={() => handleDeleteConfirm(true)}
                 onCancel={() => handleDeleteConfirm(false)}
             />
-            <ConformationModal
+            <ConfirmationModal
                 show={showLeaveModal}
-                title={`Leave '${selectedDirectory?.name}' `}
+                title={`Leave "${selectedDirectory?.name}" `}
                 message={"Are you sure you want to leave this folder?"}
                 onConfirm={() => handleLeaveConfirm(true)}
                 onCancel={() => handleLeaveConfirm(false)}

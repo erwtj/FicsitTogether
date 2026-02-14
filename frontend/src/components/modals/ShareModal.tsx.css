@@ -1,0 +1,7 @@
+﻿.error::placeholder {
+    color: #ff2642 !important;
+}
+
+.unshare-button:hover {
+    background: rgba(255, 255, 255, 0.21) !important;
+}

@@ -1,0 +1,11 @@
+﻿#split-view-left {
+    border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+    border-right: none;
+}
+
+@media (min-width: 992px) {
+    #split-view-left {
+        border-right: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+        border-bottom: none;
+    }
+}

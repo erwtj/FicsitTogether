@@ -20,6 +20,12 @@ export function createProject(req: Request, res: Response, next: NextFunction): 
             error.status = 400;
             return next(error);
         }
+
+        if (name.length > 35) {
+            const error: AppError = new Error('Directory name exceeds max length (35).');
+            error.status = 400;
+            return next(error);
+        }
         
         if (directoryId === req.user.root_directory) {
             const error: AppError = new Error('Not allowed to make projects in root directory!');
