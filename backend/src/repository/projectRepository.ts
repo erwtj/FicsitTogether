@@ -1,4 +1,5 @@
 ﻿import {db} from "./database.js";
+import {type ChartDataDTO} from "dtolib";
 
 export type Project = {
     id: string;
@@ -34,7 +35,13 @@ export function getProject(id: string) {
 const getProjectChartQuery = db.prepare<string, Chart>('SELECT chart FROM projects WHERE id = ?');
 export function getProjectChart(id: string) {
     const row = getProjectChartQuery.get(id);
-    return row ? JSON.parse(row.chart) : null;
+    return row ? JSON.parse(row.chart) as ChartDataDTO : undefined;
+}
+
+const updateProjectChartQuery = db.prepare<[string, string]>('UPDATE projects SET chart = ? WHERE id = ?');
+export function updateProjectChart(id: string, chart: any) {
+    const json = JSON.stringify(chart);
+    updateProjectChartQuery.run(json, id);
 }
 
 const getAllProjectsQuery = db.prepare<[], Project>('SELECT id, parent_directory as directoryId, name, description FROM projects');
