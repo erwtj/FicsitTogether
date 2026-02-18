@@ -3,15 +3,17 @@ import {getItemCategory, getRecipesByInputItem, getAllItems, getItem, getRecipes
 import {Modal, Card} from "react-bootstrap";
 import "./RecipeModal.tsx.css";
 import {LightningFill} from "react-bootstrap-icons";
-import {throughputToDisplay} from "../../Utils/math.ts";
+import {throughputToDisplay} from "../../utils/throughputUtil.ts";
+
 export type RecipeModalProps = {
     show: boolean;
-    onModalSubmit: (type: 'none' | 'recipe' | 'item-extractor' | 'item-spawner'  | 'item-end' | 'power',
+    onModalSubmit: (type: 'none' | 'recipe' | 'item-extractor' | 'item-spawner' | 'item-end' | 'power',
                     value: string | null) => void;
     RequiredInput: string | null;
     RequiredOutput: string | null;
 }
 
+// TODO: Move editor related components, hooks, etc into own directory
 
 function getRelevantItemsForInput(requiredInput: string): Set<string> {
     const recipes = getRecipesByInputItem(requiredInput);
@@ -39,6 +41,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
         else setSelectedItem(classname);
     }
 
+    // TODO: Most functions here should be effects to avoid unnecessary recalculations 
     // Get relevant items based on RequiredInput and RequiredOutput
     let relevantItems: Set<string> = RequiredOutput ? new Set([RequiredOutput]) :
         RequiredInput ? getRelevantItemsForInput(RequiredInput) : new Set(getAllItems().map(i => i.className));
@@ -56,23 +59,33 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
     const categoryMap = new Map<string, string[]>();
     for (const itemClassName of relevantItems) {
         const cat = getItemCategory(itemClassName);
-        if (!cat) continue;
+        if (!cat) 
+            continue;
+        
         const existing = categoryMap.get(cat);
-        if (existing) existing.push(itemClassName);
-        else categoryMap.set(cat, [itemClassName]);
+        if (existing) 
+            existing.push(itemClassName);
+        else 
+            categoryMap.set(cat, [itemClassName]);
     }
 
     const recipeList = selectedItem ? getRecipesByOutputItem(selectedItem)
         .filter(r => !RequiredInput || r.input.some(i => i.name === RequiredInput))
+            // TODO: Sorting doesnt work for Heavy Modular Frames (for example)
         .sort((a, b) => {
             const aIsPrimary = a.output[0]?.name === selectedItem;
             const bIsPrimary = b.output[0]?.name === selectedItem;
-            if (aIsPrimary !== bIsPrimary) return aIsPrimary ? -1 : 1; // Primary recipes first
+            
+            if (aIsPrimary !== bIsPrimary) 
+                return aIsPrimary ? -1 : 1; // Primary recipes first
 
             const aIsAlt = a.displayName.startsWith("Alt:");
             const bIsAlt = b.displayName.startsWith("Alt:");
-            if (aIsAlt !== bIsAlt) return aIsAlt ? 1 : -1; // Non-alt recipes first
-            return 0
+            
+            if (aIsAlt !== bIsAlt) 
+                return aIsAlt ? 1 : -1; // Non-alt recipes first
+            
+            return 0;
         })
     : [];
 
@@ -82,7 +95,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
 
     const selectedItemObj = selectedItem ? getItem(selectedItem) : null;
 
-
+    // TODO: Needs a total overhaul, split into components, streamline 
     return (
         <Modal show={show} animation={false} centered onHide={handleClose} dialogClassName="recipe-dialog">
             <Modal.Header closeButton className="w-100">
@@ -180,7 +193,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
                                         </div>
                                         <div className="d-flex flex-row gap-1 mt-2">
                                             <div className="text-center left-col">
-                                                <span>{throughputToDisplay(mainOutputItem, 60 / recipe.duration * mainOutputEntry.amount)}{' / m'}</span>
+                                                <span>{throughputToDisplay(mainOutputEntry.name, 60 / recipe.duration * mainOutputEntry.amount)}{' / m'}</span>
                                             </div>
                                             <div className="d-flex flex-row flex-wrap gap-2">
                                                 {recipe.input.map(input => {
@@ -190,7 +203,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
                                                         <div key={input.name}>
                                                             <img alt={inputItem.displayName} className="recipeTinyIcon"
                                                                  src={`/media/${inputItem.icon}_256.webp`} draggable={false}/>
-                                                            <span>{throughputToDisplay(inputItem, 60 / recipe.duration * input.amount)}</span>
+                                                            <span>{throughputToDisplay(inputItem.className, 60 / recipe.duration * input.amount)}</span>
                                                         </div>
                                                     );
                                                 })}
@@ -226,7 +239,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
                                                     <div key={input.name}>
                                                         <img alt={inputItem.displayName} className="recipeTinyIcon"
                                                              src={`/media/${inputItem.icon}_256.webp`} draggable={false}/>
-                                                        <span>{throughputToDisplay(inputItem, 60 / recipe.duration * input.amount)}</span>
+                                                        <span>{throughputToDisplay(inputItem.className, 60 / recipe.duration * input.amount)}</span>
                                                     </div>
                                                 );
                                             })}
@@ -254,16 +267,9 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
                     </div>
                 </Modal.Footer>
             )}
-
             <Modal.Footer/>
         </Modal>
     )
-
-
-
-
-
-
 }
 
 
