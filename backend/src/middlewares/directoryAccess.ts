@@ -3,7 +3,7 @@ import {db} from "../repository/database.js";
 import type {User} from "../repository/userRepository.js";
 import {getProject} from "../repository/projectRepository.js";
 
-function hasDirectoryAccess(user: User, directoryId: string): boolean {
+export function hasDirectoryAccess(user: User, directoryId: string): boolean {
     // Check if this is the user's root directory
     if (user.root_directory === directoryId) {
         return true;
@@ -34,7 +34,7 @@ function hasDirectoryAccess(user: User, directoryId: string): boolean {
     return result !== undefined;
 }
 
-function hasProjectAccess(user: User, projectId: string): boolean {
+export function hasProjectAccess(user: User, projectId: string): boolean {
     const project = getProject(projectId);
 
     if (!project) {

@@ -1,5 +1,7 @@
 ﻿import Database from 'better-sqlite3';
 
+// TODO: Rewrite all repositories for postgresql 
+
 export const db: Database.Database = new Database('db.sqlite');
 
 db.pragma('journal_mode = WAL');

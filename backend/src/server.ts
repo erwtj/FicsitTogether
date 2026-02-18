@@ -3,6 +3,7 @@ import config from './config/config.js';
 import * as fs from "node:fs";
 import * as https from "node:https";
 import * as http from "node:http";
+import {setupWebSocketServer} from "./sockets/projectSocket.js";
 
 if (config.https) {
     const options = {
@@ -10,11 +11,17 @@ if (config.https) {
         cert: fs.readFileSync('secret.pem'),
     }
     
-    https.createServer(options, app).listen(config.apiPort, () => {
+    const server = https.createServer(options, app);
+    setupWebSocketServer(server);
+    
+    server.listen(config.apiPort, () => {
         console.log(`Server is running on https://localhost:${config.apiPort}`);
     });
 } else {
-    http.createServer(app).listen(config.apiPort, () => {
+    const server = http.createServer(app);
+    setupWebSocketServer(server);
+        
+    server.listen(config.apiPort, () => {
         console.log(`Server is running on http://localhost:${config.apiPort}`);
     });
 }

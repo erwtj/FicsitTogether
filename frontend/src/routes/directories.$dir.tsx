@@ -178,22 +178,22 @@ function DirectoryPage() {
                                     }
                                 }
                                 key={directory.id}
-                                deleteDirectory={(dir) => handleDeleteDirectory(dir)}
-                                shareDirectory={directory.owner === userID ? (dir) => handleShareDirectory(dir) : undefined}
+                                deleteDirectory={handleDeleteDirectory}
+                                shareDirectory={directory.owner === userID ? handleShareDirectory : undefined}
                             />
                         )
                     })}
-                    <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                    <AddDirectoryCard onSubmit={handleCreateDirectory}/>
                 </div>
                 <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>
 
                     {projects.map((project) => {
                         return (
-                            <ProjectCard project={project} deleteProject={(project) => handleDeleteProject(project)} key={project.id}/>
+                            <ProjectCard project={project} deleteProject={handleDeleteProject} key={project.id}/>
                         )
                     })}
-                    <AddProjectCard onSubmit={(name) => handleCreateProject(name)}/>
+                    <AddProjectCard onSubmit={handleCreateProject}/>
                 </div>
             </div>
             <ConfirmationModal

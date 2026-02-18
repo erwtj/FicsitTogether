@@ -10,5 +10,14 @@
   "scripts": {
     "build": "npm run build -ws",
     "build:lib": "npm run build --workspace ficlib && npm run build --workspace dtolib"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3",
+    "jwks-rsa": "^3.2.2",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/ws": "^8.18.1"
   }
 }
