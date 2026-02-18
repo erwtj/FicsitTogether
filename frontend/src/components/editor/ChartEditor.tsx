@@ -1,11 +1,11 @@
 ﻿import { useAuth0Context } from "../../auth/useAuth0Context.ts";
 import { useState, useEffect, useRef } from "react";
 import * as Y from "yjs";
-import { ReactFlow, Background, BackgroundVariant, Controls, MiniMap } from "@xyflow/react";
+import { ReactFlow, Background, BackgroundVariant, Controls, MiniMap, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
-import { useYjsSync } from "./useYjsSync";
-import { useNodeEdgeHandlers } from "./useNodeEdgeHandlers";
+import { useYjsSync } from "./hooks/useYjsSync.ts";
+import { useNodeEdgeHandlers } from "./hooks/useNodeEdgeHandlers.ts";
 
 interface ChartEditorProps {
     projectId: string;
@@ -13,6 +13,7 @@ interface ChartEditorProps {
 
 function ChartEditorInner({ projectId }: ChartEditorProps) {
     const auth = useAuth0Context();
+    const reactFlow = useReactFlow();
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,11 +32,12 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
         if (!doc) return;
 
         const bounds = event.currentTarget.getBoundingClientRect();
-        const position = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+        const mousePosition = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+        const nodePosition = reactFlow.screenToFlowPosition(mousePosition);
         const newNode = {
             id: `node-${Date.now()}`,
             type: "default" as const,
-            position,
+            position: nodePosition,
             data: { label: "New Node" },
         };
         doc.getMap("nodes").set(newNode.id, newNode);
@@ -50,6 +52,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                 onEdgesChange={onEdgesChangeInternal}
                 onConnect={onConnect}
                 onDoubleClickCapture={onDoubleClick}
+                zoomOnDoubleClick={false}
+                nodeOrigin={[0.5, 0.0]}
                 fitView
             >
                 <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
