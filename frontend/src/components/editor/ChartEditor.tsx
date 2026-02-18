@@ -6,6 +6,7 @@ import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
 import { useNodeEdgeHandlers } from "./hooks/useNodeEdgeHandlers.ts";
+import RecipeModal from "../modals/RecipeModal.tsx";
 
 interface ChartEditorProps {
     projectId: string;
@@ -60,6 +61,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                 <Controls />
                 <MiniMap />
             </ReactFlow>
+            <RecipeModal show={true} onModalSubmit={() => 0} RequiredInput={null} RequiredOutput={null}/>
         </div>
     );
 }
