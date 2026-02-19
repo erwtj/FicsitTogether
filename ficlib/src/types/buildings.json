@@ -109,20 +109,20 @@
     "somersloopsNeeded": -1
   },
   {
-    "className": "Build_Generatorfuel_C",
-    "displayName": "fuel-Powered Generator",
-    "icon": "FactoryGame/Buildable/Factory/Generatorfuel/UI/fuelGenerator",
+    "className": "Build_GeneratorFuel_C",
+    "displayName": "Fuel-Powered Generator",
+    "icon": "FactoryGame/Buildable/Factory/GeneratorFuel/UI/FuelGenerator",
     "powerConsumption": 0.0,
     "powerProduction": 250.0,
     "fuel": [
       {
-        "mFuelClass": "Desc_Liquidfuel_C",
+        "mFuelClass": "Desc_LiquidFuel_C",
         "mSupplementalResourceClass": "",
         "mByproduct": "",
         "mByproductAmount": ""
       },
       {
-        "mFuelClass": "Desc_LiquidTurbofuel_C",
+        "mFuelClass": "Desc_LiquidTurboFuel_C",
         "mSupplementalResourceClass": "",
         "mByproduct": "",
         "mByproductAmount": ""
@@ -134,13 +134,13 @@
         "mByproductAmount": ""
       },
       {
-        "mFuelClass": "Desc_Rocketfuel_C",
+        "mFuelClass": "Desc_RocketFuel_C",
         "mSupplementalResourceClass": "",
         "mByproduct": "",
         "mByproductAmount": ""
       },
       {
-        "mFuelClass": "Desc_Ionizedfuel_C",
+        "mFuelClass": "Desc_IonizedFuel_C",
         "mSupplementalResourceClass": "",
         "mByproduct": "",
         "mByproductAmount": ""
@@ -204,19 +204,19 @@
     "powerProduction": 2500.0,
     "fuel": [
       {
-        "mFuelClass": "Desc_NuclearfuelRod_C",
+        "mFuelClass": "Desc_NuclearFuelRod_C",
         "mSupplementalResourceClass": "Desc_Water_C",
         "mByproduct": "Desc_NuclearWaste_C",
         "mByproductAmount": "50"
       },
       {
-        "mFuelClass": "Desc_PlutoniumfuelRod_C",
+        "mFuelClass": "Desc_PlutoniumFuelRod_C",
         "mSupplementalResourceClass": "Desc_Water_C",
         "mByproduct": "Desc_PlutoniumWaste_C",
         "mByproductAmount": "10"
       },
       {
-        "mFuelClass": "Desc_FicsoniumfuelRod_C",
+        "mFuelClass": "Desc_FicsoniumFuelRod_C",
         "mSupplementalResourceClass": "Desc_Water_C",
         "mByproduct": "",
         "mByproductAmount": ""

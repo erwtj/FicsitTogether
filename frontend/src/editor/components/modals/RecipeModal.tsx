@@ -1,9 +1,10 @@
 import {useState, useMemo} from "react";
-import {getItemCategories, getAllCategories, getRecipesByInputItem, getAllItems, getItem, getRecipesByOutputItem, getBuilding} from "ficlib"
-import {Modal, Card} from "react-bootstrap";
+import {getItemCategories, getAllCategories, getRecipesByInputItem, getAllItems, getItem, getRecipesByOutputItem} from "ficlib"
+import {Modal} from "react-bootstrap";
 import "./RecipeModal.tsx.css";
-import {LightningFill} from "react-bootstrap-icons";
-import {throughputToDisplay} from "../../../utils/throughputUtil.ts";
+import CategorySidebar from "./RecipeModalComponents/CategorySidebar.tsx";
+import ItemGrid from "./RecipeModalComponents/ItemGrid.tsx";
+import {CountRecipeCard, PowerRecipeCard, RecipeCard, SpawnRecipeCard} from "./RecipeModalComponents/RecipeCards.tsx";
 
 export type RecipeModalProps = {
     show: boolean;
@@ -99,50 +100,29 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
             selectedItem ? getItem(selectedItem) : null
         , [selectedItem]);
 
-    // TODO: Needs a total overhaul, split into components, streamline 
+
+    const handleSelect = (type: 'none' | 'recipe' | 'item-extractor' | 'item-spawner' | 'item-end' | 'power', id: string) => {
+        onModalSubmit(type, id);
+        setSelectedItem(null);
+        setSearchTerm("");
+    };
+
+    const showEndCards = !RequiredOutput && (!RequiredInput || RequiredInput === selectedItem);
+
     return (
         <Modal show={show} animation={false} centered onHide={handleClose} dialogClassName="recipe-dialog">
             <Modal.Header closeButton className="w-100">
                 <div className="w-100 d-flex flex-row justify-content-between me-2">
                     <Modal.Title>Items</Modal.Title>
-                    {!RequiredOutput && <input type="text" placeholder="Search" value={searchTerm} onChange={handleSearch} className="form-control w-50"/>}
+                    {!RequiredOutput && (
+                        <input type="text" placeholder="Search" value={searchTerm}
+                               onChange={handleSearch} className="form-control w-50"/>
+                    )}
                 </div>
             </Modal.Header>
             <Modal.Body className="smoothScroll row gx-0">
-                <div className="col-3">
-                    <ol className="sticky-top categoryList">
-                        {[...categoryMap.keys()].map(category => (
-                            <li key={category}>
-                                <button className="text-muted clickable-link"
-                                        onClick={() => document.getElementById(category)?.scrollIntoView({behavior: "smooth"})}>
-                                    {category}
-                                </button>
-                            </li>
-                        ))}
-                    </ol>
-                </div>
-                <div className="col">
-                    {[...categoryMap.entries()].map(([category, items]) => (
-                        <div key={category} className="mb-3" id={category}>
-                            <h4>{category}</h4>
-                            <hr/>
-                            <div className="d-flex flex-wrap gap-3">
-                                {items.map(className => {
-                                    const item = getItem(className);
-                                    if (!item) return null;
-                                    return (
-                                        <Card key={className} onClick={() => handleItemSelect(className)}
-                                              className={`itemCard${className === selectedItem ? ' selected-card' : ''}`}>
-                                            <Card.Img className="p-3 pb-0 w-100" src={`/media/${item.icon}_256.webp`} draggable={false} loading="lazy"/>
-                                            <Card.Footer className="w-100 bg-transparent border-0">
-                                                <Card.Title className="text-center">{item.displayName}</Card.Title>
-                                            </Card.Footer>
-                                        </Card>
-                                    )})}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <CategorySidebar categories={[...categoryMap.keys()]}/>
+                <ItemGrid categoryMap={categoryMap} selectedItem={selectedItem} onItemSelect={handleItemSelect}/>
             </Modal.Body>
             {selectedItemObj && (
                 <Modal.Footer className="justify-content-start">
@@ -155,117 +135,20 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
                         <hr/>
                         <div className="gap-3 recipeContainer">
                             {!RequiredInput && (
-                                <div onClick={() => { onModalSubmit("item-spawner", selectedItem); setSelectedItem(null); setSearchTerm(""); }}
-                                     className="recipeCard p-2 fs-8">
-                                    <div className="d-flex flex-row gap-1 pe-2">
-                                        <div className="left-col text-center">
-                                            <img alt={selectedItemObj.displayName} className="recipeBigIcon"
-                                                 src={`/media/${selectedItemObj.icon}_256.webp`} draggable={false}/>
-                                        </div>
-                                        <div className="flex-fill text-start pe-2">
-                                            <h6 className="fs-7">Spawn {selectedItemObj.displayName}</h6>
-                                            <span className="text-muted">Spawn output</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <SpawnRecipeCard item={selectedItemObj}
+                                                 onSelect={() => handleSelect("item-spawner", selectedItem!)}/>
                             )}
-
-                            {recipeList.map(recipe => {
-                                const mainOutputEntry = recipe.output.find(o => o.name === selectedItem);
-                                const mainOutputItem = getItem(recipe.output[0]?.name);
-                                const secondaryOutputItem = getItem(recipe.output[1]?.name);
-                                if (!mainOutputEntry || !mainOutputItem) return null;
-
-                                const buildingDisplayName = getBuilding(recipe.producedIn)?.displayName || recipe.producedIn;
-
-                                return (
-                                    <div key={recipe.className} onClick={() => { onModalSubmit("recipe", recipe.className); setSelectedItem(null); setSearchTerm(""); }}
-                                         className="recipeCard p-2 fs-8">
-                                        <div className="d-flex flex-row gap-1 pe-2">
-                                            <div className="left-col text-center">
-                                                <img alt={mainOutputItem.displayName} className="recipeBigIcon"
-                                                     src={`/media/${mainOutputItem.icon}_256.webp`} draggable={false}/>
-                                                {secondaryOutputItem && (
-                                                    <img alt={secondaryOutputItem.displayName} className="recipeSmallIcon"
-                                                         src={`/media/${secondaryOutputItem.icon}_256.webp`} draggable={false}/>
-                                                )}
-                                            </div>
-                                            <div className="flex-fill text-start">
-                                                <h6 className="fs-7">{recipe.displayName}</h6>
-                                                <span className="text-muted">{buildingDisplayName}</span>
-                                            </div>
-                                        </div>
-                                        <div className="d-flex flex-row gap-1 mt-2">
-                                            <div className="text-center left-col">
-                                                <span>{throughputToDisplay(mainOutputEntry.name, 60 / recipe.duration * mainOutputEntry.amount)}{' / m'}</span>
-                                            </div>
-                                            <div className="d-flex flex-row flex-wrap gap-2">
-                                                {recipe.input.map(input => {
-                                                    const inputItem = getItem(input.name);
-                                                    if (!inputItem) return null;
-                                                    return (
-                                                        <div key={input.name}>
-                                                            <img alt={inputItem.displayName} className="recipeTinyIcon"
-                                                                 src={`/media/${inputItem.icon}_256.webp`} draggable={false}/>
-                                                            <span>{throughputToDisplay(inputItem.className, 60 / recipe.duration * input.amount)}</span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {!RequiredOutput && (!RequiredInput || RequiredInput === selectedItem) && powerRecipes.map(recipe => (
-                                <div key={recipe.className} onClick={() => { onModalSubmit("power", recipe.className); setSelectedItem(null); setSearchTerm(""); }}
-                                     className="recipeCard p-2 fs-8" style={{minHeight: "80px"}}>
-                                    <div className="d-flex flex-row gap-1 pe-2">
-                                        <div className="left-col text-center">
-                                            <img alt={selectedItemObj.displayName} className="recipeBigIcon"
-                                                 src={`/media/${selectedItemObj.icon}_256.webp`} draggable={false}/>
-                                            <LightningFill className="recipeSmallIcon lightning" size={25}/>
-                                        </div>
-                                        <div className="flex-fill text-start">
-                                            <h6 className="fs-7">{recipe.displayName}</h6>
-                                            <span className="text-muted">{recipe.producedIn}</span>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex flex-row gap-1 mt-2">
-                                        <div className="text-center left-col">
-                                            <span>MW</span>
-                                        </div>
-                                        <div className="d-flex flex-row flex-wrap gap-2">
-                                            {recipe.input.map(input => {
-                                                const inputItem = getItem(input.name);
-                                                if (!inputItem) return null;
-                                                return (
-                                                    <div key={input.name}>
-                                                        <img alt={inputItem.displayName} className="recipeTinyIcon"
-                                                             src={`/media/${inputItem.icon}_256.webp`} draggable={false}/>
-                                                        <span>{throughputToDisplay(inputItem.className, 60 / recipe.duration * input.amount)}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
+                            {recipeList.map(recipe => (
+                                <RecipeCard key={recipe.className} recipe={recipe} selectedItem={selectedItem!}
+                                            onSelect={() => handleSelect("recipe", recipe.className)}/>
                             ))}
-
-                            {!RequiredOutput && (!RequiredInput || RequiredInput === selectedItem) && (
-                                <div onClick={() => { onModalSubmit("item-end", selectedItem); setSelectedItem(null); setSearchTerm(""); }}
-                                     className="recipeCard p-2 fs-8" style={{minHeight: "80px"}}>
-                                    <div className="d-flex flex-row gap-1 pe-2">
-                                        <div className="left-col text-center">
-                                            <img alt={selectedItemObj.displayName} className="recipeBigIcon"
-                                                 src={`/media/${selectedItemObj.icon}_256.webp`} draggable={false}/>
-                                        </div>
-                                        <div className="flex-fill text-start pe-2">
-                                            <h6 className="fs-7">Count {selectedItemObj.displayName}</h6>
-                                            <span className="text-muted">Count input</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            {showEndCards && powerRecipes.map(recipe => (
+                                <PowerRecipeCard key={recipe.className} recipe={recipe} item={selectedItemObj}
+                                                 onSelect={() => handleSelect("power", recipe.className)}/>
+                            ))}
+                            {showEndCards && (
+                                <CountRecipeCard item={selectedItemObj}
+                                                 onSelect={() => handleSelect("item-end", selectedItem!)}/>
                             )}
                         </div>
                     </div>
@@ -273,7 +156,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
             )}
             <Modal.Footer/>
         </Modal>
-    )
+    );
 }
 
 
