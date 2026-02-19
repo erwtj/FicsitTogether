@@ -87,7 +87,7 @@ export function getChart(req: Request, res: Response, next: NextFunction) {
             return next(error);
         }
 
-        res.status(200).send(chart as ChartDTO);
+        res.status(200).send(chart);
     } catch (error) {
         next(error);
     }

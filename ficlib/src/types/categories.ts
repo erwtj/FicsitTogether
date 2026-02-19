@@ -13,9 +13,16 @@ const categoriesByClassName: ReadonlyMap<string, Category> = new Map(
     categories.map(category => [category.category, category])
 );
 
-const itemToCategoryMap: Map<string, string> = new Map(
-    categories.flatMap(category => category.items.map(item => [item, category.category]))
-);
+const itemToCategoriesMap = new Map<string, string[]>();
+for (const { category, items } of categories) {
+    for (const item of items) {
+        const existing = itemToCategoriesMap.get(item);
+        if (existing)
+            existing.push(category);
+        else
+            itemToCategoriesMap.set(item, [category]);
+    }
+}
 
 
 // Make map immutable
@@ -36,8 +43,8 @@ export function getCategoryItems(category: string): Item[] {
     return cat.items.map(item => getItem(item)) as Item[];
 }
 
-export function getItemCategory(itemClassName: string): string | undefined {
-    return itemToCategoryMap.get(itemClassName);
+export function getItemCategories(itemClassName: string): string[] {
+    return itemToCategoriesMap.get(itemClassName) ?? [];
 }
 
 export function hasCategory(category: string): boolean {

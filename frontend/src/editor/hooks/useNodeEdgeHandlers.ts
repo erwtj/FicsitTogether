@@ -5,12 +5,14 @@ import {
     type NodeChange, type EdgeChange, type Connection,
     useNodesState, useEdgesState
 } from "@xyflow/react";
+import {initialNodes} from "../nodes";
+import {initialEdges} from "../edges";
 
 const LOCAL_ORIGIN = "local";
 
 export function useNodeEdgeHandlers(ydocRef: React.RefObject<Y.Doc | null>) {
-    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
+    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
 
     const onNodesChangeInternal = useCallback((changes: NodeChange[]) => {
         onNodesChange(changes);

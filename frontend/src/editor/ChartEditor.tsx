@@ -1,4 +1,4 @@
-﻿import { useAuth0Context } from "../../auth/useAuth0Context.ts";
+﻿import { useAuth0Context } from "../auth/useAuth0Context.ts";
 import { useState, useEffect, useRef } from "react";
 import * as Y from "yjs";
 import { ReactFlow, Background, BackgroundVariant, Controls, MiniMap, useReactFlow } from "@xyflow/react";
@@ -6,7 +6,7 @@ import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
 import { useNodeEdgeHandlers } from "./hooks/useNodeEdgeHandlers.ts";
-import RecipeModal from "../modals/RecipeModal.tsx";
+import RecipeModal from "./components/modals/RecipeModal.tsx";
 
 interface ChartEditorProps {
     projectId: string;

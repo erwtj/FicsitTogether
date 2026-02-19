@@ -52,8 +52,6 @@ export function createDirectory(req: Request, res: Response, next: NextFunction)
         // The owner of the parent directory is also the owner of this directory, just because you make a directory in a shared directory doesn't make you the owner
         const parentDirectory = directoryRepository.getDirectory(parentDirectoryId)!;
         const owner = parentDirectory.owner;
-        // TODO: Now that I think about it, that means any directories owner can be figured out by checking to which root it leads, and which account is associated with that root
-        // In other words, I don't think we have to set the owner per directory, you only need to know who own's the root
         
         const uuid = crypto.randomUUID();
         directoryRepository.createDirectory(uuid, parentDirectoryId, owner, name);

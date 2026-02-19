@@ -13,17 +13,14 @@ export function isClassSolid(className: string) {
     return isItemSolid(item);
 }
 
-export function roundIfNecessary(number: number) {
-    if (Math.round(number * 1000)/1000 !== Math.round(number )) {
-        return Math.round(number * 1000) / 1000;
-    }
-    return Math.round(number);
+export function roundTo3Decimals(value: number): number {
+    return Math.round((value + Number.EPSILON) * 1000) / 1000;
 }
 
 export function throughputToDisplay(className: string, throughput: number){
     if (isClassSolid(className)) {
-        return roundIfNecessary(throughput).toString();
+        return roundTo3Decimals(throughput).toString();
     } else {
-        return `${roundIfNecessary(throughput / 1000)} m³`;
+        return `${roundTo3Decimals(throughput / 1000)} m³`;
     }
 }

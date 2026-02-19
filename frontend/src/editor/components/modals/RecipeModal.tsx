@@ -1,9 +1,9 @@
-import {useState} from "react";
-import {getItemCategory, getRecipesByInputItem, getAllItems, getItem, getRecipesByOutputItem, getBuilding} from "ficlib"
+import {useState, useMemo} from "react";
+import {getItemCategories, getAllCategories, getRecipesByInputItem, getAllItems, getItem, getRecipesByOutputItem, getBuilding} from "ficlib"
 import {Modal, Card} from "react-bootstrap";
 import "./RecipeModal.tsx.css";
 import {LightningFill} from "react-bootstrap-icons";
-import {throughputToDisplay} from "../../utils/throughputUtil.ts";
+import {throughputToDisplay} from "../../../utils/throughputUtil.ts";
 
 export type RecipeModalProps = {
     show: boolean;
@@ -13,15 +13,11 @@ export type RecipeModalProps = {
     RequiredOutput: string | null;
 }
 
-// TODO: Move editor related components, hooks, etc into own directory
-
-function getRelevantItemsForInput(requiredInput: string): Set<string> {
+function getRelevantItemsForInput(requiredInput: string): string[] {
     const recipes = getRecipesByInputItem(requiredInput);
-    const relevantItems = new Set<string>([requiredInput]);
-    recipes.forEach(recipe => recipe.output.forEach(output => relevantItems.add(output.name)));
-    return relevantItems;
+    const outputNames = recipes.flatMap(recipe => recipe.output.map(output => output.name));
+    return [requiredInput, ...outputNames];
 }
-
 
 function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: RecipeModalProps) {
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
@@ -37,63 +33,71 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
     }
 
     const handleItemSelect = (classname: string) => {
-        if (selectedItem === classname) setSelectedItem(null);
-        else setSelectedItem(classname);
+        if (selectedItem === classname)
+            setSelectedItem(null);
+        else
+            setSelectedItem(classname);
     }
 
-    // TODO: Most functions here should be effects to avoid unnecessary recalculations 
-    // Get relevant items based on RequiredInput and RequiredOutput
-    let relevantItems: Set<string> = RequiredOutput ? new Set([RequiredOutput]) :
-        RequiredInput ? getRelevantItemsForInput(RequiredInput) : new Set(getAllItems().map(i => i.className));
+    const relevantItems = useMemo(() => {
+        return RequiredOutput ? [RequiredOutput] :
+            RequiredInput ? getRelevantItemsForInput(RequiredInput) : getAllItems().map(i => i.className);
+    }, [RequiredInput, RequiredOutput]);
 
-    // Filter relevant items based on search term
-    if (searchTerm.trim() !== "") {
-        const lowerSearchTerm = searchTerm.toLowerCase();
-        relevantItems = new Set(
-            [...relevantItems].filter(className =>
-                getItem(className)?.displayName.toLowerCase().includes(lowerSearchTerm)
-            )
-        );
-    }
+    const filteredItems = useMemo(() => {
+        const search = searchTerm.trim().toLowerCase();
+        return search !== ""
+            ? relevantItems.filter(className => getItem(className)?.displayName.toLowerCase().includes(search))
+            : relevantItems;
+    }, [relevantItems, searchTerm]);
 
-    const categoryMap = new Map<string, string[]>();
-    for (const itemClassName of relevantItems) {
-        const cat = getItemCategory(itemClassName);
-        if (!cat) 
-            continue;
-        
-        const existing = categoryMap.get(cat);
-        if (existing) 
-            existing.push(itemClassName);
-        else 
-            categoryMap.set(cat, [itemClassName]);
-    }
+    const categoryMap = useMemo(() => {
+        const map = new Map<string, string[]>();
+        // Keep category order
+        getAllCategories().forEach(category => map.set(category.category, []));
 
-    const recipeList = selectedItem ? getRecipesByOutputItem(selectedItem)
-        .filter(r => !RequiredInput || r.input.some(i => i.name === RequiredInput))
-            // TODO: Sorting doesnt work for Heavy Modular Frames (for example)
-        .sort((a, b) => {
-            const aIsPrimary = a.output[0]?.name === selectedItem;
-            const bIsPrimary = b.output[0]?.name === selectedItem;
-            
-            if (aIsPrimary !== bIsPrimary) 
-                return aIsPrimary ? -1 : 1; // Primary recipes first
+        // Insert items into correct category
+        for (const itemClassName of filteredItems) {
+            getItemCategories(itemClassName).forEach(cat => {
+                map.get(cat)?.push(itemClassName);
+            });
+        }
 
-            const aIsAlt = a.displayName.startsWith("Alt:");
-            const bIsAlt = b.displayName.startsWith("Alt:");
-            
-            if (aIsAlt !== bIsAlt) 
-                return aIsAlt ? 1 : -1; // Non-alt recipes first
-            
-            return 0;
-        })
-    : [];
+        // Remove empty categories
+        for (const [cat, items] of map) {
+            if (items.length === 0)
+                map.delete(cat);
+        }
 
-    const powerRecipes = selectedItem
-        ? getRecipesByInputItem(selectedItem).filter(r => r.output.length === 0)
-    : [];
+        return map;
+    }, [filteredItems]);
 
-    const selectedItemObj = selectedItem ? getItem(selectedItem) : null;
+    const recipeList = useMemo(() => {
+        if (!selectedItem) return [];
+        return getRecipesByOutputItem(selectedItem)
+            .filter(r => !RequiredInput || r.input.some(i => i.name === RequiredInput))
+            .sort((a, b) => {
+                const aIsPrimary = a.output[0]?.name === selectedItem;
+                const bIsPrimary = b.output[0]?.name === selectedItem;
+                if (aIsPrimary !== bIsPrimary)
+                    return aIsPrimary ? -1 : 1;
+
+                const aIsAlt = a.displayName.startsWith("Alternate:");
+                const bIsAlt = b.displayName.startsWith("Alternate:");
+                if (aIsAlt !== bIsAlt)
+                    return aIsAlt ? 1 : -1;
+
+                return 0;
+            });
+    }, [selectedItem, RequiredInput]);
+
+    const powerRecipes = useMemo(() =>
+            selectedItem ? getRecipesByInputItem(selectedItem).filter(r => r.output.length === 0) : []
+        , [selectedItem]);
+
+    const selectedItemObj = useMemo(() =>
+            selectedItem ? getItem(selectedItem) : null
+        , [selectedItem]);
 
     // TODO: Needs a total overhaul, split into components, streamline 
     return (

@@ -61,7 +61,6 @@ function DirectoryPage() {
         });
 
         const directoryData = fetchDirectoryContent(auth, dirId).then(DTO => {
-
             if (DTO.id === DTO.parentDirectoryId) {
                 navigate({to: "/home", replace: true});
                 return;
@@ -70,8 +69,8 @@ function DirectoryPage() {
             setDirectoryName(DTO.name);
             setSubDirectories(DTO.subDirectories);
             setProjects(DTO.projects);
-            setDirTree(DTO.directoryTree) //TODO - replace with actual directory tree from API (must be implemented in backend first)
-            setIsLoading(false)
+            setDirTree(DTO.directoryTree);
+            setIsLoading(false);
         });
         directoryData.catch(error => {
             console.error("Error fetching directory content:", error);
