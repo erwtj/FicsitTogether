@@ -1,8 +1,10 @@
-﻿import type { Edge, EdgeTypes } from "@xyflow/react";
+﻿import { type EdgeTypes } from "@xyflow/react";
+import { ItemEdge } from "./ItemEdge";
 
-export const initialEdges = [
-] satisfies Edge[];
-
-export const edgeTypes = {
-    // "item-edge": ItemEdge
-} satisfies EdgeTypes;
+/**
+ * Pass this object directly to <ReactFlow edgeTypes={edgeTypes} />.
+ * Defined outside any component so the reference is stable.
+ */
+export const edgeTypes: EdgeTypes = {
+    "item-edge": ItemEdge,
+};

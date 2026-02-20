@@ -8,7 +8,7 @@ import {CountRecipeCard, PowerRecipeCard, RecipeCard, SpawnRecipeCard} from "./R
 
 export type RecipeModalProps = {
     show: boolean;
-    onModalSubmit: (type: 'none' | 'recipe' | 'item-extractor' | 'item-spawner' | 'item-end' | 'power',
+    onModalSubmit: (type: 'none' | 'recipe' | 'item-spawner' | 'item-end' | 'power',
                     value: string | null) => void;
     RequiredInput: string | null;
     RequiredOutput: string | null;
@@ -41,8 +41,8 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
     }
 
     const relevantItems = useMemo(() => {
-        return RequiredOutput ? [RequiredOutput] :
-            RequiredInput ? getRelevantItemsForInput(RequiredInput) : getAllItems().map(i => i.className);
+        return [... new Set(RequiredOutput ? [RequiredOutput] :
+            RequiredInput ? getRelevantItemsForInput(RequiredInput) : getAllItems().map(i => i.className))];
     }, [RequiredInput, RequiredOutput]);
 
     const filteredItems = useMemo(() => {
@@ -101,7 +101,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
         , [selectedItem]);
 
 
-    const handleSelect = (type: 'none' | 'recipe' | 'item-extractor' | 'item-spawner' | 'item-end' | 'power', id: string) => {
+    const handleSelect = (type: 'none' | 'recipe' | 'item-spawner' | 'item-end' | 'power', id: string) => {
         onModalSubmit(type, id);
         setSelectedItem(null);
         setSearchTerm("");

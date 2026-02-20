@@ -1,6 +1,6 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import {type DirectoryDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO} from "dtolib"
+import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO} from "dtolib"
 
 
 // API calls

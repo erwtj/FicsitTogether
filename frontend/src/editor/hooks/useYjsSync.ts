@@ -41,9 +41,8 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
 
         const updateNodes = (event: YMapEvent<Node>) => {
             if (event.transaction.origin === LOCAL_ORIGIN) return;
-            
+
             event.keysChanged.forEach(key => {
-                console.log("Received event key", key);
                 const newNode = nodeMap.get(key);
                 if (newNode) {
                     const existing = reactFlow.getNode(key);
@@ -55,7 +54,9 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
                         newNode.measured = existing.measured;
                         setNodes(prev => applyNodeChanges([{ type: "replace", id: key, item: newNode }], prev));
                     } else {
-                        setNodes(prev => applyNodeChanges([{ type: "add", item: newNode }], prev));
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        const { width, height, measured, ...freshNode } = newNode;
+                        setNodes(prev => applyNodeChanges([{ type: "add", item: freshNode }], prev));
                     }
                 } else {
                     setNodes(prev => applyNodeChanges([{ type: "remove", id: key }], prev));
@@ -106,6 +107,7 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
             if (messageType === MESSAGE_SYNC) {
                 Y.applyUpdate(doc, content);
             } else if (messageType === MESSAGE_AWARENESS) {
+                // TODO: Do some shit with awareness 
                 console.log("Awareness update received");
             }
         };

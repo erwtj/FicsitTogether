@@ -1,0 +1,47 @@
+﻿.position-handle {
+    position: absolute;
+    background-color: rgba(121, 121, 121, 0.27);
+    border: none;
+    border-radius: 100%;
+    aspect-ratio: 1;
+    min-height: 0;
+    min-width: 0;
+    cursor: pointer;
+    display: block;
+}
+
+.num-input {
+    width: 80px;
+    border: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: 1rem;
+}
+
+.num-input:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+@keyframes pulse2 {
+    0% {
+        transform: scale(1, 1);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(6, 6);
+        opacity: 0;
+    }
+}
+
+
+
+#radar  {
+    fill: rgba(121, 0, 0, .5);
+    animation: pulse2 1.5s ease-in-out infinite;
+}
