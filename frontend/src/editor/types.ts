@@ -39,9 +39,16 @@ export type AppNode =
 
 // ─── Edge Data ────────────────────────────────────────────────────────────────
 
+export type MovablePoint = {
+    id: string;
+    x: number;
+    y: number;
+}
+
 export type ItemEdgeData = {
     /** Items (or mL for fluids) per minute flowing through this edge */
     throughput: number;
+    movablePoints?: MovablePoint[]
 };
 
 export type ItemEdgeType = Edge<ItemEdgeData, "item-edge">;

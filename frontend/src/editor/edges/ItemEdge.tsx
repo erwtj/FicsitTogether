@@ -1,4 +1,4 @@
-﻿import { memo, useCallback } from "react";
+﻿import { memo, useCallback, useEffect} from "react";
 import {
     BaseEdge,
     EdgeLabelRenderer,
@@ -12,10 +12,11 @@ import { type Item } from "ficlib";
 import { isItemSolid, roundTo3Decimals } from "../../utils/throughputUtil.ts";
 import { useYjsMutation } from "../hooks/useYjsMutation";
 import { computeNodeFactor, totalThroughputForHandle } from "../utils/factoryCalc";
-import { type ItemEdgeType, type RecipeNodeData, type ItemSpawnerNodeData } from "../types";
-
+import {type ItemEdgeType, type RecipeNodeData, type ItemSpawnerNodeData, type MovablePoint} from "../types";
+import {getCustomBezierCurve, pointOnPath} from "../utils/edgeUtils.ts";
 import "./ItemEdge.css";
 import {getItemIndexFromHandleId} from "../utils/idUtils.ts";
+import { useState } from "react";
 
 export const ItemEdge = memo(function ItemEdge({
    id,
@@ -34,14 +35,16 @@ export const ItemEdge = memo(function ItemEdge({
 }: EdgeProps<ItemEdgeType>) {
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
+    const [movablePoints, setMovablePoints] = useState<MovablePoint[]>(data?.movablePoints ?? []);
 
-    const [edgePath, labelX, labelY] = getBezierPath({
+    let [edgePath, labelX, labelY] = getBezierPath({
         sourceX, sourceY, sourcePosition,
         targetX, targetY, targetPosition,
     });
 
     // ── Derive item from source node via ficlib lookups ────────────────────
     const sourceNode = reactFlow.getNode(source);
+
 
     const sourceItem: Item | null = (() => {
         if (!sourceNode) return null;
@@ -58,7 +61,13 @@ export const ItemEdge = memo(function ItemEdge({
         return null;
     })();
 
+
     const isFluid = sourceItem ? !isItemSolid(sourceItem) : false;
+
+    // TODO: Fix that the animated stops when throughput is edit
+    useEffect(() => {
+        reactFlow.updateEdge(id, { animated: isFluid });
+    }, [isFluid, id, reactFlow]);
 
     // ── Over-capacity check ────────────────────────────────────────────────
     const allEdges = useEdges<ItemEdgeType>();
@@ -70,8 +79,8 @@ export const ItemEdge = memo(function ItemEdge({
         const recipe = getRecipe(rd.recipeClassName);
         if (!recipe) return false;
 
-        const incomingEdges = allEdges.filter(e => e.target === source);
-        const outgoingEdges = allEdges.filter(e => e.source === source);
+        const incomingEdges = allEdges.filter((e: { target: string; }) => e.target === source);
+        const outgoingEdges = allEdges.filter((e: { source: string; }) => e.source === source);
         const factor = computeNodeFactor(recipe, rd.summerSloops, rd.percentage, incomingEdges, outgoingEdges);
 
         const outputIdx = getItemIndexFromHandleId(sourceHandleId);
@@ -95,7 +104,7 @@ export const ItemEdge = memo(function ItemEdge({
                 updateEdgeData(id, { throughput: 0 });
                 return;
             }
-            updateEdgeData(id, { throughput: isFluid ? val * 1000 : val });
+            updateEdgeData(id, { throughput: isFluid ? val * 1000 : val});
         },
         [id, isFluid, updateEdgeData],
     );
@@ -103,7 +112,9 @@ export const ItemEdge = memo(function ItemEdge({
     // ── Styles ─────────────────────────────────────────────────────────────
     const pathStyle: React.CSSProperties = {
         ...style,
-        stroke: outputTooHigh ? "#790000" : style?.stroke,
+        stroke: outputTooHigh ? "#790000" :
+            isFluid ? `#${sourceItem?.fluidColor.slice(0, -2)}` : style?.stroke,
+
     };
 
     const labelStyle: React.CSSProperties = {
@@ -112,7 +123,66 @@ export const ItemEdge = memo(function ItemEdge({
         borderRadius: "10px",
     };
 
-    // TODO: Animated if fluid
+    const middlePoints = [{x: labelX, y: labelY}];
+
+    if (movablePoints.length > 0) {
+        middlePoints.pop()
+        const points = [{id: "target", x: sourceX, y: sourceY }, ...movablePoints, {id: "target", x: targetX, y: targetY }];
+        const customPath = getCustomBezierCurve(points);
+        edgePath = customPath.path;
+        const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? {id: "label", x: labelX, y: labelY};
+        labelX = labelPoint.x;
+        labelY = labelPoint.y;
+        middlePoints.push(...customPath.middlePoints);
+    }
+
+    function addMovablePoint(idx: number) {
+        const middlePoint = middlePoints[idx];
+        const id = movablePoints.length === 0 ? "label" : `${movablePoints.length}`;
+        const newPoint: MovablePoint = { id, x: middlePoint.x, y: middlePoint.y };
+        setMovablePoints(prev => {
+            const next = [...prev];
+            next.splice(idx, 0, newPoint);
+            return next;
+        });
+    }
+
+    // TODO: Finish and rewrite moving points, currently the points are added but not movable
+    function renderDraggablePoints() {
+        return (
+            <>
+                {middlePoints.map((p, idx) => (
+                    <div
+                        key={idx}
+                        style={{
+                            transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
+                            pointerEvents: "all"
+                        }}
+                        className="add-handle"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            addMovablePoint(idx);
+                        }}
+                    />
+                ))}
+                {movablePoints.length > 0 &&
+                    movablePoints.map((p, idx) => (
+                    <div
+                        key={idx}
+                        style={{
+                            transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
+                            pointerEvents: "all",
+                            cursor: "move",
+                        }}
+                        className="position-handle"
+                        onClick={(e) => (e.stopPropagation())}
+                    />
+                ))}
+            </>
+        );
+    }
+
+
     // ── Render ─────────────────────────────────────────────────────────────
     return (
         <>
@@ -158,6 +228,9 @@ export const ItemEdge = memo(function ItemEdge({
                         onDoubleClickCapture={e => e.stopPropagation()}
                     />
                 </div>
+            </EdgeLabelRenderer>
+            <EdgeLabelRenderer>
+                {selected && renderDraggablePoints()}
             </EdgeLabelRenderer>
         </>
     );

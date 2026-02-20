@@ -152,6 +152,9 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     edges={edges}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
+                    defaultEdgeOptions={{
+                        style: {strokeWidth: 1.75}
+                    }}
                     onNodesChange={onNodesChangeInternal}
                     onEdgesChange={onEdgesChangeInternal}
                     onConnect={onConnect}

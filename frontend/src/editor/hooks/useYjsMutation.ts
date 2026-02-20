@@ -1,4 +1,6 @@
 ﻿import { useCallback } from "react";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
 import { type Node, type Edge } from "@xyflow/react";
 import { useYjsDoc } from "../context/YjsContext";
 
