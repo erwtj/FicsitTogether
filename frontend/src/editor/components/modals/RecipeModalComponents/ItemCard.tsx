@@ -6,7 +6,7 @@ const ItemCard = ({ className, isSelected, onClick }: { className: string, isSel
     if (!item) return null;
     return (
         <Card onClick={onClick} className={`itemCard${isSelected ? ' selected-card' : ''}`}>
-            <Card.Img className="p-3 pb-0 w-100" src={`/media/${item.icon}_256.webp`} draggable={false} loading="lazy"/>
+            <Card.Img className="p-3 pb-0 w-100" src={`/media/${item.icon}_256.webp`} draggable={false} loading="lazy" decoding="async"/>
             <Card.Footer className="w-100 bg-transparent border-0">
                 <Card.Title className="text-center">{item.displayName}</Card.Title>
             </Card.Footer>

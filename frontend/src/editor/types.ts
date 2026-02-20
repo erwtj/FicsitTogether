@@ -50,3 +50,18 @@ export type ItemEdgeType = Edge<ItemEdgeData, "item-edge">;
 
 /** inputFactor: number of buildings running; outputFactor: includes Somer Sloop bonus */
 export type NodeFactor = { inputFactor: number; outputFactor: number };
+
+export const nodeColor = (node: Node) => {
+    switch (node.type){
+        case "recipe-node":
+            return "#e2e2e2";
+        case "item-spawner-node":
+            return "#4CAF50";
+        case "end-node":
+            return "#FF9800";
+        case "power-node":
+            return "#FFEB3B";
+        default:
+            return "#ff0000";
+    }
+}

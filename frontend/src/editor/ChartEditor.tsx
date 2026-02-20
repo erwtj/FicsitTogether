@@ -15,7 +15,7 @@ import RecipeModal, {type RecipeModalProps} from "./components/modals/RecipeModa
 import {getRecipe} from "ficlib";
 import {getItemIndexFromHandleId} from "./utils/idUtils.ts";
 import {type PendingConnection, useNodeSpawner} from "./hooks/useNodeSpawner.ts";
-import type {AppNode} from "./types.ts";
+import {type AppNode, nodeColor} from "./types.ts";
 
 interface ChartEditorProps {
     projectId: string;
@@ -165,7 +165,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                 >
                     <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
                     <Controls />
-                    <MiniMap />
+                    <MiniMap className="bg-body" position="top-right" nodeColor={nodeColor}/>
                 </ReactFlow>
 
                 <RecipeModal
