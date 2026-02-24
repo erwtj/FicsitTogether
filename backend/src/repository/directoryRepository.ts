@@ -106,6 +106,15 @@ export function getSharedWith(directoryId: string) {
     return getSharedWithQuery.all(directoryId);
 }
 
+const existsShareQuery = db.prepare<[string, string], Number>(`
+    SELECT 1
+    FROM share_directories sd
+    WHERE sd.directory = ? AND sd.user == ?; 
+`);
+export function existsShare(directoryId: string, userId: string) {
+    return existsShareQuery.get(directoryId, userId) !== undefined;
+}
+
 // TODO make the query more efficient
 const getDirectoryTreeQuery = db.prepare<[string, string, string], DirectoryMinimalInfo>(`
     WITH RECURSIVE parent_dirs(id, parent_directory, owner, name) AS (
@@ -147,3 +156,4 @@ const getDirectoryTreeQuery = db.prepare<[string, string, string], DirectoryMini
 export function getDirectoryTree(directoryId: string, userId: string) {
     return getDirectoryTreeQuery.all(directoryId, userId, userId).reverse();
 }
+
