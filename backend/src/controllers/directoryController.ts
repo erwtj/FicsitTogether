@@ -127,7 +127,7 @@ export function shareDirectory(req: Request, res: Response, next: NextFunction) 
         
         const shareExist = directoryRepository.existsShare(directory.id, user.id);
 
-        if (!shareExist) // Only sare if not shared yet, otherwise we just ok because why would we error for this
+        // if (!shareExist) // Only sare if not shared yet, otherwise we just ok because why would we error for this
             directoryRepository.shareDirectory(user.id, directoryId);
         res.sendStatus(200);
     } catch (error) {
