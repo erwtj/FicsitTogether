@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+﻿import {useCallback, useEffect, useRef, useState } from "react";
 import * as Y from "yjs";
 import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -16,7 +16,7 @@ import { useConnectionValidation } from "./hooks/useConnectionValidation.ts";
 import { useFactorySync } from "./hooks/useFactorySync.ts";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
 import { useNodeModal } from "./hooks/useNodeModal.ts";
-import type { Edge } from "@xyflow/react";
+import type { Edge, NodeChange } from "@xyflow/react";
 import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
 
 interface ChartEditorProps {
@@ -52,10 +52,31 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     // Connection validation
     const { isValidConnection } = useConnectionValidation();
 
+    const handleKeyDownCapture = useCallback((event: React.KeyboardEvent) => {
+        // Ignore text inputs
+        if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+
+        if (event.key === "a" && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            const selectChanges: NodeChange[] = [];
+
+            for (const node of nodes) {
+                selectChanges.push({
+                    type: "select",
+                    selected: true,
+                    id: node.id
+                });
+            }
+
+            onNodesChangeInternal(selectChanges);
+        }
+    }, [nodes, onNodesChangeInternal]);
+
     return (
         <YjsContext.Provider value={ydocRef}>
-            <div style={{ width: "100%", height: "100vh" }}>
+            <div style={{ width: "100%", height: "100vh" }} tabIndex={0}>
                 <ReactFlow
+                    tabIndex={0}
                     nodes={nodes}
                     edges={edges}
                     nodeTypes={nodeTypes}
@@ -72,6 +93,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     nodeOrigin={[0.5, 0.0]}
                     deleteKeyCode={['Backspace', 'Delete']}
                     multiSelectionKeyCode={'Shift'}
+                    onKeyDownCapture={handleKeyDownCapture}
                     fitView
                 >
                     <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
