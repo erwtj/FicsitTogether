@@ -1,41 +1,20 @@
 ﻿import { memo } from "react";
-import { type NodeProps, Position, useEdges } from "@xyflow/react";
+import { type NodeProps, Position } from "@xyflow/react";
 import { Card } from "react-bootstrap";
 import { getRecipe, getItem, getBuilding } from "ficlib";
 import { ItemHandle } from "../handles/ItemHandle";
-import { roundTo3Decimals, isItemSolid  } from "../../utils/throughputUtil.ts";
-import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
-import {type PowerNodeType, type ItemEdgeType} from "../types";
+import { roundTo3Decimals, isItemSolid } from "../../utils/throughputUtil.ts";
+import { type PowerNodeType } from "../types";
 
 export const PowerNode = memo(function PowerNode({ id, data }: NodeProps<PowerNodeType>) {
     const { recipeClassName } = data;
 
     const recipe = getRecipe(recipeClassName)!;
 
-    const allEdges = useEdges<ItemEdgeType>();
-    const incomingEdges = allEdges.filter(e => e.target === id);
+    // Read pre-computed factor from data (pushed by useFactorySync)
+    const lowestFactor = data._factor ?? 1;
 
-    // Group throughput by target handle, then find the most-constrained input
     const craftsPerMinute = 60 / recipe.duration;
-
-    const throughputByHandle = new Map<string, number>();
-    for (const edge of incomingEdges) {
-        const h = edge.targetHandle ?? "";
-        throughputByHandle.set(h, (throughputByHandle.get(h) ?? 0) + (edge.data?.throughput ?? 0));
-    }
-
-    let lowestFactor = 1;
-    if (throughputByHandle.size > 0) {
-        lowestFactor = Infinity;
-        throughputByHandle.forEach((throughput, handleId) => {
-            const idx = getItemIndexFromHandleId(handleId);
-            const input = recipe.input[idx];
-            if (!input) return;
-            const required = input.amount * craftsPerMinute;
-            if (required > 0) lowestFactor = Math.min(lowestFactor, throughput / required);
-        });
-        if (!isFinite(lowestFactor)) lowestFactor = 1;
-    }
 
     const inputHandles = recipe.input.map((input, i) => {
         const handleId = `${id}-input-handle-${i}`;
@@ -45,10 +24,10 @@ export const PowerNode = memo(function PowerNode({ id, data }: NodeProps<PowerNo
             id: handleId,
             position: `${(100 / (recipe.input.length + 1)) * (i + 1)}%`,
             displayAmount: roundTo3Decimals(input.amount * craftsPerMinute * lowestFactor / (solid ? 1 : 1000)),
-            item: item,
+            item,
         };
     });
-    
+
     const building = getBuilding(recipe.producedIn)!;
 
     return (

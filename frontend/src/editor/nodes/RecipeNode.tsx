@@ -1,60 +1,56 @@
-﻿import { memo } from "react";
-import { type NodeProps, Position, useEdges } from "@xyflow/react";
+﻿import { memo, useMemo } from "react";
+import { type NodeProps, Position } from "@xyflow/react";
 import { Card } from "react-bootstrap";
 import { getRecipe, getBuilding, getItem } from "ficlib";
 import { ItemHandle } from "../handles/ItemHandle";
-import { computeNodeFactor, totalThroughputForHandle } from "../utils/factoryCalc";
 import { useYjsMutation } from "../hooks/useYjsMutation";
 import { roundTo3Decimals, isItemSolid } from "../../utils/throughputUtil.ts";
-import {type RecipeNodeType, type ItemEdgeType} from "../types";
+import { type RecipeNodeType, type NodeFactor } from "../types";
 
 import "./RecipeNode.css";
 
+const DEFAULT_FACTOR: NodeFactor = { inputFactor: 1, outputFactor: 1 };
+
 export const RecipeNode = memo(function RecipeNode({
-                                                       id,
-                                                       data,
-                                                   }: NodeProps<RecipeNodeType>) {
+    id,
+    data,
+}: NodeProps<RecipeNodeType>) {
     const { recipeClassName, summerSloops, percentage } = data;
-    /*const { updateNodeData } =*/ useYjsMutation();
+    useYjsMutation();
 
     const recipe = getRecipe(recipeClassName)!;
     const producedIn = getBuilding(recipe.producedIn)!;
 
-    const allEdges = useEdges<ItemEdgeType>();
-    const incomingEdges = allEdges.filter(e => e.target === id);
-    const outgoingEdges = allEdges.filter(e => e.source === id);
+    // Read pre-computed factor from data (pushed by useFactorySync) — no edge store subscription
+    const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
+    const outputOverUsed: Record<string, boolean> = data._outputOverUsed ?? {};
 
-    const factor = computeNodeFactor(recipe, summerSloops, percentage, incomingEdges, outgoingEdges);
     const craftsPerMinute = 60.0 / recipe.duration;
 
-    const inputHandles = recipe.input.map((input, i) => {
+    const inputHandles = useMemo(() => recipe.input.map((input, i) => {
         const item = getItem(input.name)!;
-        
         const handleId = `${id}-input-handle-${i}`;
         const solid = isItemSolid(item);
         return {
             id: handleId,
             position: `${(100 / (recipe.input.length + 1)) * (i + 1)}%`,
             displayAmount: roundTo3Decimals(input.amount * craftsPerMinute * factor.inputFactor / (solid ? 1 : 1000)),
-            item: item,
+            item,
         };
-    });
+    }), [recipe, id, craftsPerMinute, factor.inputFactor]);
 
-    const outputHandles = recipe.output.map((output, i) => {
+    const outputHandles = useMemo(() => recipe.output.map((output, i) => {
         const item = getItem(output.name)!;
-        
         const handleId = `${id}-output-handle-${i}`;
         const solid = isItemSolid(item);
-        const maxAmount = output.amount * craftsPerMinute * factor.outputFactor / (solid ? 1 : 1000);
-        const usedAmount = totalThroughputForHandle(outgoingEdges, handleId, "source") / (solid ? 1 : 1000);
         return {
             id: handleId,
             position: `${(100 / (recipe.output.length + 1)) * (i + 1)}%`,
-            displayAmount: roundTo3Decimals(maxAmount),
-            overUsed: roundTo3Decimals(usedAmount) > roundTo3Decimals(maxAmount),
-            item: item,
+            displayAmount: roundTo3Decimals(output.amount * craftsPerMinute * factor.outputFactor / (solid ? 1 : 1000)),
+            overUsed: outputOverUsed[handleId] ?? false,
+            item,
         };
-    });
+    }), [recipe, id, craftsPerMinute, factor.outputFactor, outputOverUsed]);
 
     const openSloopModal = () => {
         window.dispatchEvent(new CustomEvent("openSloopModal", {

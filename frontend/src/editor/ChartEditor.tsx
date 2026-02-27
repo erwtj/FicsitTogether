@@ -8,6 +8,7 @@ import "./ChartEditor.css";
 import {useYjsSync} from "./hooks/useYjsSync.ts";
 import {useNodeEdgeHandlers} from "./hooks/useNodeEdgeHandlers.ts";
 import {useConnectionValidation} from "./hooks/useConnectionValidation.ts";
+import {useFactorySync} from "./hooks/useFactorySync.ts";
 import {YjsContext} from "./context/YjsContext.tsx";
 import {nodeTypes} from "./nodes";
 import {edgeTypes} from "./edges";
@@ -97,6 +98,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
         useNodeEdgeHandlers(ydocRef, onDropOnCanvas);
 
     const { isValidConnection } = useConnectionValidation();
+
+    useFactorySync(edges as import("@xyflow/react").Edge<import("./types").ItemEdgeData>[]);
 
     useYjsSync({ projectId, token, setNodes, setEdges, ydocRef });
 

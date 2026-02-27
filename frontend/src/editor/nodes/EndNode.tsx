@@ -1,10 +1,10 @@
 ﻿import { memo } from "react";
-import { type NodeProps, Position, useEdges } from "@xyflow/react";
+import { type NodeProps, Position } from "@xyflow/react";
 import { Card } from "react-bootstrap";
 import { getItem } from "ficlib";
 import { ItemHandle } from "../handles/ItemHandle";
 import { roundTo3Decimals, isItemSolid } from "../../utils/throughputUtil.ts";
-import {type EndNodeType, type ItemEdgeType} from "../types";
+import { type EndNodeType } from "../types";
 
 export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType>) {
     const { itemClassName } = data;
@@ -12,13 +12,12 @@ export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType
     const item = itemClassName ? getItem(itemClassName) : undefined;
     const solid = item ? isItemSolid(item) : true;
 
-    const allEdges = useEdges<ItemEdgeType>();
-    const incomingEdges = allEdges.filter(e => e.target === id);
-    const totalThroughput = incomingEdges.reduce((s, e) => s + (e.data?.throughput ?? 0), 0);
+    // Read pre-computed total throughput from data (pushed by useFactorySync)
+    const totalThroughput = data._totalThroughput ?? 0;
     const displayAmount = roundTo3Decimals(totalThroughput / (solid ? 1 : 1000));
 
     const handleId = `${id}-input-handle-0`;
-    
+
     if (!item)
         return null;
 
@@ -42,7 +41,7 @@ export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType
                     <div className="fw-semibold">{item.displayName}</div>
                     <div className="text-muted">{displayAmount} /min</div>
                 </Card.Body>
-                
+
                 <Card.Footer style={{ height: "30px" }}>
                     TODO: Convert to sink points
                 </Card.Footer>

@@ -163,6 +163,9 @@ export function useNodeEdgeHandlers(
         [reactFlow, onDropOnCanvas],
     );
 
+    // Buffered positions for deferred Yjs writes: map of nodeId → latest position
+    const pendingPositions = useRef<Map<string, { x: number; y: number }>>(new Map());
+
     // ── Node changes ──────────────────────────────────────────────────────
 
     const onNodesChangeInternal = useCallback((changes: NodeChange[]) => {
@@ -170,18 +173,38 @@ export function useNodeEdgeHandlers(
         const doc = ydocRef.current;
         if (!doc) return;
 
+        // Separate position changes (buffered) from structural changes (immediate)
+        const structural: NodeChange[] = [];
+        changes.forEach((change) => {
+            if (change.type === "position") {
+                if (change.position) {
+                    pendingPositions.current.set(change.id, change.position);
+                }
+                // On drag-end (dragging === false), flush all buffered positions
+                if (change.dragging === false) {
+                    doc.transact(() => {
+                        const nodeMap = doc.getMap<Node>("nodes");
+                        pendingPositions.current.forEach((pos, id) => {
+                            const node = nodeMap.get(id);
+                            if (node) nodeMap.set(id, { ...node, position: pos });
+                        });
+                        pendingPositions.current.clear();
+                    }, LOCAL_ORIGIN);
+                }
+            } else {
+                structural.push(change);
+            }
+        });
+
+        if (structural.length === 0) return;
+
         doc.transact(() => {
             const nodeMap = doc.getMap<Node>("nodes");
-            changes.forEach((change) => {
+            structural.forEach((change) => {
                 if (change.type === "remove" && nodeMap.has(change.id)) {
                     nodeMap.delete(change.id);
                 } else if (change.type === "add") {
                     nodeMap.set(change.item.id, change.item);
-                } else if (change.type === "position") {
-                    const node = nodeMap.get(change.id);
-                    if (node && change.position) {
-                        nodeMap.set(change.id, { ...node, position: change.position });
-                    }
                 } else if (change.type === "dimensions") {
                     const node = nodeMap.get(change.id);
                     if (node) {

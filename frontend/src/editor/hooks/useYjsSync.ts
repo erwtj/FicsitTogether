@@ -42,45 +42,67 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
         const updateNodes = (event: YMapEvent<Node>) => {
             if (event.transaction.origin === LOCAL_ORIGIN) return;
 
+            const nodeChanges: Parameters<typeof applyNodeChanges>[0] = [];
+
             event.keysChanged.forEach(key => {
                 const newNode = nodeMap.get(key);
                 if (newNode) {
                     const existing = reactFlow.getNode(key);
                     if (existing) {
-                        // Preserve ReactFlow internal state
+                        // Preserve ReactFlow internal state and locally-computed fields
                         newNode.selected = existing.selected;
                         newNode.width = existing.width;
                         newNode.height = existing.height;
                         newNode.measured = existing.measured;
-                        setNodes(prev => applyNodeChanges([{ type: "replace", id: key, item: newNode }], prev));
+                        // Preserve computed _factor fields (not stored in Yjs)
+                        if (existing.data && newNode.data) {
+                            const ed = existing.data as Record<string, unknown>;
+                            const nd = newNode.data as Record<string, unknown>;
+                            for (const k of Object.keys(ed)) {
+                                if (k.startsWith("_") && !(k in nd)) {
+                                    nd[k] = ed[k];
+                                }
+                            }
+                        }
+                        nodeChanges.push({ type: "replace", id: key, item: newNode });
                     } else {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { width, height, measured, ...freshNode } = newNode;
-                        setNodes(prev => applyNodeChanges([{ type: "add", item: freshNode }], prev));
+                        nodeChanges.push({ type: "add", item: freshNode });
                     }
                 } else {
-                    setNodes(prev => applyNodeChanges([{ type: "remove", id: key }], prev));
+                    nodeChanges.push({ type: "remove", id: key });
                 }
             });
+
+            if (nodeChanges.length > 0) {
+                setNodes(prev => applyNodeChanges(nodeChanges, prev));
+            }
         };
 
         const updateEdges = (event: YMapEvent<Edge>) => {
             if (event.transaction.origin === LOCAL_ORIGIN) return;
-            
+
+            const edgeChanges: Parameters<typeof applyEdgeChanges>[0] = [];
+
             event.keysChanged.forEach(key => {
                 const newEdge = edgeMap.get(key);
                 if (newEdge) {
                     const existing = reactFlow.getEdge(key);
                     if (existing) {
                         newEdge.selected = existing.selected;
-                        setEdges(prev => applyEdgeChanges([{ type: "replace", id: key, item: newEdge }], prev));
+                        edgeChanges.push({ type: "replace", id: key, item: newEdge });
                     } else {
-                        setEdges(prev => applyEdgeChanges([{ type: "add", item: newEdge }], prev));
+                        edgeChanges.push({ type: "add", item: newEdge });
                     }
                 } else {
-                    setEdges(prev => applyEdgeChanges([{ type: "remove", id: key }], prev));
+                    edgeChanges.push({ type: "remove", id: key });
                 }
             });
+
+            if (edgeChanges.length > 0) {
+                setEdges(prev => applyEdgeChanges(edgeChanges, prev));
+            }
         };
 
         nodeMap.observe(updateNodes);

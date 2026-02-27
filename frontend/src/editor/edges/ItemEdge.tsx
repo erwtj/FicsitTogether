@@ -1,37 +1,40 @@
-﻿import { memo, useCallback, useEffect} from "react";
+﻿import { memo, useCallback, useEffect, useMemo } from "react";
 import {
     BaseEdge,
     EdgeLabelRenderer,
     getBezierPath,
     type EdgeProps,
     useReactFlow,
-    useEdges,
 } from "@xyflow/react";
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
 import { isItemSolid, roundTo3Decimals } from "../../utils/throughputUtil.ts";
 import { useYjsMutation } from "../hooks/useYjsMutation";
-import { computeNodeFactor, totalThroughputForHandle } from "../utils/factoryCalc";
-import {type ItemEdgeType, type RecipeNodeData, type ItemSpawnerNodeData, type MovablePoint} from "../types";
-import {getCustomBezierCurve, pointOnPath} from "../utils/edgeUtils.ts";
+import {
+    type ItemEdgeType,
+    type RecipeNodeData,
+    type ItemSpawnerNodeData,
+    type MovablePoint,
+} from "../types";
+import { getCustomBezierCurve } from "../utils/edgeUtils.ts";
 import "./ItemEdge.css";
-import {getItemIndexFromHandleId} from "../utils/idUtils.ts";
+import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
 import { useState } from "react";
 
 export const ItemEdge = memo(function ItemEdge({
-   id,
-   source,
-   sourceHandleId,
-   sourceX,
-   sourceY,
-   targetX,
-   targetY,
-   sourcePosition,
-   targetPosition,
-   data,
-   selected,
-   markerEnd,
-   style,
+    id,
+    source,
+    sourceHandleId,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    data,
+    selected,
+    markerEnd,
+    style,
 }: EdgeProps<ItemEdgeType>) {
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
@@ -42,11 +45,13 @@ export const ItemEdge = memo(function ItemEdge({
         targetX, targetY, targetPosition,
     });
 
-    // ── Derive item from source node via ficlib lookups ────────────────────
+    // ── Source node (direct read, not a subscription) ──────────────────
+    // We only need the source node for the item icon and outputTooHigh flag.
+    // useFactorySync has already baked _outputOverUsed into the node's data,
+    // so re-renders happen only when node data changes — not on position moves.
     const sourceNode = reactFlow.getNode(source);
 
-
-    const sourceItem: Item | null = (() => {
+    const sourceItem: Item | null = useMemo(() => {
         if (!sourceNode) return null;
         if (sourceNode.type === "recipe-node") {
             const rd = sourceNode.data as RecipeNodeData;
@@ -59,38 +64,25 @@ export const ItemEdge = memo(function ItemEdge({
             return getItem(sd.itemClassName) ?? null;
         }
         return null;
-    })();
-
+    }, [sourceNode, sourceHandleId]);
 
     const isFluid = sourceItem ? !isItemSolid(sourceItem) : false;
 
-    // TODO: Fix that the animated stops when throughput is edit
     useEffect(() => {
         reactFlow.updateEdge(id, { animated: isFluid });
     }, [isFluid, id, reactFlow]);
 
     // ── Over-capacity check ────────────────────────────────────────────────
-    const allEdges = useEdges<ItemEdgeType>();
-
-    const outputTooHigh = (() => {
-        if (!sourceNode || !sourceHandleId || sourceNode.type !== "recipe-node") return false;
-
-        const rd = sourceNode.data as RecipeNodeData;
-        const recipe = getRecipe(rd.recipeClassName);
-        if (!recipe) return false;
-
-        const incomingEdges = allEdges.filter((e: { target: string; }) => e.target === source);
-        const outgoingEdges = allEdges.filter((e: { source: string; }) => e.source === source);
-        const factor = computeNodeFactor(recipe, rd.summerSloops, rd.percentage, incomingEdges, outgoingEdges);
-
-        const outputIdx = getItemIndexFromHandleId(sourceHandleId);
-        const outputItem = recipe.output[outputIdx];
-        if (!outputItem) return false;
-
-        const maxOut = outputItem.amount * (60 / recipe.duration) * factor.outputFactor;
-        const usedOut = totalThroughputForHandle(outgoingEdges, sourceHandleId, "source");
-        return roundTo3Decimals(usedOut) > roundTo3Decimals(maxOut);
-    })();
+    // Read the pre-computed flag from the source node's data (set by useFactorySync).
+    // Falls back to false for item-spawner nodes (they don't have recipe outputs).
+    const outputTooHigh = useMemo(() => {
+        if (!sourceNode || !sourceHandleId) return false;
+        if (sourceNode.type === "recipe-node") {
+            const d = sourceNode.data as RecipeNodeData;
+            return d._outputOverUsed?.[sourceHandleId] ?? false;
+        }
+        return false;
+    }, [sourceNode, sourceHandleId]);
 
     // ── Throughput input ───────────────────────────────────────────────────
     const throughput = data?.throughput ?? 0;
@@ -104,7 +96,7 @@ export const ItemEdge = memo(function ItemEdge({
                 updateEdgeData(id, { throughput: 0 });
                 return;
             }
-            updateEdgeData(id, { throughput: isFluid ? val * 1000 : val});
+            updateEdgeData(id, { throughput: isFluid ? val * 1000 : val });
         },
         [id, isFluid, updateEdgeData],
     );
@@ -114,7 +106,6 @@ export const ItemEdge = memo(function ItemEdge({
         ...style,
         stroke: outputTooHigh ? "#790000" :
             isFluid ? `#${sourceItem?.fluidColor.slice(0, -2)}` : style?.stroke,
-
     };
 
     const labelStyle: React.CSSProperties = {
@@ -123,14 +114,14 @@ export const ItemEdge = memo(function ItemEdge({
         borderRadius: "10px",
     };
 
-    const middlePoints = [{x: labelX, y: labelY}];
+    const middlePoints = [{ x: labelX, y: labelY }];
 
     if (movablePoints.length > 0) {
-        middlePoints.pop()
-        const points = [{id: "target", x: sourceX, y: sourceY }, ...movablePoints, {id: "target", x: targetX, y: targetY }];
+        middlePoints.pop();
+        const points = [{ id: "target", x: sourceX, y: sourceY }, ...movablePoints, { id: "target", x: targetX, y: targetY }];
         const customPath = getCustomBezierCurve(points);
         edgePath = customPath.path;
-        const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? {id: "label", x: labelX, y: labelY};
+        const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? { id: "label", x: labelX, y: labelY };
         labelX = labelPoint.x;
         labelY = labelPoint.y;
         middlePoints.push(...customPath.middlePoints);
@@ -138,8 +129,8 @@ export const ItemEdge = memo(function ItemEdge({
 
     function addMovablePoint(idx: number) {
         const middlePoint = middlePoints[idx];
-        const id = movablePoints.length === 0 ? "label" : `${movablePoints.length}`;
-        const newPoint: MovablePoint = { id, x: middlePoint.x, y: middlePoint.y };
+        const newId = movablePoints.length === 0 ? "label" : `${movablePoints.length}`;
+        const newPoint: MovablePoint = { id: newId, x: middlePoint.x, y: middlePoint.y };
         setMovablePoints(prev => {
             const next = [...prev];
             next.splice(idx, 0, newPoint);
@@ -147,7 +138,6 @@ export const ItemEdge = memo(function ItemEdge({
         });
     }
 
-    // TODO: Finish and rewrite moving points, currently the points are added but not movable
     function renderDraggablePoints() {
         return (
             <>
@@ -167,28 +157,26 @@ export const ItemEdge = memo(function ItemEdge({
                 ))}
                 {movablePoints.length > 0 &&
                     movablePoints.map((p, idx) => (
-                    <div
-                        key={idx}
-                        style={{
-                            transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
-                            pointerEvents: "all",
-                            cursor: "move",
-                        }}
-                        className="position-handle"
-                        onClick={(e) => (e.stopPropagation())}
-                    />
-                ))}
+                        <div
+                            key={idx}
+                            style={{
+                                transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
+                                pointerEvents: "all",
+                                cursor: "move",
+                            }}
+                            className="position-handle"
+                            onClick={(e) => (e.stopPropagation())}
+                        />
+                    ))}
             </>
         );
     }
 
-
     // ── Render ─────────────────────────────────────────────────────────────
     return (
         <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle}/>
+            <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} />
 
-            {/* Animated icon when edge is selected */}
             {selected && sourceItem && (
                 <>
                     {outputTooHigh && (
@@ -205,7 +193,6 @@ export const ItemEdge = memo(function ItemEdge({
                 </>
             )}
 
-            {/* Throughput label */}
             <EdgeLabelRenderer>
                 <div
                     className="nodrag nopan"
@@ -235,3 +222,4 @@ export const ItemEdge = memo(function ItemEdge({
         </>
     );
 });
+

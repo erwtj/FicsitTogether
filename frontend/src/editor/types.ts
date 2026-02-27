@@ -7,6 +7,13 @@ export type RecipeNodeData = {
     recipeClassName: string;
     summerSloops: number;
     percentage: number[];
+    /**
+     * Computed by useFactorySync — nodes read this instead of subscribing
+     * to the edge store themselves. Never written to Yjs.
+     */
+    _factor?: NodeFactor;
+    /** Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs. */
+    _outputOverUsed?: Record<string, boolean>;
 };
 
 export type ItemSpawnerNodeData = {
@@ -18,10 +25,14 @@ export type ItemSpawnerNodeData = {
 
 export type EndNodeData = {
     itemClassName: string;
+    /** Total throughput flowing in. Never written to Yjs. */
+    _totalThroughput?: number;
 };
 
 export type PowerNodeData = {
     recipeClassName: string;
+    /** Computed clock factor. Never written to Yjs. */
+    _factor?: number;
 };
 
 // ─── Typed Nodes ─────────────────────────────────────────────────────────────
