@@ -1,7 +1,8 @@
 ﻿import type { Node } from "@xyflow/react";
 
 export function generateNodeId() {
-    return `node-${crypto.randomUUID().replace('-', '')}`;
+    const id = crypto.randomUUID().replaceAll('-', '');
+    return `node-${id}`;
 }
 
 // Handle id convention: `node-<nodeId>-(input|output)-handle-<index>`
