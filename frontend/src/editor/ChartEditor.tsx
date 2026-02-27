@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import * as Y from "yjs";
-import { Background, BackgroundVariant, Controls, MiniMap, ReactFlow } from "@xyflow/react";
+import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
 
@@ -17,6 +17,7 @@ import { useFactorySync } from "./hooks/useFactorySync.ts";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
 import { useNodeModal } from "./hooks/useNodeModal.ts";
 import type { Edge } from "@xyflow/react";
+import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
 
 interface ChartEditorProps {
     projectId: string;
@@ -74,8 +75,10 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     fitView
                 >
                     <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
-                    <Controls />
                     <MiniMap className="bg-body" position="top-right" nodeColor={nodeColor} />
+                    <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
+                        <OverviewSidePanel/>
+                    </Panel>
                 </ReactFlow>
 
                 <RecipeModal
