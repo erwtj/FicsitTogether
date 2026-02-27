@@ -1,6 +1,7 @@
 ﻿import { useCallback } from "react";
 import { type Node, type Edge } from "@xyflow/react";
 import { useYjsDoc } from "../context/YjsContext";
+import { stripComputedFields } from "../utils/idUtils";
 
 /**
  * Returns helpers to update node / edge data in the shared Y.Doc.
@@ -20,7 +21,7 @@ export function useYjsMutation() {
             const nodeMap = doc.getMap<Node>("nodes");
             const node = nodeMap.get(nodeId);
             if (node) {
-                nodeMap.set(nodeId, { ...node, data: { ...node.data, ...patch } });
+                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
             }
         },
         [ydocRef],

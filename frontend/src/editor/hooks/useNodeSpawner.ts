@@ -10,7 +10,7 @@ import {
     type EndNodeData,
     type PowerNodeData,
 } from "../types";
-import { generateNodeId } from "../utils/idUtils";
+import { generateNodeId, stripComputedFields } from "../utils/idUtils";
 import { getHandleItemClassName } from "../utils/throughput";
 
 type SpawnType = "recipe" | "item-spawner" | "item-end" | "power";
@@ -59,7 +59,7 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
             if (!newNode) return;
 
             doc.transact(() => {
-                nodeMap.set(nodeId, newNode!);
+                nodeMap.set(nodeId, stripComputedFields(newNode!));
                 if (!pendingConnection) return;
 
                 const { nodeId: existingId, handleId, handleType, throughput } = pendingConnection;

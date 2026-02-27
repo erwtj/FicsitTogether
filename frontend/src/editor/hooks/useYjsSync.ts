@@ -2,6 +2,7 @@
 import * as Y from "yjs";
 import { YMapEvent } from "yjs";
 import { type Node, type Edge, applyNodeChanges, applyEdgeChanges, useReactFlow } from "@xyflow/react";
+import { stripComputedFields } from "../utils/idUtils";
 
 const MESSAGE_SYNC = 0;
 const MESSAGE_AWARENESS = 1;
@@ -47,27 +48,26 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
             event.keysChanged.forEach(key => {
                 const newNode = nodeMap.get(key);
                 if (newNode) {
+                    const cleanNode = stripComputedFields(newNode);
                     const existing = reactFlow.getNode(key);
                     if (existing) {
-                        // Preserve ReactFlow internal state and locally-computed fields
-                        newNode.selected = existing.selected;
-                        newNode.width = existing.width;
-                        newNode.height = existing.height;
-                        newNode.measured = existing.measured;
-                        // Preserve computed _factor fields (not stored in Yjs)
-                        if (existing.data && newNode.data) {
+                        // Preserve ReactFlow internal state
+                        cleanNode.selected = existing.selected;
+                        cleanNode.width = existing.width;
+                        cleanNode.height = existing.height;
+                        cleanNode.measured = existing.measured;
+                        // Preserve locally-computed _ fields (not stored in Yjs)
+                        if (existing.data && cleanNode.data) {
                             const ed = existing.data as Record<string, unknown>;
-                            const nd = newNode.data as Record<string, unknown>;
+                            const nd = cleanNode.data as Record<string, unknown>;
                             for (const k of Object.keys(ed)) {
-                                if (k.startsWith("_") && !(k in nd)) {
-                                    nd[k] = ed[k];
-                                }
+                                if (k.startsWith("_")) nd[k] = ed[k];
                             }
                         }
-                        nodeChanges.push({ type: "replace", id: key, item: newNode });
+                        nodeChanges.push({ type: "replace", id: key, item: cleanNode });
                     } else {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        const { width, height, measured, ...freshNode } = newNode;
+                        const { width, height, measured, ...freshNode } = cleanNode;
                         nodeChanges.push({ type: "add", item: freshNode });
                     }
                 } else {

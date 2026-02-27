@@ -12,6 +12,7 @@ import {
     usedSourceThroughput, usedTargetThroughput,
 } from "../utils/throughput";
 import type { PendingConnection } from "./useNodeSpawner";
+import { stripComputedFields } from "../utils/idUtils";
 
 const LOCAL_ORIGIN = "local";
 
@@ -95,7 +96,7 @@ export function useNodeEdgeHandlers(
                         const nodeMap = doc.getMap<Node>("nodes");
                         pendingPositions.current.forEach((pos, id) => {
                             const n = nodeMap.get(id);
-                            if (n) nodeMap.set(id, { ...n, position: pos });
+                            if (n) nodeMap.set(id, stripComputedFields({ ...n, position: pos }));
                         });
                         pendingPositions.current.clear();
                     }, LOCAL_ORIGIN);
@@ -112,7 +113,7 @@ export function useNodeEdgeHandlers(
                 if (change.type === "remove" && nodeMap.has(change.id)) {
                     nodeMap.delete(change.id);
                 } else if (change.type === "add") {
-                    nodeMap.set(change.item.id, change.item);
+                    nodeMap.set(change.item.id, stripComputedFields(change.item));
                 } else if (change.type === "dimensions") {
                     const n = nodeMap.get(change.id);
                     if (n) nodeMap.set(change.id, {
