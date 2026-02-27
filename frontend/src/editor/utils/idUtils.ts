@@ -1,5 +1,5 @@
 ﻿export function generateNodeId() {
-    return `node-${Date.now()}`;
+    return `node-${crypto.randomUUID().replace('-', '')}`;
 }
 
 // Handle id convention: `node-<nodeId>-(input|output)-handle-<index>`
