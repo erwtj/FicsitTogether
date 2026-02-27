@@ -18,6 +18,7 @@ import { useYjsSync } from "./hooks/useYjsSync.ts";
 import { useNodeModal } from "./hooks/useNodeModal.ts";
 import type { Edge, NodeChange } from "@xyflow/react";
 import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
+import { Toast } from "react-bootstrap";
 
 interface ChartEditorProps {
     projectId: string;
@@ -47,7 +48,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     useFactorySync(edges as Edge<ItemEdgeData>[], nodes);
 
     // Sync document using Yjs
-    useYjsSync({ projectId, token, setNodes, setEdges, ydocRef });
+    const {connected} = useYjsSync({ projectId, token, setNodes, setEdges, ydocRef });
 
     // Connection validation
     const { isValidConnection } = useConnectionValidation();
@@ -104,6 +105,17 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     </Panel>
                 </ReactFlow>
 
+                <div className="position-fixed top-0 end-0 p-3 z-1">
+                    <Toast show={!connected} className="delayed-appear">
+                        <Toast.Header closeButton={false}>
+                            <strong className={"text-warning me-auto"}>Warning</strong>
+                        </Toast.Header>
+                        <Toast.Body>
+                            Connection to server lost...
+                        </Toast.Body>
+                    </Toast>
+                </div>
+                
                 <RecipeModal
                     show={show}
                     onModalSubmit={onModalSubmit}

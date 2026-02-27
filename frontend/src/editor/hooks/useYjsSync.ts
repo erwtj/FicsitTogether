@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useCallback } from "react";
+﻿import { useEffect, useRef, useCallback, useState } from "react";
 import * as Y from "yjs";
 import { YMapEvent } from "yjs";
 import { type Node, type Edge, applyNodeChanges, applyEdgeChanges, useReactFlow } from "@xyflow/react";
@@ -17,9 +17,14 @@ interface UseYjsSyncProps {
 
 const LOCAL_ORIGIN = "local";
 
+const RECONNECT_DELAY_MS = 5000;
+
 export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: UseYjsSyncProps) {
     const reactFlow = useReactFlow();
     const wsRef = useRef<WebSocket | null>(null);
+    const [connected, setConnected] = useState(false);
+    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const destroyedRef = useRef(false);
 
     const sendUpdate = useCallback((update: Uint8Array) => {
         const ws = wsRef.current;
@@ -31,6 +36,8 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
 
     useEffect(() => {
         if (!token) return;
+
+        destroyedRef.current = false;
 
         const doc = new Y.Doc();
         ydocRef.current = doc;
@@ -108,45 +115,71 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
         nodeMap.observe(updateNodes);
         edgeMap.observe(updateEdges);
 
-        // --- WebSocket ---
-
-        const ws = new WebSocket(
-            `${import.meta.env.VITE_WS_URL}/${projectId}`,
-            [`bearer.${token}`]
-        );
-        ws.binaryType = "arraybuffer";
-        wsRef.current = ws;
-
-        ws.onopen = () => console.log("WebSocket connected");
-        ws.onerror = (error) => console.error("WebSocket error:", error);
-        ws.onclose = () => console.log("WebSocket closed");
-        ws.onmessage = (event) => {
-            if (!(event.data instanceof ArrayBuffer)) return;
-            const message = new Uint8Array(event.data);
-            const messageType = message[0];
-            const content = message.slice(1);
-
-            if (messageType === MESSAGE_SYNC) {
-                Y.applyUpdate(doc, content);
-            } else if (messageType === MESSAGE_AWARENESS) {
-                // TODO: Do some shit with awareness 
-                console.log("Awareness update received");
-            }
-        };
-
         // Forward local Yjs changes to server
         doc.on("update", sendUpdate);
 
+        // --- WebSocket with auto-reconnect ---
+
+        const connect = () => {
+            if (destroyedRef.current) return;
+
+            const ws = new WebSocket(
+                `${import.meta.env.VITE_WS_URL}/${projectId}`,
+                [`bearer.${token}`]
+            );
+            ws.binaryType = "arraybuffer";
+            wsRef.current = ws;
+
+            ws.onopen = () => {
+                setConnected(true);
+                console.log("WebSocket connected");
+            };
+
+            ws.onerror = (error) => console.error("WebSocket error:", error);
+
+            ws.onclose = () => {
+                setConnected(false);
+                wsRef.current = null;
+                if (!destroyedRef.current) {
+                    console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
+                    reconnectTimerRef.current = setTimeout(connect, RECONNECT_DELAY_MS);
+                } else {
+                    console.log("WebSocket closed.");
+                }
+            };
+
+            ws.onmessage = (event) => {
+                if (!(event.data instanceof ArrayBuffer)) return;
+                const message = new Uint8Array(event.data);
+                const messageType = message[0];
+                const content = message.slice(1);
+
+                if (messageType === MESSAGE_SYNC) {
+                    Y.applyUpdate(doc, content);
+                } else if (messageType === MESSAGE_AWARENESS) {
+                    // TODO: Do some shit with awareness
+                    console.log("Awareness update received");
+                }
+            };
+        };
+
+        connect();
+
         return () => {
+            destroyedRef.current = true;
+            if (reconnectTimerRef.current !== null) {
+                clearTimeout(reconnectTimerRef.current);
+                reconnectTimerRef.current = null;
+            }
             nodeMap.unobserve(updateNodes);
             edgeMap.unobserve(updateEdges);
             doc.off("update", sendUpdate);
             doc.destroy();
-            ws.close();
+            wsRef.current?.close();
             ydocRef.current = null;
             wsRef.current = null;
         };
     }, [projectId, token]); // DO NOT ADD reactFlow, setNodes, setEdges
 
-    return { wsRef };
+    return { wsRef, connected };
 }
