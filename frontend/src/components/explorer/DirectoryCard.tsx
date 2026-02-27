@@ -36,8 +36,8 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
 
                 <div className={"d-flex flex-column align-items-start justify-content-center"}>
                     {directoryInfo.name.length === 0 ?
-                        <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem"}} key="title">No name</h5> :
-                        <h5 className={"text-truncate mb-0"} style={{width: "12rem"}} key="title">{directoryInfo.name}</h5>
+                        <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem", height: "1.7rem"}} key="title">No name</h5> :
+                        <h5 className={"text-truncate mb-0"} style={{width: "12rem", height: "1.7rem"}} key="title">{directoryInfo.name}</h5>
                     }
 
                     {directoryInfo.isShared && directoryInfo.sharedBy && (

@@ -124,7 +124,7 @@ export function OverviewSidePanel() {
         <>
             <ChevronRight
                 size={20}
-                className="text-body opacity-75"
+                className="text-body opacity-75 clickable-link"
                 role="button"
                 onClick={handleShow}
             />
@@ -134,19 +134,13 @@ export function OverviewSidePanel() {
             <Offcanvas show={showPanel} onHide={handleShow} placement="start" scroll backdrop={false}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>
-                        <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary"}>
+                        <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary clickable-link"}>
                             <ArrowLeft size={20} className="mb-1 me-3"/>
-                        </Link> 
-                        <button
-                            className="border-0 bg-transparent p-0 text-start clickable-link"
-                            onClick={() => setShowDocInfo(true)}
-                            title="Edit document info"
-                        >
-                            {metadata.name
-                                ? <span className={"text-white clickable-link"}>{metadata.name}</span>
-                                : <span className="text-muted fst-italic">No name</span>
-                            }
-                        </button>
+                        </Link>
+                        {metadata.name
+                            ? <span className="text-white clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>{metadata.name}</span>
+                            : <span className="text-muted fst-italic clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>No name</span>
+                        }
                     </Offcanvas.Title>
                 </Offcanvas.Header>
 
