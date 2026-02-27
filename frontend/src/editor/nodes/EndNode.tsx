@@ -22,27 +22,38 @@ export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType
         return null;
 
     return (
-        <div className="react-flow__node-default p-0">
-            <ItemHandle item={item} id={handleId} type="target"
-                        position={Position.Top} style={{ left: "50%" }} />
+        <div className={"react-flow__node-default p-0"}>
+            <ItemHandle item={item} id={handleId} type={"target"}
+                        position={Position.Top} style={{ left: "50%" }}/>
 
             <Card>
-                <Card.Header style={{ height: "30px" }}>
-                    <span className="position-absolute"
-                          style={{ width: "100px", left: "calc(50% - 50px)" }}>
-                        {displayAmount}
-                    </span>
+                <Card.Header style={{height: "30px"}}>
+                            <span className={"text-center"}>
+                                {displayAmount}
+                            </span>
                 </Card.Header>
-                <Card.Body className="p-3 text-center">
-                    {item && (
-                        <img src={`/media/${item.icon}_256.webp`} alt={item.displayName}
-                             className="itemIcon mb-1" />
-                    )}
-                    <div className="fw-semibold">{item.displayName}</div>
-                    <div className="text-muted">{displayAmount} /min</div>
-                </Card.Body>
 
-                <Card.Footer style={{ height: "30px" }}>
+                <Card.Body className="p-3 pt-2">
+                    <div className="container">
+                        <div className="row gap-2">
+                            <div className="col-auto p-1 text-start">
+                                <h5 className="fs-6">
+                                    {item.displayName}
+                                </h5>
+                                <span className={"text-body num-input"}>
+                                            {displayAmount} {!solid && " m³"}
+                                        </span>
+                            </div>
+
+                            <div className="col-auto p-0 align-content-center">
+                                <img src={`/media/${item.icon}_256.webp`}
+                                     alt={item.displayName}
+                                     className="itemIcon"></img>
+                            </div>
+                        </div>
+                    </div>
+                </Card.Body>
+                <Card.Footer>
                     TODO: Convert to sink points
                 </Card.Footer>
             </Card>

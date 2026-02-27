@@ -21,6 +21,8 @@ export type ItemSpawnerNodeData = {
     itemClassName: string;
     /** Items (or mL for fluids) per minute this node provides */
     outputAmount: number;
+    /** Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs. */
+    _outputOverUsed?: Record<string, boolean>;
 };
 
 export type EndNodeData = {

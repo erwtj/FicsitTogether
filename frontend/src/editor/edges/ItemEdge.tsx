@@ -74,11 +74,15 @@ export const ItemEdge = memo(function ItemEdge({
 
     // ── Over-capacity check ────────────────────────────────────────────────
     // Read the pre-computed flag from the source node's data (set by useFactorySync).
-    // Falls back to false for item-spawner nodes (they don't have recipe outputs).
+    // Works for both recipe-node and item-spawner-node sources.
     const outputTooHigh = useMemo(() => {
         if (!sourceNode || !sourceHandleId) return false;
         if (sourceNode.type === "recipe-node") {
             const d = sourceNode.data as RecipeNodeData;
+            return d._outputOverUsed?.[sourceHandleId] ?? false;
+        }
+        if (sourceNode.type === "item-spawner-node") {
+            const d = sourceNode.data as ItemSpawnerNodeData;
             return d._outputOverUsed?.[sourceHandleId] ?? false;
         }
         return false;

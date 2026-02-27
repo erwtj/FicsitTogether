@@ -5,50 +5,88 @@ import { computeNodeFactor, totalThroughputForHandle } from "../utils/factoryCal
 import {
     type ItemEdgeData,
     type RecipeNodeData,
+    type ItemSpawnerNodeData,
     type PowerNodeData,
     type EndNodeData,
 } from "../types";
 import { getItemIndexFromHandleId } from "../utils/idUtils";
 
 /**
- * Watches for edge changes (via a polling comparison on edges array identity)
- * and pushes computed factors into affected node data using reactFlow.setNodes.
- *
- * This is the ONLY place where edge throughput → node factor derivation happens.
- * Nodes no longer subscribe to the edge store; they just read their own data prop.
+ * Build a cheap string fingerprint of the semantic data fields we care about
+ * for each node (excludes position, width, height, selected, and _ computed fields).
+ * Used to detect real data changes without triggering on drag moves.
+ */
+function nodeDataFingerprint(nodes: Node[]): string {
+    return nodes.map(n => {
+        if (n.type === "item-spawner-node") {
+            const d = n.data as ItemSpawnerNodeData;
+            return `${n.id}:${d.outputAmount}`;
+        }
+        if (n.type === "recipe-node") {
+            const d = n.data as RecipeNodeData;
+            return `${n.id}:${d.recipeClassName}:${d.summerSloops}:${d.percentage.join(",")}`;
+        }
+        if (n.type === "power-node") {
+            const d = n.data as PowerNodeData;
+            return `${n.id}:${d.recipeClassName}`;
+        }
+        return n.id;
+    }).join("|");
+}
+
+/**
+ * Watches for edge OR relevant node-data changes and pushes computed factors
+ * into affected node data using reactFlow.setNodes.
  *
  * The update is one-directional:
- *   edge change → node data update (via setNodes, local only, NOT written to Yjs)
- * Node data changes do NOT trigger another edge/node round-trip (no circular loop).
+ *   (edge change OR node data change) → setNodes with computed _ fields (local only, NOT written to Yjs)
+ * The _ fields do NOT feed back into this hook, so there is no circular loop.
  */
 export function useFactorySync(
     edges: Edge<ItemEdgeData>[],
+    nodes: Node[],
 ) {
     const reactFlow = useReactFlow();
 
-    // Prevent re-entrancy: if setNodes triggers a re-render that somehow
-    // loops back here before we're done, skip it.
     const isSyncing = useRef(false);
-
-    // Track previous edges reference so we only recompute when edges actually change
     const prevEdgesRef = useRef<Edge<ItemEdgeData>[]>([]);
+    const prevNodeFingerprintRef = useRef<string>("");
 
     useEffect(() => {
-        // Skip if edges reference hasn't changed (position-only node moves don't change edges)
-        if (prevEdgesRef.current === edges) return;
+        const fingerprint = nodeDataFingerprint(nodes);
+        const edgesChanged = prevEdgesRef.current !== edges;
+        const nodesChanged = prevNodeFingerprintRef.current !== fingerprint;
+
+        if (!edgesChanged && !nodesChanged) return;
+
         prevEdgesRef.current = edges;
+        prevNodeFingerprintRef.current = fingerprint;
 
         if (isSyncing.current) return;
         isSyncing.current = true;
 
-        reactFlow.setNodes((nodes: Node[]) => {
+        reactFlow.setNodes((currentNodes: Node[]) => {
             let changed = false;
-            const nextNodes = nodes.map((node) => {
+            const nextNodes = currentNodes.map((node) => {
                 const nodeEdges = edges.filter(
                     (e) => e.source === node.id || e.target === node.id,
                 );
                 const incomingEdges = nodeEdges.filter((e) => e.target === node.id);
                 const outgoingEdges = nodeEdges.filter((e) => e.source === node.id);
+
+                if (node.type === "item-spawner-node") {
+                    const d = node.data as ItemSpawnerNodeData;
+                    const handleId = `${node.id}-output-handle-0`;
+                    const usedOut = totalThroughputForHandle(outgoingEdges, handleId, "source");
+                    const overUsed = usedOut > d.outputAmount + 0.001;
+                    const prevOverUsed = d._outputOverUsed?.[handleId];
+                    if (prevOverUsed === overUsed) return node;
+                    changed = true;
+                    return {
+                        ...node,
+                        data: { ...d, _outputOverUsed: { [handleId]: overUsed } },
+                    };
+                }
 
                 if (node.type === "recipe-node") {
                     const d = node.data as RecipeNodeData;
@@ -63,7 +101,6 @@ export function useFactorySync(
                         outgoingEdges,
                     );
 
-                    // Compute per-handle over-capacity flags
                     const outputOverUsed: Record<string, boolean> = {};
                     recipe.output.forEach((output, i) => {
                         const handleId = `${node.id}-output-handle-${i}`;
@@ -72,7 +109,6 @@ export function useFactorySync(
                         outputOverUsed[handleId] = usedOut > maxOut + 0.001;
                     });
 
-                    // Shallow compare to avoid unnecessary node object replacement
                     const prevFactor = d._factor;
                     const prevOverUsed = d._outputOverUsed;
                     const factorChanged =
@@ -90,11 +126,7 @@ export function useFactorySync(
                     changed = true;
                     return {
                         ...node,
-                        data: {
-                            ...d,
-                            _factor: factor,
-                            _outputOverUsed: outputOverUsed,
-                        },
+                        data: { ...d, _factor: factor, _outputOverUsed: outputOverUsed },
                     };
                 }
 
@@ -147,12 +179,9 @@ export function useFactorySync(
             });
 
             isSyncing.current = false;
-            return changed ? nextNodes : nodes;
+            return changed ? nextNodes : currentNodes;
         });
 
-        // isSyncing is cleared inside setNodes callback; also clear here as fallback
-        // in case setNodes was synchronous and already cleared it.
         isSyncing.current = false;
-    }, [edges, reactFlow]);
+    }, [edges, nodes, reactFlow]);
 }
-

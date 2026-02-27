@@ -99,7 +99,10 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
 
     const { isValidConnection } = useConnectionValidation();
 
-    useFactorySync(edges as import("@xyflow/react").Edge<import("./types").ItemEdgeData>[]);
+    useFactorySync(
+        edges as import("@xyflow/react").Edge<import("./types").ItemEdgeData>[],
+        nodes,
+    );
 
     useYjsSync({ projectId, token, setNodes, setEdges, ydocRef });
 
