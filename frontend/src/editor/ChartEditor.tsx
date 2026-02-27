@@ -74,9 +74,10 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
 
     return (
         <YjsContext.Provider value={ydocRef}>
-            <div style={{ width: "100%", height: "100vh" }} tabIndex={0}>
+            <div style={{ width: "100%", height: "100vh" }}>
                 <ReactFlow
-                    tabIndex={0}
+                    style={{outline: "none"}}
+                    tabIndex={-1}
                     nodes={nodes}
                     edges={edges}
                     nodeTypes={nodeTypes}
