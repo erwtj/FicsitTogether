@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { Offcanvas } from "react-bootstrap";
 import {
+    ArrowLeft,
     BoxArrowDown,
     BoxArrowInDown,
     Buildings,
@@ -10,7 +11,9 @@ import {
 import { useNodes } from "@xyflow/react";
 import { useFactoryStats, type ItemThroughput, type BuildingCount } from "../../hooks/useFactoryStats";
 import { useYjsMetadata } from "../../hooks/useYjsMetadata";
-import { throughputToDisplay } from "../../../utils/throughputUtil";
+import {roundTo3Decimals, throughputToDisplay} from "../../../utils/throughputUtil";
+import "./OverviewSidePanel.css";
+import { Link } from "@tanstack/react-router";
 
 // ─── Item / Building list renderers ──────────────────────────────────────────
 
@@ -66,7 +69,7 @@ function DocumentInfoPanel({
     show: boolean;
     onHide: () => void;
 }) {
-    const { metadata, setTitle, setDescription } = useYjsMetadata();
+    const { metadata, setName, setDescription } = useYjsMetadata();
 
     return (
         <Offcanvas show={show} onHide={onHide} placement="start" scroll backdrop={false}>
@@ -76,18 +79,18 @@ function DocumentInfoPanel({
             <Offcanvas.Body>
                 <div className="d-flex flex-column gap-3">
                     <div>
-                        <label htmlFor="doc-title" className="form-label">Title</label>
+                        <label htmlFor="doc-name" className="form-label">Document name</label>
                         <input
-                            id="doc-title"
+                            id="doc-name"
                             type="text"
                             className="form-control"
                             value={metadata.name}
-                            onChange={e => setTitle(e.target.value)}
+                            onChange={e => setName(e.target.value)}
                             placeholder="No name"
                         />
                     </div>
                     <div>
-                        <label htmlFor="doc-description" className="form-label">Description</label>
+                        <label htmlFor="doc-description" className="form-label">Document description</label>
                         <textarea
                             id="doc-description"
                             className="form-control"
@@ -131,13 +134,16 @@ export function OverviewSidePanel() {
             <Offcanvas show={showPanel} onHide={handleShow} placement="start" scroll backdrop={false}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>
+                        <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary"}>
+                            <ArrowLeft size={20} className="mb-1 me-3"/>
+                        </Link> 
                         <button
                             className="border-0 bg-transparent p-0 text-start clickable-link"
                             onClick={() => setShowDocInfo(true)}
                             title="Edit document info"
                         >
                             {metadata.name
-                                ? <span>{metadata.name}</span>
+                                ? <span className={"text-white clickable-link"}>{metadata.name}</span>
                                 : <span className="text-muted fst-italic">No name</span>
                             }
                         </button>
@@ -146,66 +152,25 @@ export function OverviewSidePanel() {
 
                 <Offcanvas.Body>
                     <div className="d-flex flex-column gap-3">
-
-                        {/* ── Inputs ── */}
-                        <section>
-                            <h5 className="d-flex align-items-center gap-2 mb-2">
-                                <BoxArrowInDown /> Input
+                        <section className="sidepanel-section">
+                            <h5 className="d-flex align-items-center gap-2 mb-2" style={{marginBottom: "-0px"}}>
+                                <BoxArrowInDown style={{marginBottom: "0px"}}/> Input
                             </h5>
                             <ul className="list-unstyled mb-0">
                                 <ItemList items={inputs} />
                             </ul>
                         </section>
 
-                        <hr className="my-0" />
-
-                        {/* ── Outputs ── */}
-                        <section>
-                            <h5 className="d-flex align-items-center gap-2 mb-2">
-                                <BoxArrowDown /> Output
+                        <section className="sidepanel-section">
+                            <h5 className="d-flex align-items-center gap-2 mb-2" style={{marginBottom: "-3px"}}>
+                                <BoxArrowDown style={{marginTop: "3px"}}/> Output
                             </h5>
                             <ul className="list-unstyled mb-0">
                                 <ItemList items={outputs} />
                             </ul>
                         </section>
-
-                        <hr className="my-0" />
-
-                        {/* ── Power ── */}
-                        <section>
-                            <h5 className="d-flex align-items-center gap-2 mb-2">
-                                <LightningFill /> Power
-                            </h5>
-                            <ul className="list-unstyled mb-0">
-                                <li className="text-body">
-                                    Consumption:{" "}
-                                    <span className="text-body-secondary">
-                                        {powerConsumptionMW}
-                                    </span>{" "}
-                                    MW
-                                </li>
-                                <li className="text-body">
-                                    Production:{" "}
-                                    <span className="text-body-secondary">
-                                        {powerProductionMW}
-                                    </span>{" "}
-                                    MW
-                                </li>
-                                <li className="text-body">
-                                    Net:{" "}
-                                    <span className={netPower >= 0 ? "text-success" : "text-danger"}>
-                                        {netPower > 0 ? "+" : ""}
-                                        {netPower}
-                                    </span>{" "}
-                                    MW
-                                </li>
-                            </ul>
-                        </section>
-
-                        <hr className="my-0" />
-
-                        {/* ── Buildings ── */}
-                        <section>
+                        
+                        <section className="sidepanel-section">
                             <h5 className="d-flex align-items-center gap-2 mb-2">
                                 <Buildings /> Buildings
                             </h5>
@@ -213,7 +178,36 @@ export function OverviewSidePanel() {
                                 <BuildingList buildings={buildings} />
                             </ul>
                         </section>
-
+                        
+                        <section className="sidepanel-section">
+                            <h5 className="d-flex align-items-center gap-2 mb-2">
+                                <LightningFill /> Power
+                            </h5>
+                            <ul className="list-unstyled mb-0">
+                                <li className="text-body">
+                                    Consumption:{" "}
+                                    <span className="text-body-secondary">
+                                        {roundTo3Decimals(powerConsumptionMW)}
+                                    </span>{" "}
+                                    MW
+                                </li>
+                                <li className="text-body">
+                                    Production:{" "}
+                                    <span className="text-body-secondary">
+                                        {roundTo3Decimals(powerProductionMW)}
+                                    </span>{" "}
+                                    MW
+                                </li>
+                                <li className="text-body">
+                                    Net:{" "}
+                                    <span className={netPower >= 0 ? "text-success" : "text-danger"}>
+                                        {netPower > 0 ? "+" : ""}
+                                        {roundTo3Decimals(netPower)}
+                                    </span>{" "}
+                                    MW
+                                </li>
+                            </ul>
+                        </section>
                     </div>
                 </Offcanvas.Body>
             </Offcanvas>

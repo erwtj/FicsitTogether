@@ -4,6 +4,7 @@ import { useYjsDoc } from "../context/YjsContext";
 export type DocumentMetadata = {
     name: string;
     description: string;
+    parentDirectoryId?: string;
 };
 
 /**
@@ -24,6 +25,7 @@ export function useYjsMetadata() {
                 setMetadata({
                     name: map.get("name") ?? "",
                     description: map.get("description") ?? "",
+                    parentDirectoryId: map.get("directoryId"),
                 });
             };
             map.observe(observer);
@@ -69,5 +71,5 @@ export function useYjsMetadata() {
         [ydocRef],
     );
 
-    return { metadata, setTitle: setName, setDescription };
+    return { metadata, setName, setDescription };
 }

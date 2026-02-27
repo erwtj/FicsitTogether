@@ -80,6 +80,7 @@ function loadDocument (projectId: string): Y.Doc {
     
     metadataMap.set('name', project?.name || '');
     metadataMap.set('description', project?.description || '');
+    metadataMap.set('directoryId', project?.directoryId || '');
     
     return ydoc;
 }
