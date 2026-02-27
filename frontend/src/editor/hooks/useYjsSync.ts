@@ -135,7 +135,9 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
                 console.log("WebSocket connected");
             };
 
-            ws.onerror = (error) => console.error("WebSocket error:", error);
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            }
 
             ws.onclose = () => {
                 setConnected(false);

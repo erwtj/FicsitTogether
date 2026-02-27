@@ -23,6 +23,7 @@ export async function fetchDirectoryContent(auth: Auth0ContextType, dirID: strin
             Authorization: `Bearer ${token}`
         }
     });
+    
     return response?.data as DirectoryContentDTO;
 }
 export async function fetchSharedDirectories(auth: Auth0ContextType): Promise<SharedDirectoryDTO[]> {

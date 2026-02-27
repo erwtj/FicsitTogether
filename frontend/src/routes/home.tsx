@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import { Folder, People } from "react-bootstrap-icons";
 import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
-import {useState, useEffect} from "react";
+import {useState} from "react";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 import {
     fetchRoot,
@@ -14,7 +14,6 @@ import {
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
 import "./home.tsx.css";
-import {Spinner} from "react-bootstrap";
 
 export const Route = createFileRoute('/home')({
     beforeLoad: ({context}) => {
@@ -26,6 +25,32 @@ export const Route = createFileRoute('/home')({
     staticData: {
         title: "Ficsit Together | Home",
         showNav: true,
+    },
+    loader: async ({context}) => {
+        const {auth} = context;
+        if (!auth) {
+            throw redirect({to: '/login', replace: true});
+        }
+
+        const [root, sharedRaw] = await Promise.all([
+            fetchRoot(auth),
+            fetchSharedDirectories(auth),
+        ])
+        
+        const owned = root.subDirectories.map(dir => ({
+            id: dir.id,
+            name: dir.name,
+            isShared: false,
+        } as DirectoryInfo));
+
+        const shared = sharedRaw.map(dir => ({
+            id: dir.id,
+            name: dir.name,
+            isShared: true,
+            sharedBy: dir.ownerUsername
+        } as DirectoryInfo));
+
+        return { root, owned, shared };
     }
 })
 
@@ -33,46 +58,19 @@ export const Route = createFileRoute('/home')({
 // TODO - handle empty folder names
 function HomePage() {
     const auth = useAuth0Context()
-    const [rootId, setRootId] = useState<string>("");
-    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-
-    const [ownedDirectories, setOwnedDirectories] = useState<DirectoryInfo[]>([]);
-    const [sharedDirectories, setSharedDirectories] = useState<DirectoryInfo[]>([]);
+    const { root, owned, shared } = Route.useLoaderData();
+    const [ownedDirectories, setOwnedDirectories] = useState<DirectoryInfo[]>(owned);
+    const [sharedDirectories, setSharedDirectories] = useState<DirectoryInfo[]>(shared);
+    
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
 
-    // Fetch both owned and shared directories on component mount
-    useEffect(() => {
-        const ownedDir = fetchRoot(auth).then(DTO => {
-            setRootId(DTO.id);
-            return DTO.subDirectories.map(dir => ({
-                id: dir.id,
-                name: dir.name,
-                isShared: false,
-            } as DirectoryInfo));
-        });
-
-        const sharedDir = fetchSharedDirectories(auth).then(dirs => dirs.map(dir => ({
-            id: dir.id,
-            name: dir.name,
-            isShared: true,
-            sharedBy: dir.ownerUsername
-        } as DirectoryInfo)));
-
-        ownedDir.then(owned => setOwnedDirectories(owned))
-        sharedDir.then(shared => setSharedDirectories(shared))
-        Promise.all([ownedDir, sharedDir]).then(() => setIsLoading(false))
-        .catch(err => {
-            console.error('Error fetching directories:', err);
-            setIsLoading(false);
-        });
-    }, [auth]);
     const handleCreateDirectory = (name: string) => {
-        createDirectory(auth, rootId, name)
+        createDirectory(auth, root.id, name)
         .then(newDir => {
             setOwnedDirectories(prev => [...prev, {
                 id: newDir.id,
@@ -130,21 +128,6 @@ function HomePage() {
     const handleShareDirectory = (directory: DirectoryInfo) => {
         setSelectedDirectory(directory);
         setShowShareModal(true);
-    }
-
-    if (isLoading) {
-        return (
-            <div
-                className="d-flex flex-column align-items-center justify-content-center"
-                style={{
-                    position: "fixed",
-                    inset: 0
-                }}
-            >
-                <Spinner animation="border" style={{ width: "4rem", height: "4rem" }} />
-                <small className="text-muted mt-3">Loading Home...</small>
-            </div>
-        );
     }
 
     return (

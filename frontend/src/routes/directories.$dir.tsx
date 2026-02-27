@@ -1,7 +1,7 @@
-import {createFileRoute, useNavigate} from '@tanstack/react-router'
+import {createFileRoute, notFound} from '@tanstack/react-router'
 import {redirect} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {
     createDirectory,
     createProject,
@@ -9,8 +9,7 @@ import {
     fetchDirectoryContent,
     fetchUser,
 } from "../api/apiCalls.ts";
-import {type DirectoryDTO, type ProjectDTO, type DirectoryTreeDTO} from "dtolib";
-import {Spinner} from "react-bootstrap";
+import {type DirectoryDTO, type ProjectDTO} from "dtolib";
 import {Folder} from 'react-bootstrap-icons';
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
@@ -30,53 +29,50 @@ export const Route = createFileRoute('/directories/$dir')({
     staticData: {
         showNav: true,
         title: "Ficsit Together | Directories"
+    },
+    loader: async ({context, params: {dir}}) => {
+        const { auth } = context;
+        if (!auth) throw redirect({ to: '/login', replace: true })
+
+        const [user, directory] = await Promise.all([
+            fetchUser(auth),
+            fetchDirectoryContent(auth, dir).catch(err => {
+                if (err.response?.status === 403 || err.response?.status === 404) {
+                    throw notFound()
+                }
+                throw err
+            }),
+        ])
+
+        if (directory.id === directory.parentDirectoryId) {
+            throw redirect({ to: '/home', replace: true })
+        }
+
+        return { user, directory }
     }
 })
 
 function DirectoryPage() {
+    const { dir: dirId } = Route.useParams();
+    return (
+        <DirectoryPageContent key={dirId}/> // Force remount when directory changes to reset state
+    );
+}
+
+function DirectoryPageContent() {
     const auth = useAuth0Context()
     const { dir: dirId } = Route.useParams();
-    const navigate = useNavigate();
+    
+    const { user, directory } = Route.useLoaderData();
 
-    const [directoryName, setDirectoryName] = useState<string>("");
-    const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>([]);
-    const [userID, setUserID] = useState<string>("");
-    const [projects, setProjects] = useState<ProjectDTO[]>([]);
-    const [dirTree, setDirTree] = useState<DirectoryTreeDTO[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>(directory.subDirectories);
+    const [projects, setProjects] = useState<ProjectDTO[]>(directory.projects);
 
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
-
-    // Fetch directory content and user data on component mount and when dirId or userID changes
-    useEffect(() => {
-        const userData = fetchUser(auth).then(DTO => {
-            setUserID(DTO.id);
-        });
-        userData.catch(error => {
-            console.error("Error fetching user data:", error);
-        });
-
-        const directoryData = fetchDirectoryContent(auth, dirId).then(DTO => {
-            if (DTO.id === DTO.parentDirectoryId) {
-                navigate({to: "/home", replace: true});
-                return;
-            }
-
-            setDirectoryName(DTO.name);
-            setSubDirectories(DTO.subDirectories);
-            setProjects(DTO.projects);
-            setDirTree(DTO.directoryTree);
-            setIsLoading(false);
-        });
-        directoryData.catch(error => {
-            console.error("Error fetching directory content:", error);
-        });
-
-    }, [auth, dirId, userID]);
 
     // Create Directory and Project flow
     const handleCreateDirectory = (name: string) => {
@@ -140,27 +136,12 @@ function DirectoryPage() {
         setShowShareModal(true);
     }
 
-    if (isLoading) {
-        return (
-            <div
-                className="d-flex flex-column align-items-center justify-content-center"
-                style={{
-                    position: "fixed",
-                    inset: 0
-                }}
-            >
-                <Spinner animation="border" style={{ width: "4rem", height: "4rem" }} />
-                <small className="text-muted mt-3">Loading Directory...</small>
-            </div>
-        );
-    }
-
     return (
         <>
-            <DirectoryTree dirTree={dirTree}/>
+            <DirectoryTree dirTree={directory.directoryTree}/>
             <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4">
                 <Folder size={32}/>
-                <h3 className="mb-0">{directoryName}</h3>
+                <h3 className="mb-0">{directory.name}</h3>
             </div>
             <div key={"explorer"} className="d-flex flex-column p-5 gap-3 mx-lg-5 pt-4">
                 <div key={"directory-list"} className={"d-flex flex-wrap gap-3 justify-content-center"}
@@ -178,7 +159,7 @@ function DirectoryPage() {
                                 }
                                 key={directory.id}
                                 deleteDirectory={handleDeleteDirectory}
-                                shareDirectory={directory.owner === userID ? handleShareDirectory : undefined}
+                                shareDirectory={directory.owner === user.id ? handleShareDirectory : undefined}
                             />
                         )
                     })}
