@@ -12,6 +12,7 @@ interface Config {
     auth0Domain: string;
     auth0ClientId: string;
     environment: string;
+    databaseUrl: string;
 }
 
 const config: Config = {
@@ -23,6 +24,7 @@ const config: Config = {
     auth0Domain: process.env.AUTH0_DOMAIN || "AUTH0-DOMAIN",
     auth0ClientId: process.env.AUTH0_CLIENT_ID || "AUTH0-CLIENT-ID",
     environment: process.env.NODE_ENV || 'development',
+    databaseUrl: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/ficsittogether",
 };
 
 export default config;

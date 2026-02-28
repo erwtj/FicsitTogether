@@ -1,4 +1,4 @@
-﻿import {db} from "./database.js";
+﻿import {pool} from "./database.js";
 
 export type User = {
     id: string;
@@ -8,23 +8,33 @@ export type User = {
     root_directory: string;
 }
 
-const createUserQuery = db.prepare<[string, string, string, string]>('INSERT INTO users (id, username, auth0_id, root_directory) VALUES (?, ?, ?, ?)');
-export function createUser(id: string, username: string, auth0_id: string, root_directory: string) {
-    createUserQuery.run(id, username, auth0_id, root_directory);
+export async function createUser(id: string, username: string, auth0_id: string, root_directory: string) {
+    await pool.query(
+        'INSERT INTO users (id, username, auth0_id, root_directory) VALUES ($1, $2, $3, $4)',
+        [id, username, auth0_id, root_directory]
+    );
 }
 
-const getUserByNameQuery = db.prepare<[string], User>('SELECT id, username, auth0_id, root_directory, created_at FROM users WHERE username = ?;');
-const getUserByIdQuery = db.prepare<[string], User>('SELECT id, username, auth0_id, root_directory, created_at FROM users WHERE id = ?;');
-const getUserByAuth0IdQuery = db.prepare<[string], User>('SELECT id, username, auth0_id, root_directory, created_at FROM users WHERE auth0_id = ?;');
-
-export function getUserByUsername(username: string) {
-    return getUserByNameQuery.get(username);
+export async function getUserByUsername(username: string) {
+    const res = await pool.query<User>(
+        'SELECT id, username, auth0_id, root_directory, created_at FROM users WHERE username = $1',
+        [username]
+    );
+    return res.rows[0] ?? undefined;
 }
 
-export function getUserById(id: string) {
-    return getUserByIdQuery.get(id);
+export async function getUserById(id: string) {
+    const res = await pool.query<User>(
+        'SELECT id, username, auth0_id, root_directory, created_at FROM users WHERE id = $1',
+        [id]
+    );
+    return res.rows[0] ?? undefined;
 }
 
-export function getUserByAuth0Id(id: string) {
-    return getUserByAuth0IdQuery.get(id);
+export async function getUserByAuth0Id(id: string) {
+    const res = await pool.query<User>(
+        'SELECT id, username, auth0_id, root_directory, created_at FROM users WHERE auth0_id = $1',
+        [id]
+    );
+    return res.rows[0] ?? undefined;
 }

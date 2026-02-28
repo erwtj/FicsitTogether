@@ -1,9 +1,7 @@
 ﻿/.idea
 /node_modules
 
-**.sqlite
-**.sqlite-shm
-**.sqlite-wal
+data
 
 # Secrets
 **.env

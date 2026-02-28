@@ -1,73 +1,48 @@
-﻿import Database from 'better-sqlite3';
+﻿import pg from 'pg';
+import config from '../config/config.js';
 
-// TODO: Rewrite all repositories for postgresql 
+const { Pool } = pg;
 
-export const db: Database.Database = new Database('db.sqlite');
+export const pool = new Pool({ connectionString: config.databaseUrl });
 
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+export async function initDatabase() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS users
+        (
+            id             TEXT        NOT NULL CONSTRAINT users_pk PRIMARY KEY,
+            username       TEXT        NOT NULL CONSTRAINT users_pk_2 UNIQUE,
+            auth0_id       TEXT        NOT NULL CONSTRAINT users_pk_3 UNIQUE,
+            root_directory TEXT        NOT NULL,
+            created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
 
-// root_directory on user is not foreign key, this way we do not need to disable foreign keys before inserting user
-db.exec(`
-    create table if not exists users
-    (
-        id         text not null
-            constraint users_pk
-                primary key,
-        username   text not null
-            constraint users_pk_2
-                unique,
-        auth0_id   text not null
-            constraint users_pk_3
-                unique,
-        root_directory text not null,
-        created_at DATETIME default CURRENT_TIMESTAMP
-    );
-    
-    create table if not exists directories
-    (
-        id               text not null
-            constraint directories_pk
-                primary key,
-        parent_directory text not null
-            constraint directories_directories_id_fk
-                references directories
-                on delete cascade,
-        owner            text not null
-            constraint directories_users_id_fk
-                references users
-                on delete cascade,
-        name             text not null
-    );
-    
-    create table if not exists projects
-    (
-        id               text not null
-            constraint projects_pk
-                primary key,
-        parent_directory text not null
-            constraint projects_directories_id_fk
-                references directories
-                on delete cascade,
-        name             text not null,
-        description      text not null,
-        chart            text not null
-    );
-    
-    create unique index if not exists projects_id_uindex
-        on projects (id);
-    
-    create table if not exists share_directories
-    (
-        user      text not null
-            constraint share_directories_users_id_fk
-                references users
-                on delete cascade,
-        directory text not null
-            constraint share_directories_directories_id_fk
-                references directories
-                on delete cascade,
-        constraint share_directories_pk
-            primary key (user, directory)
-    );
-`);
+        CREATE TABLE IF NOT EXISTS directories
+        (
+            id               TEXT NOT NULL CONSTRAINT directories_pk PRIMARY KEY,
+            parent_directory TEXT NOT NULL CONSTRAINT directories_directories_id_fk
+                REFERENCES directories ON DELETE CASCADE,
+            owner            TEXT NOT NULL CONSTRAINT directories_users_id_fk
+                REFERENCES users ON DELETE CASCADE,
+            name             TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS projects
+        (
+            id               TEXT NOT NULL CONSTRAINT projects_pk PRIMARY KEY,
+            parent_directory TEXT NOT NULL CONSTRAINT projects_directories_id_fk
+                REFERENCES directories ON DELETE CASCADE,
+            name             TEXT NOT NULL,
+            description      TEXT NOT NULL,
+            chart            TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS share_directories
+        (
+            "user"    TEXT NOT NULL CONSTRAINT share_directories_users_id_fk
+                REFERENCES users ON DELETE CASCADE,
+            directory TEXT NOT NULL CONSTRAINT share_directories_directories_id_fk
+                REFERENCES directories ON DELETE CASCADE,
+            CONSTRAINT share_directories_pk PRIMARY KEY ("user", directory)
+        );
+    `);
+}

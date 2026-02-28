@@ -1,0 +1,17 @@
+﻿# Docker compose for development environment
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=ficsitdb
+
+volumes:
+  postgres_data:

@@ -1,4 +1,4 @@
-﻿import {db} from "./database.js";
+﻿import {pool} from "./database.js";
 
 export type Directory = {
     id: string;
@@ -12,59 +12,6 @@ export type DirectoryMinimalInfo = {
     name: string;
 }
 
-const createDirectoryQuery = db.prepare('INSERT INTO directories (id, parent_directory, owner, name) VALUES (?, ?, ?, ?)');
-export function createDirectory(id: string, parentDirectoryId: string, owner: string, name: string) {
-    createDirectoryQuery.run(id, parentDirectoryId, owner, name);
-}
-
-const getDirectoryQuery = db.prepare<string, Directory>('SELECT id, name, owner, parent_directory as parentDirectoryId FROM directories WHERE id = ?');
-export function getDirectory(id: string) {
-    return getDirectoryQuery.get(id);
-}
-
-const getAllDirectoriesQuery = db.prepare<[], Directory>('SELECT id, name, owner, parent_directory as parentDirectoryId FROM directories');
-export function getAllDirectories() {
-    return getAllDirectoriesQuery.all();
-}
-
-const getDirectoriesQuery = db.prepare<[string, string], Directory>('SELECT id, name, owner, parent_directory as parentDirectoryId FROM directories WHERE parent_directory = ? AND id != ?');
-export function getDirectories(parentDirectoryId: string) {
-    return getDirectoriesQuery.all(parentDirectoryId, parentDirectoryId);
-}
-
-const deleteDirectoryQuery = db.prepare('DELETE FROM directories WHERE id = ?');
-export function deleteDirectory(id: string) {
-    deleteDirectoryQuery.run(id);
-}
-
-const getDirectoriesRecursiveQuery = db.prepare<string, Directory>(`
-    WITH RECURSIVE subdirs(id, parent_directory, owner, name) AS (
-        SELECT id, parent_directory, owner, name FROM directories WHERE id = ?
-    
-        UNION
-    
-        SELECT d.id, d.parent_directory, d.owner, d.name FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
-    )
-    SELECT id, parent_directory, owner, name as parentDirectoryId FROM subdirs;
-`);
-export function getDirectoriesRecursive(directoryId: string) {
-    return getDirectoriesRecursiveQuery.all(directoryId);
-}
-
-const shareDirectoryQuery = db.prepare<[string, string]>(`
-    INSERT INTO share_directories (user, directory) VALUES (?, ?)
-`)
-export function shareDirectory(user: string, directory: string, ) {
-    shareDirectoryQuery.run(user, directory);
-}
-
-const unshareDirectoryQuery = db.prepare<[string, string]>(`
-    DELETE FROM share_directories WHERE user = ? AND directory = ?;
-`);
-export function unshareDirectory(user: string, directory: string) {
-    unshareDirectoryQuery.run(user, directory);
-}
-
 type SharedDirectory = {
     id: string;
     name: string;
@@ -73,46 +20,9 @@ type SharedDirectory = {
     ownerId: string;
 }
 
-const getSharedDirectoriesQuery = db.prepare<[string], SharedDirectory>(`
-    SELECT
-        d.id,
-        d.name,
-        d.parent_directory as parentDirectoryId,
-        u.username as ownerUsername,
-        u.id as ownerId
-    FROM share_directories sd
-             JOIN directories d ON sd.directory = d.id
-             JOIN users u ON d.owner = u.id
-    WHERE sd.user = ?
-    ORDER BY d.name;
-`);
-export function getSharedDirectories(userId: string) {
-    return getSharedDirectoriesQuery.all(userId);
-}
-
 type MinimalUserInfo = {
     id: string;
     username: string;
-}
-const getSharedWithQuery = db.prepare<[string], MinimalUserInfo>(`
-    SELECT u.id, u.username
-    FROM share_directories sd
-             JOIN users u ON sd.user = u.id
-             JOIN directories d ON sd.directory = d.id
-    WHERE sd.directory = ?
-      AND sd.user != d.owner; 
-`);
-export function getSharedWith(directoryId: string) {
-    return getSharedWithQuery.all(directoryId);
-}
-
-const existsShareQuery = db.prepare<[string, string], Number>(`
-    SELECT 1
-    FROM share_directories sd
-    WHERE sd.directory = ? AND sd.user == ?; 
-`);
-export function existsShare(directoryId: string, userId: string) {
-    return existsShareQuery.get(directoryId, userId) !== undefined;
 }
 
 type DirectoryTreeRow = {
@@ -123,49 +33,146 @@ type DirectoryTreeRow = {
 
 const MAX_TREE_DEPTH = 12;
 
-// TODO make the query more efficient
-const getDirectoryTreeQuery = db.prepare<[string, number, string, string], DirectoryTreeRow>(`
-    WITH RECURSIVE parent_dirs(id, parent_directory, owner, name, depth) AS (
-        SELECT id, parent_directory, owner, name, 0
-        FROM directories
-        WHERE id = ?
-
-        UNION
-
-        SELECT d.id, d.parent_directory, d.owner, d.name, pd.depth + 1
-        FROM directories d
-                 INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
-        WHERE pd.depth < ?
-    ),
-                   accessible_parents AS (
-                    
-                       SELECT DISTINCT pd.id, pd.parent_directory, pd.owner, pd.name, pd.depth
-                       FROM parent_dirs pd
-                       WHERE EXISTS (
-                           WITH RECURSIVE check_access(id, parent_directory, owner) AS (
-                           SELECT id, parent_directory, owner
-                           FROM directories
-                           WHERE id = pd.id
-
-                           UNION
-
-                           SELECT d.id, d.parent_directory, d.owner
-                           FROM directories d
-                                    INNER JOIN check_access ca ON d.id = ca.parent_directory
-                       )
-                                 SELECT 1
-                                 FROM check_access ca
-                                 LEFT JOIN share_directories sd ON sd.directory = ca.id AND sd.user = ?
-                                 WHERE ca.owner = ? OR sd.user IS NOT NULL
-                                 )
-                   )
-    SELECT id, parent_directory, owner, name, depth
-    FROM accessible_parents WHERE id != parent_directory
-`);
-export function getDirectoryTree(directoryId: string, userId: string): { tree: DirectoryMinimalInfo[], depthLimitReached: boolean } {
-    const rows = getDirectoryTreeQuery.all(directoryId, MAX_TREE_DEPTH, userId, userId);
-    const depthLimitReached = rows.some(r => r.depth >= MAX_TREE_DEPTH);
-    const tree = rows.map(({ id, name }) => ({ id, name })).reverse();
-    return { tree, depthLimitReached };
+export async function createDirectory(id: string, parentDirectoryId: string, owner: string, name: string) {
+    await pool.query(
+        'INSERT INTO directories (id, parent_directory, owner, name) VALUES ($1, $2, $3, $4)',
+        [id, parentDirectoryId, owner, name]
+    );
 }
 
+export async function getDirectory(id: string) {
+    const res = await pool.query<Directory>(
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories WHERE id = $1',
+        [id]
+    );
+    return res.rows[0] ?? undefined;
+}
+
+export async function getAllDirectories() {
+    const res = await pool.query<Directory>(
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories'
+    );
+    return res.rows;
+}
+
+export async function getDirectories(parentDirectoryId: string) {
+    const res = await pool.query<Directory>(
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories WHERE parent_directory = $1 AND id != $1',
+        [parentDirectoryId]
+    );
+    return res.rows;
+}
+
+export async function deleteDirectory(id: string) {
+    await pool.query('DELETE FROM directories WHERE id = $1', [id]);
+}
+
+export async function getDirectoriesRecursive(directoryId: string) {
+    const res = await pool.query<Directory>(`
+        WITH RECURSIVE subdirs(id, parent_directory, owner, name) AS (
+            SELECT id, parent_directory, owner, name FROM directories WHERE id = $1
+            UNION ALL
+            SELECT d.id, d.parent_directory, d.owner, d.name
+            FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
+        )
+        SELECT id, parent_directory as "parentDirectoryId", owner, name FROM subdirs
+    `, [directoryId]);
+    return res.rows;
+}
+
+export async function shareDirectory(user: string, directory: string) {
+    await pool.query(
+        'INSERT INTO share_directories ("user", directory) VALUES ($1, $2)',
+        [user, directory]
+    );
+}
+
+export async function unshareDirectory(user: string, directory: string) {
+    await pool.query(
+        'DELETE FROM share_directories WHERE "user" = $1 AND directory = $2',
+        [user, directory]
+    );
+}
+
+export async function getSharedDirectories(userId: string) {
+    const res = await pool.query<SharedDirectory>(`
+        SELECT
+            d.id,
+            d.name,
+            d.parent_directory as "parentDirectoryId",
+            u.username as "ownerUsername",
+            u.id as "ownerId"
+        FROM share_directories sd
+                 JOIN directories d ON sd.directory = d.id
+                 JOIN users u ON d.owner = u.id
+        WHERE sd.user = $1
+        ORDER BY d.name
+    `, [userId]);
+    return res.rows;
+}
+
+export async function getSharedWith(directoryId: string) {
+    const res = await pool.query<MinimalUserInfo>(`
+        SELECT u.id, u.username
+        FROM share_directories sd
+                 JOIN users u ON sd."user" = u.id
+                 JOIN directories d ON sd.directory = d.id
+        WHERE sd.directory = $1
+          AND sd."user" != d.owner
+    `, [directoryId]);
+    return res.rows;
+}
+
+export async function existsShare(directoryId: string, userId: string) {
+    const res = await pool.query(
+        'SELECT 1 FROM share_directories sd WHERE sd.directory = $1 AND sd."user" = $2',
+        [directoryId, userId]
+    );
+    return res.rowCount! > 0;
+}
+
+export async function getDirectoryTree(directoryId: string, userId: string): Promise<{ tree: DirectoryMinimalInfo[], depthLimitReached: boolean }> {
+    const res = await pool.query<DirectoryTreeRow>(`
+        WITH RECURSIVE parent_dirs(id, parent_directory, owner, name, depth) AS (
+            SELECT id, parent_directory, owner, name, 0
+            FROM directories
+            WHERE id = $1
+
+            UNION ALL
+
+            SELECT d.id, d.parent_directory, d.owner, d.name, pd.depth + 1
+            FROM directories d
+                     INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
+            WHERE pd.depth < $2
+        ),
+        accessible_parents AS (
+            SELECT DISTINCT pd.id, pd.parent_directory, pd.owner, pd.name, pd.depth
+            FROM parent_dirs pd
+            WHERE EXISTS (
+                WITH RECURSIVE check_access(id, parent_directory, owner) AS (
+                    SELECT id, parent_directory, owner
+                    FROM directories
+                    WHERE id = pd.id
+
+                    UNION ALL
+
+                    SELECT d.id, d.parent_directory, d.owner
+                    FROM directories d
+                             INNER JOIN check_access ca ON d.id = ca.parent_directory
+                )
+                SELECT 1
+                FROM check_access ca
+                LEFT JOIN share_directories sd ON sd.directory = ca.id AND sd."user" = $3
+                WHERE ca.owner = $4 OR sd."user" IS NOT NULL
+            )
+        )
+        SELECT id, name, depth
+        FROM accessible_parents
+        WHERE id != parent_directory
+        ORDER BY depth DESC
+    `, [directoryId, MAX_TREE_DEPTH, userId, userId]);
+
+    const depthLimitReached = res.rows.some(r => r.depth >= MAX_TREE_DEPTH);
+    const tree = res.rows.map(({ id, name }) => ({ id, name }));
+    return { tree, depthLimitReached };
+}

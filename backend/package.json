@@ -7,13 +7,11 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.1",
     "@types/ws": "^8.18.1",
     "argon2": "^0.44.0",
-    "better-sqlite3": "^12.6.2",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "dtolib": "*",
@@ -22,6 +20,7 @@
     "ficlib": "*",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2",
+    "pg": "^8.19.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "ws": "^8.19.0",
@@ -31,5 +30,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@types/pg": "^8.16.0"
+  }
 }
