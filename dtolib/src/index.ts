@@ -71,6 +71,10 @@ export type DirectoryTreeDTO = {
     name: string;
 }
 
+export type DirectoryTreeResultDTO = {
+    tree: DirectoryTreeDTO[];
+    depthLimitReached: boolean;
+}
 
 // Contains directory info, including contents of directory
 export type DirectoryContentDTO = {
@@ -80,7 +84,7 @@ export type DirectoryContentDTO = {
     parentDirectoryId: string, 
     subDirectories: DirectoryDTO[],
     projects: ProjectDTO[],
-    directoryTree: DirectoryTreeDTO[],
+    directoryTree: DirectoryTreeResultDTO,
 }
 
 // Singular directory info

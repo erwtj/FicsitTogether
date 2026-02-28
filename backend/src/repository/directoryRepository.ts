@@ -115,22 +115,31 @@ export function existsShare(directoryId: string, userId: string) {
     return existsShareQuery.get(directoryId, userId) !== undefined;
 }
 
+type DirectoryTreeRow = {
+    id: string;
+    name: string;
+    depth: number;
+}
+
+const MAX_TREE_DEPTH = 12;
+
 // TODO make the query more efficient
-const getDirectoryTreeQuery = db.prepare<[string, string, string], DirectoryMinimalInfo>(`
-    WITH RECURSIVE parent_dirs(id, parent_directory, owner, name) AS (
-        SELECT id, parent_directory, owner, name
+const getDirectoryTreeQuery = db.prepare<[string, number, string, string], DirectoryTreeRow>(`
+    WITH RECURSIVE parent_dirs(id, parent_directory, owner, name, depth) AS (
+        SELECT id, parent_directory, owner, name, 0
         FROM directories
         WHERE id = ?
 
         UNION
 
-        SELECT d.id, d.parent_directory, d.owner, d.name
+        SELECT d.id, d.parent_directory, d.owner, d.name, pd.depth + 1
         FROM directories d
                  INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
+        WHERE pd.depth < ?
     ),
                    accessible_parents AS (
                     
-                       SELECT DISTINCT pd.id, pd.parent_directory, pd.owner, pd.name
+                       SELECT DISTINCT pd.id, pd.parent_directory, pd.owner, pd.name, pd.depth
                        FROM parent_dirs pd
                        WHERE EXISTS (
                            WITH RECURSIVE check_access(id, parent_directory, owner) AS (
@@ -150,10 +159,13 @@ const getDirectoryTreeQuery = db.prepare<[string, string, string], DirectoryMini
                                  WHERE ca.owner = ? OR sd.user IS NOT NULL
                                  )
                    )
-    SELECT id, parent_directory, owner, name
+    SELECT id, parent_directory, owner, name, depth
     FROM accessible_parents WHERE id != parent_directory
 `);
-export function getDirectoryTree(directoryId: string, userId: string) {
-    return getDirectoryTreeQuery.all(directoryId, userId, userId).reverse();
+export function getDirectoryTree(directoryId: string, userId: string): { tree: DirectoryMinimalInfo[], depthLimitReached: boolean } {
+    const rows = getDirectoryTreeQuery.all(directoryId, MAX_TREE_DEPTH, userId, userId);
+    const depthLimitReached = rows.some(r => r.depth >= MAX_TREE_DEPTH);
+    const tree = rows.map(({ id, name }) => ({ id, name })).reverse();
+    return { tree, depthLimitReached };
 }
 

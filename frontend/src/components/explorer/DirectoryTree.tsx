@@ -1,9 +1,9 @@
 ﻿import {Link} from "@tanstack/react-router";
 import {Navbar, Nav} from "react-bootstrap";
-import {ChevronRight, House} from 'react-bootstrap-icons';
+import {ChevronRight, House, ThreeDots} from 'react-bootstrap-icons';
 import type {DirectoryTreeDTO} from "dtolib";
 
-function DirectoryTree({dirTree}: {dirTree: DirectoryTreeDTO[]}) {
+function DirectoryTree({dirTree, depthLimitReached}: {dirTree: DirectoryTreeDTO[], depthLimitReached?: boolean}) {
     return (
         <Navbar bg="dark" className="border-bottom overflow-hidden top-screen-navbar d-none d-sm-flex" variant="dark" style={{ height: "40px", width: "100vw" }} >
             <Nav className="d-flex align-items-center ms-3">
@@ -13,6 +13,14 @@ function DirectoryTree({dirTree}: {dirTree: DirectoryTreeDTO[]}) {
                     </Link>
                 </Nav.Item>
                 <ChevronRight size={16} className="text-muted me-1"/>
+                {depthLimitReached && (
+                    <>
+                        <Nav.Item className="d-flex align-items-center">
+                            <ThreeDots size={16} className="text-muted" title="Depth limit reached" />
+                        </Nav.Item>
+                        <ChevronRight size={16} className="text-muted me-1"/>
+                    </>
+                )}
             </Nav>
             <Nav>
                 {dirTree.map((dir, index) => (

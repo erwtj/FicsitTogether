@@ -19,8 +19,7 @@ export const router = createRouter({
     context: {
         auth: undefined,
     } as RouterContext,
-    defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    defaultPreload: false,
     defaultNotFoundComponent: NotFoundComponent,
 });
 

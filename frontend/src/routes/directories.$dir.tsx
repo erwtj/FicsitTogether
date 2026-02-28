@@ -138,7 +138,7 @@ function DirectoryPageContent() {
 
     return (
         <>
-            <DirectoryTree dirTree={directory.directoryTree}/>
+            <DirectoryTree dirTree={directory.directoryTree.tree} depthLimitReached={directory.directoryTree.depthLimitReached}/>
             <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4">
                 <Folder size={32}/>
                 <h3 className="mb-0">{directory.name}</h3>
