@@ -21,7 +21,7 @@ function getRelevantItemsForInput(requiredInput: string): string[] {
 }
 
 function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: RecipeModalProps) {
-    const [selectedItem, setSelectedItem] = useState<string | null>(null);
+    const [selectedItem, setSelectedItem] = useState<string | null>(RequiredOutput ?? null);
     const [searchTerm, setSearchTerm] = useState("");
 
     const handleClose = () => {

@@ -117,6 +117,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                 </div>
                 
                 <RecipeModal
+                    key={`${show}-${requiredOutput}`}
                     show={show}
                     onModalSubmit={onModalSubmit}
                     RequiredInput={requiredInput}
