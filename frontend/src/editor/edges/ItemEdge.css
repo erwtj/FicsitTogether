@@ -1,4 +1,9 @@
-﻿.num-input {
+﻿@keyframes fluid-flow {
+    from { stroke-dashoffset: 20; }
+    to   { stroke-dashoffset: 0; }
+}
+
+.num-input {
     width: 80px;
     border: none;
     padding: 0;

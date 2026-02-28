@@ -1,4 +1,4 @@
-﻿import { memo, useCallback, useEffect, useMemo } from "react";
+﻿import { memo, useCallback, useMemo } from "react";
 import {
     BaseEdge,
     EdgeLabelRenderer,
@@ -22,20 +22,20 @@ import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
 import { useState } from "react";
 
 export const ItemEdge = memo(function ItemEdge({
-    id,
-    source,
-    sourceHandleId,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-    data,
-    selected,
-    markerEnd,
-    style,
-}: EdgeProps<ItemEdgeType>) {
+                                                   id,
+                                                   source,
+                                                   sourceHandleId,
+                                                   sourceX,
+                                                   sourceY,
+                                                   targetX,
+                                                   targetY,
+                                                   sourcePosition,
+                                                   targetPosition,
+                                                   data,
+                                                   selected,
+                                                   markerEnd,
+                                                   style,
+                                               }: EdgeProps<ItemEdgeType>) {
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
     const [movablePoints, setMovablePoints] = useState<MovablePoint[]>(data?.movablePoints ?? []);
@@ -68,9 +68,6 @@ export const ItemEdge = memo(function ItemEdge({
 
     const isFluid = sourceItem ? !isItemSolid(sourceItem) : false;
 
-    useEffect(() => {
-        reactFlow.updateEdge(id, { animated: isFluid });
-    }, [isFluid, id, reactFlow]);
 
     // ── Over-capacity check ────────────────────────────────────────────────
     // Read the pre-computed flag from the source node's data (set by useFactorySync).
@@ -105,11 +102,13 @@ export const ItemEdge = memo(function ItemEdge({
         [id, isFluid, updateEdgeData],
     );
 
-    // ── Styles ─────────────────────────────────────────────────────────────
+    const fluidColor = isFluid && sourceItem?.fluidColor
+        ? `${sourceItem.fluidColor.slice(0, -2)}` // Remove alpha from hex color
+        : null;
+
     const pathStyle: React.CSSProperties = {
         ...style,
-        stroke: outputTooHigh ? "#790000" :
-            isFluid ? `#${sourceItem?.fluidColor.slice(0, -2)}` : style?.stroke,
+        stroke: outputTooHigh ? "#790000" : (fluidColor ?? style?.stroke),
     };
 
     const labelStyle: React.CSSProperties = {
@@ -180,6 +179,17 @@ export const ItemEdge = memo(function ItemEdge({
     return (
         <>
             <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} />
+            {isFluid && (
+                <path
+                    d={edgePath}
+                    fill="none"
+                    stroke={outputTooHigh ? "rgba(255,90,90,0.5)" : fluidColor ? `${fluidColor}` : "rgba(255,255,255,0.4)"}
+                    strokeWidth={2}
+                    strokeDasharray="4"
+                    style={{ animation: "fluid-flow 1s linear infinite" }}
+                    pointerEvents="none"
+                />
+            )}
 
             {selected && sourceItem && (
                 <>
