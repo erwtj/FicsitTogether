@@ -28,8 +28,8 @@ export const ProjectCard = ({project, deleteProject}: ProjectProps) => {
             <Link to={"/edit/$project"} params={{ project: project.id }} className={"stretched-link"}></Link>
             <Card.Title className={"d-flex align-items-center justify-content-between user-select-none"}>
                 {project.name.length === 0 ?
-                    <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem"}} key="name">No name</h5> :
-                    <h5 className={"text-truncate mb-0"} style={{width: "14rem"}} key="name">{project.name}</h5>
+                    <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem", height: "1.7rem"}} key="name">No name</h5> :
+                    <h5 className={"text-truncate mb-0"} style={{width: "14rem", height: "1.7rem"}} key="name">{project.name}</h5>
                 }
                 <Dropdown className={"z-2 ms-auto"} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
