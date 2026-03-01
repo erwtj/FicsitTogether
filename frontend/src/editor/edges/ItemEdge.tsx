@@ -1,10 +1,11 @@
-﻿import { memo, useCallback, useMemo } from "react";
+﻿import { memo, useCallback, useMemo, useState } from "react";
 import {
     BaseEdge,
     EdgeLabelRenderer,
     getBezierPath,
     type EdgeProps,
     useReactFlow,
+    useStore,
 } from "@xyflow/react";
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
@@ -19,11 +20,11 @@ import {
 import { getCustomBezierCurve } from "../utils/edgeUtils.ts";
 import "./ItemEdge.css";
 import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
-import { useState } from "react";
 
 export const ItemEdge = memo(function ItemEdge({
                                                    id,
                                                    source,
+                                                   target,
                                                    sourceHandleId,
                                                    sourceX,
                                                    sourceY,
@@ -38,18 +39,29 @@ export const ItemEdge = memo(function ItemEdge({
                                                }: EdgeProps<ItemEdgeType>) {
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
-    const [movablePoints, setMovablePoints] = useState<MovablePoint[]>(data?.movablePoints ?? []);
 
-    let [edgePath, labelX, labelY] = getBezierPath({
+    // During a drag we buffer intermediate positions in local state so the SVG
+    const [dragBuffer, setDragBuffer] = useState<MovablePoint[] | null>(null);
+
+    // The effective movable points: drag buffer while dragging, data prop otherwise.
+    const movablePoints: MovablePoint[] = useMemo(
+        () => dragBuffer ?? (data?.movablePoints ?? []),
+        [dragBuffer, data?.movablePoints],
+    );
+
+
+    sourceY = sourceY - 10; // Nudge source handle up by 10px to align with item icon center
+    targetY = targetY + 10; // Nudge target handle up by 10px to align with item icon center
+
+    const [basePath, baseLabelX, baseLabelY] = getBezierPath({
         sourceX, sourceY, sourcePosition,
         targetX, targetY, targetPosition,
     });
-
-    // ── Source node (direct read, not a subscription) ──────────────────
-    // We only need the source node for the item icon and outputTooHigh flag.
-    // useFactorySync has already baked _outputOverUsed into the node's data,
-    // so re-renders happen only when node data changes — not on position moves.
     const sourceNode = reactFlow.getNode(source);
+
+    // Reactively subscribe to source node's selected state so the edge
+    const sourceNodeSelected = useStore((s: { nodes: { id: string; selected?: boolean }[] }) => s.nodes.find(n => n.id === source)?.selected ?? false);
+    const targetNodeSelected = useStore((s: { nodes: { id: string; selected?: boolean }[] }) => s.nodes.find(n => n.id === target)?.selected ?? false);
 
     const sourceItem: Item | null = useMemo(() => {
         if (!sourceNode) return null;
@@ -119,31 +131,81 @@ export const ItemEdge = memo(function ItemEdge({
         borderRadius: "10px",
     };
 
-    const middlePoints = [{ x: labelX, y: labelY }];
+    const { edgePath, labelX, labelY, middlePoints } = useMemo(() => {
+        if (movablePoints.length > 0) {
+            const points = [{ id: "source", x: sourceX, y: sourceY }, ...movablePoints, { id: "target", x: targetX, y: targetY }];
+            const customPath = getCustomBezierCurve(points);
+            const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? { id: "label", x: baseLabelX, y: baseLabelY };
+            return {
+                edgePath: customPath.path,
+                labelX: labelPoint.x,
+                labelY: labelPoint.y,
+                middlePoints: customPath.middlePoints,
+            };
+        }
+        return {
+            edgePath: basePath,
+            labelX: baseLabelX,
+            labelY: baseLabelY,
+            middlePoints: [{ x: baseLabelX, y: baseLabelY }],
+        };
+    }, [movablePoints, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
 
-    if (movablePoints.length > 0) {
-        middlePoints.pop();
-        const points = [{ id: "target", x: sourceX, y: sourceY }, ...movablePoints, { id: "target", x: targetX, y: targetY }];
-        const customPath = getCustomBezierCurve(points);
-        edgePath = customPath.path;
-        const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? { id: "label", x: labelX, y: labelY };
-        labelX = labelPoint.x;
-        labelY = labelPoint.y;
-        middlePoints.push(...customPath.middlePoints);
-    }
-
-    function addMovablePoint(idx: number) {
+    const addMovablePoint = useCallback((idx: number) => {
         const middlePoint = middlePoints[idx];
-        const newId = movablePoints.length === 0 ? "label" : `${movablePoints.length}`;
+        const current = data?.movablePoints ?? [];
+        const newId = current.length === 0 ? "label" : `${current.length}`;
         const newPoint: MovablePoint = { id: newId, x: middlePoint.x, y: middlePoint.y };
-        setMovablePoints(prev => {
-            const next = [...prev];
-            next.splice(idx, 0, newPoint);
-            return next;
-        });
-    }
+        const next = [...current];
+        next.splice(idx, 0, newPoint);
+        // Write directly to Yjs — data prop update will re-render with the new point.
+        updateEdgeData(id, { movablePoints: next });
+    }, [middlePoints, data?.movablePoints, id, updateEdgeData]);
 
-    function renderDraggablePoints() {
+    const handleDragStart = useCallback((e: React.MouseEvent, idx: number) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origin = (data?.movablePoints ?? [])[idx];
+        const base = [...(data?.movablePoints ?? [])];
+        const { zoom } = reactFlow.getViewport();
+
+        // Seed the drag buffer from the current Yjs data.
+        setDragBuffer(base);
+
+        // Use a local mutable array as scratch pad so mousemove doesn't
+        // create a new closure / stale-closure problem with setState.
+        const scratch = [...base];
+
+        function onMouseMove(moveEvent: MouseEvent) {
+            const dx = (moveEvent.clientX - startX) / zoom;
+            const dy = (moveEvent.clientY - startY) / zoom;
+            scratch[idx] = { ...origin, x: origin.x + dx, y: origin.y + dy };
+            setDragBuffer([...scratch]);
+        }
+
+        //TODO: Fix the fact that mouseup deselects the edge
+        function onMouseUp(upEvent: MouseEvent) {
+            upEvent.stopPropagation();
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp, { capture: true });
+            // Suppress the pointerup and click that ReactFlow uses to deselect.
+            const suppress = (ev: Event) => ev.stopPropagation();
+            window.addEventListener("pointerup", suppress, { capture: true, once: true });
+            window.addEventListener("click", suppress, { capture: true, once: true });
+            // Clear drag buffer first so render falls back to data prop after Yjs commit.
+            setDragBuffer(null);
+            // Commit to Yjs — data prop update will take over rendering.
+            updateEdgeData(id, { movablePoints: scratch });
+        }
+
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp, { capture: true });
+    }, [data?.movablePoints, reactFlow, id, updateEdgeData]);
+
+    const renderDraggablePoints = useCallback(() => {
         return (
             <>
                 {middlePoints.map((p, idx) => (
@@ -170,30 +232,32 @@ export const ItemEdge = memo(function ItemEdge({
                                 cursor: "move",
                             }}
                             className="position-handle"
-                            onClick={(e) => (e.stopPropagation())}
+                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onMouseDown={(e) => handleDragStart(e, idx)}
                         />
                     ))}
             </>
         );
-    }
+    }, [middlePoints, movablePoints, addMovablePoint, handleDragStart]);
 
     // ── Render ─────────────────────────────────────────────────────────────
     return (
         <>
             <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} className={isFluid ? "fluid-edge" : undefined} />
 
-            {selected && sourceItem && (
+            {(sourceNodeSelected || targetNodeSelected) && sourceItem && (
                 <>
                     {outputTooHigh && (
                         <circle cx="0" cy="0" r="4" id="radar">
-                            <animateMotion dur="8s" repeatCount="indefinite" path={edgePath} />
+                            <animateMotion dur="8s" repeatCount="indefinite" path={edgePath} begin={"0s"} calcMode="linear" />
                         </circle>
                     )}
                     <image
                         href={`/media/${sourceItem.icon}_256.webp`}
                         x={-10} y={-10} height="20px" width="20px"
                     >
-                        <animateMotion dur="8s" repeatCount="indefinite" path={edgePath} />
+                        <animateMotion dur="8s" repeatCount="indefinite" path={edgePath} begin={"0s"} calcMode="linear"/>
                     </image>
                 </>
             )}

@@ -24,8 +24,8 @@ function evalCubicBezier(b0: Vec2, b1: Vec2, b2: Vec2, b3: Vec2, t: number): Vec
     };
 }
 
-export function getCustomBezierCurve(points: MovablePoint[], alpha: number = 0.5, precision = 3): CustomEdgeCurves {
-    if (points.length < 3) return { middlePoints: [], path: "" };
+export function getCustomBezierCurve(points: MovablePoint[], alpha: number = 0.4, precision = 3): CustomEdgeCurves {
+    if (points.length < 2) return { middlePoints: [], path: "" };
 
     const N = points.length;
     const k = alpha / 3;
@@ -38,23 +38,36 @@ export function getCustomBezierCurve(points: MovablePoint[], alpha: number = 0.5
 
     const fmt = (v: number) => Number(v.toFixed(precision)).toString();
 
-    // Start the path at the first point
     let d = `M ${fmt(points[0].x)} ${fmt(points[0].y)}`;
     const middlePoints: Vec2[] = [];
 
     for (let i = 0; i < N - 1; i++) {
-        const A = get(i - 1);
         const B = get(i);
         const C = get(i + 1);
-        const Dp = get(i + 2);
 
-        const b0 = B;
-        const b1 = add(B, mul(sub(C, A), k));
-        const b2 = sub(C, mul(sub(Dp, B), k));
-        const b3 = C;
+        let b1: Vec2;
+        let b2: Vec2;
 
-        d += ` C ${fmt(b1.x)} ${fmt(b1.y)}, ${fmt(b2.x)} ${fmt(b2.y)}, ${fmt(b3.x)} ${fmt(b3.y)}`;
-        middlePoints.push(evalCubicBezier(b0, b1, b2, b3, 0.5));
+        if (i === 0) {
+            // Force the curve to exit straight down from the source handle
+            const dy = Math.abs(C.y - B.y) * k * 3;
+            b1 = { x: B.x, y: B.y + dy };
+        } else {
+            const A = get(i - 1);
+            b1 = add(B, mul(sub(C, A), k));
+        }
+
+        if (i === N - 2) {
+            // Force the curve to enter straight up into the target handle
+            const dy = Math.abs(C.y - B.y) * k * 3;
+            b2 = { x: C.x, y: C.y - dy };
+        } else {
+            const Dp = get(i + 2);
+            b2 = sub(C, mul(sub(Dp, B), k));
+        }
+
+        d += ` C ${fmt(b1.x)} ${fmt(b1.y)}, ${fmt(b2.x)} ${fmt(b2.y)}, ${fmt(C.x)} ${fmt(C.y)}`;
+        middlePoints.push(evalCubicBezier(B, b1, b2, C, 0.5));
     }
 
     return { middlePoints, path: d };

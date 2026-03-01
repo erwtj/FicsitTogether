@@ -137,13 +137,13 @@ export function useNodeEdgeHandlers(
             const edgeMap = doc.getMap<Edge>("edges");
             for (const change of changes) {
                 if (change.type === "add") {
-                    edgeMap.set(change.item.id, change.item);
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { selected: _sel, ...edgeToStore } = change.item;
+                    edgeMap.set(edgeToStore.id, edgeToStore);
                 } else if (change.type === "remove") {
                     edgeMap.delete(change.id);
-                } else if (change.type === "select") {
-                    const e = edgeMap.get(change.id);
-                    if (e) edgeMap.set(change.id, { ...e, selected: change.selected });
                 }
+                // "select" is local UI state — intentionally not synced to Yjs.
             }
         }, LOCAL_ORIGIN);
     }, [onEdgesChange, ydocRef]);
@@ -175,8 +175,9 @@ export function useNodeEdgeHandlers(
                 throughput = Math.max(0, max - usedTargetThroughput(allEdges, target, targetHandle));
         }
 
-        doc.getMap<Edge>("edges").set(`edge-${Date.now()}`, {
-            id: `edge-${Date.now()}`,
+        const edgeId = `edge-${Date.now()}`;
+        doc.getMap<Edge>("edges").set(edgeId, {
+            id: edgeId,
             type: "item-edge",
             source, target, sourceHandle, targetHandle,
             data: { throughput },
