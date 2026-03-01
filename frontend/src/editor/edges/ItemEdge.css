@@ -1,6 +1,11 @@
 ﻿@keyframes fluid-flow {
-    from { stroke-dashoffset: 20; }
-    to   { stroke-dashoffset: 0; }
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -12; }
+}
+
+.fluid-edge {
+    stroke-dasharray: 6 6;
+    animation: fluid-flow 0.5s linear infinite;
 }
 
 .num-input {

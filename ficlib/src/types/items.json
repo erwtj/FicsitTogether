@@ -22,7 +22,7 @@
     "displayName": "Water",
     "icon": "FactoryGame/Resource/RawResources/Water/UI/LiquidWater_Pipe",
     "form": "RF_LIQUID",
-    "fluidColor": "#7AB0D400",
+    "fluidColor": "7AB0D400",
     "energyValue": 0.0,
     "resourceSinkPoints": 0.0
   },

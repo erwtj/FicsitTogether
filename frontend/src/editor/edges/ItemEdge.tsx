@@ -103,12 +103,14 @@ export const ItemEdge = memo(function ItemEdge({
     );
 
     const fluidColor = isFluid && sourceItem?.fluidColor
-        ? `${sourceItem.fluidColor.slice(0, -2)}` // Remove alpha from hex color
+        ? `#${sourceItem.fluidColor.slice(0, -2)}` // Remove alpha from hex color
         : null;
 
     const pathStyle: React.CSSProperties = {
         ...style,
-        stroke: outputTooHigh ? "#790000" : (fluidColor ?? style?.stroke),
+        stroke: isFluid
+            ? (outputTooHigh ? "rgba(255,90,90,0.7)" : (fluidColor ?? "rgba(255,255,255,0.4)"))
+            : (outputTooHigh ? "#790000" : style?.stroke),
     };
 
     const labelStyle: React.CSSProperties = {
@@ -178,18 +180,7 @@ export const ItemEdge = memo(function ItemEdge({
     // ── Render ─────────────────────────────────────────────────────────────
     return (
         <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} />
-            {isFluid && (
-                <path
-                    d={edgePath}
-                    fill="none"
-                    stroke={outputTooHigh ? "rgba(255,90,90,0.5)" : fluidColor ? `${fluidColor}` : "rgba(255,255,255,0.4)"}
-                    strokeWidth={2}
-                    strokeDasharray="4"
-                    style={{ animation: "fluid-flow 1s linear infinite" }}
-                    pointerEvents="none"
-                />
-            )}
+            <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} className={isFluid ? "fluid-edge" : undefined} />
 
             {selected && sourceItem && (
                 <>
