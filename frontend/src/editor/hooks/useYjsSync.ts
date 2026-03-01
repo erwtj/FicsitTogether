@@ -95,14 +95,12 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
             event.keysChanged.forEach(key => {
                 const newEdge = edgeMap.get(key);
                 if (newEdge) {
-                    // selected is local UI state — never restore it from Yjs.
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { selected: _sel, ...cleanEdge } = newEdge;
                     const existing = reactFlow.getEdge(key);
                     if (existing) {
-                        edgeChanges.push({ type: "replace", id: key, item: cleanEdge as Edge });
+                        newEdge.selected = existing.selected;
+                        edgeChanges.push({ type: "replace", id: key, item: newEdge });
                     } else {
-                        edgeChanges.push({ type: "add", item: cleanEdge as Edge });
+                        edgeChanges.push({ type: "add", item: newEdge });
                     }
                 } else {
                     edgeChanges.push({ type: "remove", id: key });
