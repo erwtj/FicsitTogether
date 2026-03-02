@@ -56,7 +56,7 @@ export const ItemSpawnerNode = memo(function ItemSpawnerNode({
                                     placeholder={"0"}
                                     value={visibleValue}
                                     onChange={onChange}
-                                    onFocus={() => { setInputValue(String(displayAmount)); setIsFocused(true); }}
+                                    onFocus={() => { setInputValue(displayAmount === 0 ? "" : String(displayAmount)); setIsFocused(true); }}
                                     onBlur={() => setIsFocused(false)}
                                     onClickCapture={e => e.stopPropagation()}
                                     onDoubleClickCapture={e => e.stopPropagation()}
