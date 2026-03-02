@@ -37,9 +37,9 @@ export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType
 
             <Card>
                 <Card.Header style={{height: "30px"}}>
-                            <span className={"text-center"}>
-                                {displayAmount}
-                            </span>
+                    <span className={"text-center"}>
+                        {displayAmount}
+                    </span>
                 </Card.Header>
 
                 <Card.Body className="p-3 pt-2">
@@ -47,7 +47,7 @@ export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType
                         <div className="row gap-2">
                             <div className="col-auto p-1 text-start">
                                 <h5 className="fs-6">
-                                    {item.displayName}
+                                    {sinkOutput && "Sink: "} {item.displayName}
                                 </h5>
                                 <span className={"text-body num-input"}>
                                     {sinkOutput ? displayTickets : displayAmount} {!solid && " m³"}
