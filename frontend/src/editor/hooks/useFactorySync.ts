@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef } from "react";
 import { useReactFlow, type Edge, type Node } from "@xyflow/react";
-import { getRecipe } from "ficlib";
+import {getItem, getRecipe } from "ficlib";
 import { computeNodeFactor, totalThroughputForHandle } from "../utils/factoryCalc";
 import {
     type ItemEdgeData,
@@ -39,7 +39,7 @@ function nodeDataFingerprint(nodes: Node[]): string {
  * into affected node data using reactFlow.setNodes.
  *
  * The update is one-directional:
- *   (edge change OR node data change) → setNodes with computed _ fields (local only, NOT written to Yjs)
+ *   (edge change OR node data change) -> setNodes with computed _ fields (local only, NOT written to Yjs)
  * The _ fields do NOT feed back into this hook, so there is no circular loop.
  */
 export function useFactorySync(
@@ -138,7 +138,10 @@ export function useFactorySync(
                     );
                     if (d._totalThroughput === total) return node;
                     changed = true;
-                    return { ...node, data: { ...d, _totalThroughput: total } };
+
+                    const sinkFactor = getItem(d.itemClassName)?.resourceSinkPoints ?? 0;
+                    const totalSink = total * sinkFactor;
+                    return { ...node, data: { ...d, _totalThroughput: total, _totalSinkPoints: totalSink } };
                 }
 
                 if (node.type === "power-node") {

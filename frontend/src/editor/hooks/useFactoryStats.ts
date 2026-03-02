@@ -87,7 +87,11 @@ export function useFactoryStats(nodes: Node[]): FactoryStats {
                 const d = node.data as EndNodeData;
                 if (!d.itemClassName) continue;
                 const total = d._totalThroughput ?? 0;
-                accumulateItem(outputMap, d.itemClassName, total);
+                const totalSinkPoints = d._totalSinkPoints ?? 0;
+                if (d.sinkOutput)
+                    accumulateItem(outputMap, 'Desc_ResourceSinkCoupon_C', totalSinkPoints);
+                else
+                    accumulateItem(outputMap, d.itemClassName, total);
                 continue;
             }
 

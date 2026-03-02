@@ -1,43 +1,33 @@
 ﻿import { type Node, type Edge } from "@xyflow/react";
 
-// ─── Node Data ────────────────────────────────────────────────────────────────
+// Classnames are looked up via getWhatever() from ficlib
 
 export type RecipeNodeData = {
-    /** ClassName looked up via getRecipe() at render time */
     recipeClassName: string;
     summerSloops: number;
     percentage: number[];
-    /**
-     * Computed by useFactorySync — nodes read this instead of subscribing
-     * to the edge store themselves. Never written to Yjs.
-     */
-    _factor?: NodeFactor;
-    /** Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs. */
-    _outputOverUsed?: Record<string, boolean>;
+
+    _factor?: NodeFactor; // Computed input/output factor based on building count and Somer Sloop bonus. Never written to Yjs
+    _outputOverUsed?: Record<string, boolean>; // Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs
 };
 
 export type ItemSpawnerNodeData = {
-    /** ClassName looked up via getItem() at render time */
     itemClassName: string;
-    /** Items (or mL for fluids) per minute this node provides */
-    outputAmount: number;
-    /** Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs. */
-    _outputOverUsed?: Record<string, boolean>;
+    outputAmount: number; // Items (or mL for fluids) per minute this node provides
+    _outputOverUsed?: Record<string, boolean>; // Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs
 };
 
 export type EndNodeData = {
     itemClassName: string;
-    /** Total throughput flowing in. Never written to Yjs. */
-    _totalThroughput?: number;
+    sinkOutput: boolean;
+    _totalThroughput?: number; // Total throughput flowing in. Never written to Yjs
+    _totalSinkPoints?: number; // Total sink points flowing in (throughput * item sink points). Never written to Yjs
 };
 
 export type PowerNodeData = {
     recipeClassName: string;
-    /** Computed clock factor. Never written to Yjs. */
-    _factor?: number;
+    _factor?: number; // Computed clock factor. Never written to Yjs
 };
-
-// ─── Typed Nodes ─────────────────────────────────────────────────────────────
 
 export type RecipeNodeType     = Node<RecipeNodeData,      "recipe-node">;
 export type ItemSpawnerNodeType = Node<ItemSpawnerNodeData, "item-spawner-node">;
@@ -50,8 +40,6 @@ export type AppNode =
     | EndNodeType
     | PowerNodeType;
 
-// ─── Edge Data ────────────────────────────────────────────────────────────────
-
 export type MovablePoint = {
     id: string;
     x: number;
@@ -59,16 +47,13 @@ export type MovablePoint = {
 }
 
 export type ItemEdgeData = {
-    /** Items (or mL for fluids) per minute flowing through this edge */
     throughput: number;
     movablePoints?: MovablePoint[]
 };
 
 export type ItemEdgeType = Edge<ItemEdgeData, "item-edge">;
 
-// ─── Factor ───────────────────────────────────────────────────────────────────
-
-/** inputFactor: number of buildings running; outputFactor: includes Somer Sloop bonus */
+// inputFactor: number of buildings running; outputFactor: includes Somer Sloop bonus
 export type NodeFactor = { inputFactor: number; outputFactor: number };
 
 export const nodeColor = (node: Node) => {
