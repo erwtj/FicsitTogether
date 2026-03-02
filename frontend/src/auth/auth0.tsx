@@ -21,7 +21,7 @@ function Auth0ContextProvider({ children }: { children: React.ReactNode }) {
         login: () => loginWithRedirect(),
         logout: () => logout({ logoutParams: { returnTo: window.location.origin } }),
         isLoading,
-        getAccessTokenSilently: getAccessTokenSilently
+        getAccessTokenSilently
     }
 
     return (
@@ -39,7 +39,8 @@ export function Auth0Wrapper({ children }: { children: React.ReactNode }) {
             clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
             authorizationParams={{
                 redirect_uri: window.location.origin,
-                audience: import.meta.env.VITE_AUTH0_AUDIENCE
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                scope: 'openid profile email offline_access'
             }}
 
             // TODO: Unsafe, only use in dev

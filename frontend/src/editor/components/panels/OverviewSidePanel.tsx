@@ -134,9 +134,15 @@ export function OverviewSidePanel() {
             <Offcanvas show={showPanel} onHide={handleShow} placement="start" scroll backdrop={false}>
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>
-                        <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary clickable-link"}>
-                            <ArrowLeft size={20} className="mb-1 me-3"/>
-                        </Link>
+                        {(metadata.parentDirectoryId && metadata.parentDirectoryId !== "") ?
+                            <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary clickable-link"}>
+                                <ArrowLeft size={20} className="mb-1 me-3"/>
+                            </Link>
+                            :
+                            <Link to={"/home"} className={"text-body-secondary clickable-link"}>
+                                <ArrowLeft size={20} className="mb-1 me-3"/>
+                            </Link>
+                        }
                         {metadata.name
                             ? <span className="text-white clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>{metadata.name}</span>
                             : <span className="text-muted fst-italic clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>No name</span>
