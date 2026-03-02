@@ -54,8 +54,6 @@ export const Route = createFileRoute('/home')({
     }
 })
 
-
-// TODO - handle empty folder names
 function HomePage() {
     const auth = useAuth0Context()
 
@@ -131,8 +129,8 @@ function HomePage() {
     }
 
     return (
-        <div className="container h-100 mw-100">
-            <div className="row gap-4 gap-lg-0 h-100">
+        <div className="container flex-grow-1 mw-100">
+            <div className="row gap-4 gap-lg-0 flex-grow-1 h-100">
                 <div className="col-12 col-lg-6 p-4" id="split-view-left">
                     {/* Owned directories */}
                     <h4 className="d-flex align-items-center gap-2 justify-content-center mb-3">
