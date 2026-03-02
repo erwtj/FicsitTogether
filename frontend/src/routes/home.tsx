@@ -14,6 +14,7 @@ import {
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
 import "./home.tsx.css";
+import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
 
 export const Route = createFileRoute('/home')({
     beforeLoad: ({context}) => {
@@ -130,6 +131,7 @@ function HomePage() {
 
     return (
         <div className="container flex-grow-1 mw-100">
+            <BuyMeCoffeeWidget />
             <div className="row gap-4 gap-lg-0 flex-grow-1 h-100">
                 <div className="col-12 col-lg-6 p-4" id="split-view-left">
                     {/* Owned directories */}

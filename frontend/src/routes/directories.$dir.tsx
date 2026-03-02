@@ -18,6 +18,7 @@ import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import {ProjectCard, type ProjectInfo} from "../components/explorer/ProjectCard.tsx";
 import {AddProjectCard} from "../components/explorer/AddProjectCard.tsx";
 import DirectoryTree from "../components/explorer/DirectoryTree.tsx";
+import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
 
 export const Route = createFileRoute('/directories/$dir')({
     component: DirectoryPage,
@@ -138,6 +139,7 @@ function DirectoryPageContent() {
 
     return (
         <>
+            <BuyMeCoffeeWidget />
             <DirectoryTree dirTree={directory.directoryTree.tree} depthLimitReached={directory.directoryTree.depthLimitReached}/>
             <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4">
                 <Folder size={32}/>
