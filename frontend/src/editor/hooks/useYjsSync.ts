@@ -75,6 +75,7 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
                     } else {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { width, height, measured, ...freshNode } = cleanNode;
+                        freshNode.selected = false;
                         nodeChanges.push({ type: "add", item: freshNode });
                     }
                 } else {
@@ -100,6 +101,7 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
                         newEdge.selected = existing.selected;
                         edgeChanges.push({ type: "replace", id: key, item: newEdge });
                     } else {
+                        newEdge.selected = false;
                         edgeChanges.push({ type: "add", item: newEdge });
                     }
                 } else {

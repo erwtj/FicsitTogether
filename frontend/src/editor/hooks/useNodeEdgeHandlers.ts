@@ -137,13 +137,10 @@ export function useNodeEdgeHandlers(
             const edgeMap = doc.getMap<Edge>("edges");
             for (const change of changes) {
                 if (change.type === "add") {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { selected: _sel, ...edgeToStore } = change.item;
-                    edgeMap.set(edgeToStore.id, edgeToStore);
+                    edgeMap.set(change.item.id, change.item);
                 } else if (change.type === "remove") {
                     edgeMap.delete(change.id);
                 }
-                // "select" is local UI state — intentionally not synced to Yjs.
             }
         }, LOCAL_ORIGIN);
     }, [onEdgesChange, ydocRef]);

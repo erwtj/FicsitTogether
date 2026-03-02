@@ -5,7 +5,6 @@ import {
     getBezierPath,
     type EdgeProps,
     useReactFlow,
-    useStore,
 } from "@xyflow/react";
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
@@ -22,21 +21,21 @@ import "./ItemEdge.css";
 import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
 
 export const ItemEdge = memo(function ItemEdge({
-                                                   id,
-                                                   source,
-                                                   target,
-                                                   sourceHandleId,
-                                                   sourceX,
-                                                   sourceY,
-                                                   targetX,
-                                                   targetY,
-                                                   sourcePosition,
-                                                   targetPosition,
-                                                   data,
-                                                   selected,
-                                                   markerEnd,
-                                                   style,
-                                               }: EdgeProps<ItemEdgeType>) {
+    id,
+    source,
+    target,
+    sourceHandleId,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    data,
+    selected,
+    markerEnd,
+    style,
+}: EdgeProps<ItemEdgeType>) {
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
 
@@ -57,11 +56,9 @@ export const ItemEdge = memo(function ItemEdge({
         sourceX, sourceY, sourcePosition,
         targetX, targetY, targetPosition,
     });
-    const sourceNode = reactFlow.getNode(source);
 
-    // Reactively subscribe to source node's selected state so the edge
-    const sourceNodeSelected = useStore((s: { nodes: { id: string; selected?: boolean }[] }) => s.nodes.find(n => n.id === source)?.selected ?? false);
-    const targetNodeSelected = useStore((s: { nodes: { id: string; selected?: boolean }[] }) => s.nodes.find(n => n.id === target)?.selected ?? false);
+    const sourceNode = reactFlow.getNode(source);
+    const targetNode = reactFlow.getNode(target);
 
     const sourceItem: Item | null = useMemo(() => {
         if (!sourceNode) return null;
@@ -246,7 +243,7 @@ export const ItemEdge = memo(function ItemEdge({
         <>
             <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} className={isFluid ? "fluid-edge" : undefined} />
 
-            {(sourceNodeSelected || targetNodeSelected) && sourceItem && (
+            {(sourceNode?.selected || targetNode?.selected || selected) && sourceItem && (
                 <>
                     {outputTooHigh && (
                         <circle cx="0" cy="0" r="4" id="radar">
