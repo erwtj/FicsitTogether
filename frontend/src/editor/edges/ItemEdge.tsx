@@ -19,6 +19,7 @@ import {
 import { getCustomBezierCurve } from "../utils/edgeUtils.ts";
 import "./ItemEdge.css";
 import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
+import { Plus } from "react-bootstrap-icons";
 
 export const ItemEdge = memo(function ItemEdge({
     id,
@@ -206,18 +207,16 @@ export const ItemEdge = memo(function ItemEdge({
         return (
             <>
                 {middlePoints.map((p, idx) => (
-                    <div
-                        key={idx}
-                        style={{
-                            transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
-                            pointerEvents: "all"
-                        }}
-                        className="add-handle"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            addMovablePoint(idx);
-                        }}
-                    />
+                    <Plus key={idx}
+                          style={{
+                              transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
+                              pointerEvents: "all",
+                          }}
+                          className="add-handle"
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              addMovablePoint(idx);
+                          }}/>
                 ))}
                 {movablePoints.length > 0 &&
                     movablePoints.map((p, idx) => (
@@ -227,6 +226,7 @@ export const ItemEdge = memo(function ItemEdge({
                                 transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
                                 pointerEvents: "all",
                                 cursor: "move",
+                                zIndex: 10000,
                             }}
                             className="position-handle"
                             onClick={(e) => e.stopPropagation()}
@@ -264,9 +264,10 @@ export const ItemEdge = memo(function ItemEdge({
                     className="nodrag nopan"
                     style={{
                         position: "absolute",
-                        transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+                        transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY - (selected ? 20 : 0)}px)`,
                         fontSize: 12,
                         pointerEvents: "all",
+                        zIndex: selected ? 10000 : 0,
                     }}
                 >
                     <input

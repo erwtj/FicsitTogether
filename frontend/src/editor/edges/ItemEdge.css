@@ -53,8 +53,11 @@
     min-height: 0;
     min-width: 0;
     display: block;
-    width: 10px;
-    height: 10px;
+    width: 20px;
+    height: 20px;
+    z-index: 1000;
+
+    cursor: cell;
 }
 
 .position-handle {
