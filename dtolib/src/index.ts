@@ -18,7 +18,7 @@ export type ItemSpawnerNodeData = {
 
 export type RecipeNodeData = {
     recipeClassName: string;
-    summerSloops: number;
+    somersloops: number;
     percentages: number[];
 }
 

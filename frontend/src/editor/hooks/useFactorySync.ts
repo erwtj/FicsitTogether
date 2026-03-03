@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useReactFlow, type Edge, type Node } from "@xyflow/react";
 import {getItem, getRecipe } from "ficlib";
 import { computeNodeFactor, totalThroughputForHandle } from "../utils/factoryCalc";
@@ -24,7 +24,7 @@ function nodeDataFingerprint(nodes: Node[]): string {
         }
         if (n.type === "recipe-node") {
             const d = n.data as RecipeNodeData;
-            return `${n.id}:${d.recipeClassName}:${d.summerSloops}:${d.percentage.join(",")}`;
+            return `${n.id}:${d.recipeClassName}:${d.somersloops}:${d.percentage.join(",")}`;
         }
         if (n.type === "power-node") {
             const d = n.data as PowerNodeData;
@@ -95,7 +95,7 @@ export function useFactorySync(
 
                     const factor = computeNodeFactor(
                         recipe,
-                        d.summerSloops,
+                        d.somersloops,
                         d.percentage,
                         incomingEdges,
                         outgoingEdges,

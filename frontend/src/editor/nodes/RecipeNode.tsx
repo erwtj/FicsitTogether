@@ -1,4 +1,4 @@
-﻿import { memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { type NodeProps, Position } from "@xyflow/react";
 import { Card } from "react-bootstrap";
 import { getRecipe, getBuilding, getItem } from "ficlib";
@@ -15,13 +15,13 @@ export const RecipeNode = memo(function RecipeNode({
     id,
     data,
 }: NodeProps<RecipeNodeType>) {
-    const { recipeClassName, summerSloops, percentage } = data;
+    const { recipeClassName, somersloops, percentage } = data;
     useYjsMutation();
 
     const recipe = getRecipe(recipeClassName)!;
     const producedIn = getBuilding(recipe.producedIn)!;
 
-    // Read pre-computed factor from data (pushed by useFactorySync) — no edge store subscription
+    // Read pre-computed factor from data (pushed by useFactorySync) no edge store subscription
     const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
     const outputOverUsed: Record<string, boolean> = data._outputOverUsed ?? {};
 
@@ -54,7 +54,7 @@ export const RecipeNode = memo(function RecipeNode({
 
     const openSloopModal = () => {
         window.dispatchEvent(new CustomEvent("openSloopModal", {
-            detail: { nodeId: id, summerSloops, percentage },
+            detail: { nodeId: id, somersloops, percentage },
         }));
     };
 
@@ -65,7 +65,7 @@ export const RecipeNode = memo(function RecipeNode({
                             position={Position.Top} style={{ left: h.position }} />
             ))}
 
-            <Card className={summerSloops !== 0 ? "slooping" : ""}>
+            <Card className={somersloops !== 0 ? "slooping" : ""}>
                 <Card.Header style={{ height: "30px" }}>
                     {inputHandles.map(h => (
                         <span key={h.id} className="position-absolute"
@@ -109,7 +109,7 @@ export const RecipeNode = memo(function RecipeNode({
                     ))}
                     {producedIn.somersloopsNeeded > 0 && (
                         <button className="sloopButton" onClick={openSloopModal}>
-                            <img className={summerSloops === 0 ? "sloop-image" : "sloop-image sloop-active"}
+                            <img className={somersloops === 0 ? "sloop-image" : "sloop-image sloop-active"}
                                  src="/media/FactoryGame/Prototype/WAT/UI/Wat_1_256.webp" alt="sloop" />
                         </button>
                     )}

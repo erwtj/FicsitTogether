@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Pure helpers for computing throughput limits and usage on node handles.
  * These are used by both the connection handler (to pre-fill edge throughput)
  * and by useFactorySync (for over-capacity detection).
@@ -54,7 +54,7 @@ export function maxSourceThroughput(
 
         const incomingEdges = allEdges.filter(e => e.target === sourceNode.id);
         const outgoingEdges = allEdges.filter(e => e.source === sourceNode.id);
-        const factor = computeNodeFactor(recipe, d.summerSloops, d.percentage, incomingEdges, outgoingEdges);
+        const factor = computeNodeFactor(recipe, d.somersloops, d.percentage, incomingEdges, outgoingEdges);
 
         const output = recipe.output[handleIdx];
         if (!output) return null;
@@ -82,7 +82,7 @@ export function maxTargetThroughput(
 
     const incomingEdges = allEdges.filter(e => e.target === targetNode.id);
     const outgoingEdges = allEdges.filter(e => e.source === targetNode.id);
-    const factor = computeNodeFactor(recipe, d.summerSloops, d.percentage, incomingEdges, outgoingEdges);
+    const factor = computeNodeFactor(recipe, d.somersloops, d.percentage, incomingEdges, outgoingEdges);
 
     const input = recipe.input[handleIdx];
     if (!input) return null;

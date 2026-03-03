@@ -1,4 +1,4 @@
-﻿import { useCallback } from "react";
+import { useCallback } from "react";
 import * as Y from "yjs";
 import { type Edge } from "@xyflow/react";
 import { getRecipe } from "ficlib";
@@ -44,11 +44,11 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
             const nodeMap = doc.getMap<AppNode>("nodes");
             const edgeMap = doc.getMap<Edge<ItemEdgeData>>("edges");
 
-            // ── Build node ────────────────────────────────────────────────
+            // -- Build node ------------------------------------------------
             let newNode: AppNode | null = null;
 
             if (type === "recipe")
-                newNode = { id: nodeId, type: "recipe-node", position, data: { recipeClassName: className, summerSloops: 0, percentage: [] } as RecipeNodeData };
+                newNode = { id: nodeId, type: "recipe-node", position, data: { recipeClassName: className, somersloops: 0, percentage: [] } as RecipeNodeData };
             else if (type === "item-spawner")
                 newNode = { id: nodeId, type: "item-spawner-node", position, data: { itemClassName: className, outputAmount: pendingConnection?.throughput ?? 0 } as ItemSpawnerNodeData };
             else if (type === "item-end")

@@ -1,10 +1,10 @@
-﻿import { type Node, type Edge } from "@xyflow/react";
+import { type Node, type Edge } from "@xyflow/react";
 
 // Classnames are looked up via getWhatever() from ficlib
 
 export type RecipeNodeData = {
     recipeClassName: string;
-    summerSloops: number;
+    somersloops: number;
     percentage: number[];
 
     _factor?: NodeFactor; // Computed input/output factor based on building count and Somer Sloop bonus. Never written to Yjs
