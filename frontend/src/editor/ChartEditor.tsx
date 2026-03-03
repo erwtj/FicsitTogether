@@ -97,7 +97,6 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     multiSelectionKeyCode={'Shift'}
                     onKeyDownCapture={handleKeyDownCapture}
                     fitView
-                    elevateEdgesOnSelect={true}
                 >
                     <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
                     <MiniMap className="bg-body" position="top-right" nodeColor={nodeColor} />

@@ -267,7 +267,6 @@ export const ItemEdge = memo(function ItemEdge({
                         transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY - (selected ? 20 : 0)}px)`,
                         fontSize: 12,
                         pointerEvents: "all",
-                        zIndex: selected ? 10000 : 0,
                     }}
                 >
                     <input
