@@ -1,39 +1,39 @@
 .circleImage {
-    width: 100px;
-    height: 100px;
+    width: 6.25rem;
+    height: 6.25rem;
     border-radius: 50%;
     margin: 0 auto;
     display: block;
 }
 
-.itemCard {
+.itemCardOverview {
     background: #1e2227 !important;
     border: 1px solid #3a4048 !important;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 20px;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1.25rem;
     transition: background 0.15s, border-color 0.15s;
-    height: 295px !important;
-    width: 180px !important;
+    height: 18.5rem !important;
+    width: 11.5rem !important;
     display: flex !important;
     flex-direction: column !important;
 }
 
-.itemCard .card-body {
+.itemCardOverview .card-body {
     margin-top: auto !important;
     padding-top: 0 !important;
 }
 
 .itemCardImage {
-    height: 120px;
-    width: 120px;
+    height: 7.5rem;
+    width: 7.5rem;
     align-self: center;
 
 }
 
 
 .cardTitle {
-    font-size: 1.2rem; !important; /* Adjust the font size as needed */
+    font-size: 1.2rem !important; /* Adjust the font size as needed */
     white-space: pre-wrap;
     overflow: visible;
     text-overflow: clip;
@@ -42,7 +42,7 @@
 .dir-sticky-wrap {
     position: absolute;
     z-index: 100;
-    padding: 18px 20px;
+    padding: 1.125rem 1.25rem;
     background: rgba(0, 0, 0, 0);
     width: fit-content;
 }
@@ -55,11 +55,11 @@
     font-size: 1rem;
     font-weight: 500;
     letter-spacing: 0.03em;
-    padding: 10px 20px;
-    height: 44px;
+    padding: 0.625rem 1.25rem;
+    height: 2.75rem;
     display: flex;
     align-items: center;
-    border-radius: 6px 0 0 6px;
+    border-radius: 0.375rem 0 0 0.375rem;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
@@ -75,9 +75,9 @@
     background: #1e2227;
     border: 1px solid #3a4048;
     color: #6c7a88;
-    padding: 10px 12px;
-    height: 44px;
-    border-radius: 0 6px 6px 0;
+    padding: 0.625rem 0.75rem;
+    height: 2.75rem;
+    border-radius: 0 0.375rem 0.375rem 0;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
@@ -92,17 +92,17 @@
 .dir-dropdown .dropdown-menu {
     background: #1a1f25;
     border: 1px solid #3a4048;
-    border-radius: 6px;
-    padding: 4px;
-    min-width: 180px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+    min-width: 11.25rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.5);
 }
 
 .dir-dropdown .dropdown-item {
     color: #9aa4b0;
     font-size: 1rem;
-    border-radius: 4px;
-    padding: 9px 16px;
+    border-radius: 0.25rem;
+    padding: 0.5625rem 1rem;
     transition: background 0.12s, color 0.12s;
 }
 
@@ -113,5 +113,5 @@
 
 .dir-dropdown .dropdown-divider {
     border-color: #2e343c;
-    margin: 4px 0;
+    margin: 0.25rem 0;
 }

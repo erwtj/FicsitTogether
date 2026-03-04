@@ -1,14 +1,13 @@
-import {createFileRoute, notFound} from '@tanstack/react-router'
+import {createFileRoute, notFound, useNavigate} from '@tanstack/react-router'
 import {redirect} from "@tanstack/react-router";
 import {fetchAllProjectsInDirectory, fetchDirectoryContent} from "../api/apiCalls.ts";
-import {useAuth0Context} from "../auth/useAuth0Context.ts";
 import { getAllResources, getItem, getResource, type Resource } from "ficlib";
 import { useMemo } from "react";
 import {buildUsageMaps} from "../utils/overviewUtil.ts";
 import "./overview.$dir.tsx.css"
-import { CircularProgressbar, CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
-import {isItemSolid, roundTo3Decimals, throughputToDisplay} from "../utils/throughputUtil.ts";
-import {ArrowLeft, Folder } from "react-bootstrap-icons";
+import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
+import {isItemSolid, roundTo3Decimals} from "../utils/throughputUtil.ts";
+import {ArrowLeft, FileEarmarkBarGraph, Folder } from "react-bootstrap-icons";
 import {Button, ButtonGroup, Card, Dropdown } from "react-bootstrap";
 
 type itemUsageData = {
@@ -72,20 +71,19 @@ const allResources: Set<string> = new Set(getAllResources().map((resource: Resou
 function countToDisplay(itemClassName: string, amount: number): string {
     const item = getItem(itemClassName)!;
     const isSolid = isItemSolid(item);
+    let result = "";
     if (isSolid) {
         amount = roundTo3Decimals(amount);
     } else {
         amount = roundTo3Decimals(amount / 1000);
     }
 
+    result = amount.toString();
+
     if (Math.abs(amount) >= 100000) {
-        amount = amount.toExponential(2);
+        result = amount.toExponential(2);
     }
-    return isSolid ? amount.toString() : `${amount} m³`;
-
-
-
-
+    return isSolid ? result : `${result} m³`;
 }
 
 function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassName: string }) {
@@ -121,12 +119,12 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
     return (
         <center>
             <div style={{
-                width: 180,
-                height: 180,
-                paddingLeft: 8,
-                paddingRight: 8,
-                marginTop: 10,
-                marginBottom: 20,
+                width: '11.25rem',
+                height: '11.25rem',
+                paddingLeft: '0.5rem',
+                paddingRight: '0.5rem',
+                marginTop: '0.625rem',
+                marginBottom: '1.25rem',
                 userSelect: "none"
             }}>
                 <CircularProgressbarWithChildren value={percentage} styles={circleStyle}>
@@ -143,7 +141,8 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
                     <div>
                         <h4 style={{
                             marginBottom: 0,
-                            fontSize: '1rem'
+                            fontSize: '1rem',
+                            marginTop: '0.5rem'
                         }} className={warning ? "text-danger" : ""}>{resource.displayName}</h4>
                         <span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{amount} { !isInfinite ? `/ ${maxAmount}` : "/ ∞"}</span>
                     </div>
@@ -157,7 +156,7 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageDa
     const netAmount = itemUsageData.output - itemUsageData.input;
 
     return (
-        <Card key={itemClassName} className="itemCard no-drag">
+        <Card key={itemClassName} className="itemCardOverview no-drag">
             <Card.Img variant="top" src={`/media/${item.icon}_256.webp`} className="itemCardImage mb-1" draggable={false} />
             <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '3rem' }}>
                 <Card.Title className="text-center m-0">
@@ -180,14 +179,13 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageDa
 
 
 function OverviewPageContent() {
-    const auth = useAuth0Context()
-    const { dir: dirId } = Route.useParams();
     const { directory, parentDir, charts } = Route.useLoaderData();
+    const navigate = useNavigate();
 
     const { resourceMap, itemMap } = useMemo(() => {
         if (!charts) return { resourceMap: new Map<string, itemUsageData>(), itemMap: new Map<string, itemUsageData>() };
         return buildUsageMaps(charts, allResources);
-    }, [charts, allResources]);
+    }, [charts]);
 
     const noDropDown = parentDir.id === parentDir.parentDirectoryId && directory.subDirectories.length === 0;
 
@@ -195,8 +193,14 @@ function OverviewPageContent() {
         <div>
             <div className="dir-sticky-wrap ">
                 <Dropdown as={ButtonGroup} className="dir-dropdown">
-                    <Button className="btn-dir">
-                        <Folder size={20} style={{ marginBottom: 0, marginRight: 8}} />
+                    <Button className="btn-dir"
+                            onClick = {() => {
+                                navigate({ to: `/directories/${directory.id}`, replace: true })
+                            }}
+
+                    >
+                        <ArrowLeft size={16} style={{ marginBottom: 0, marginRight: '0.5rem'}} />
+                        <Folder size={20} style={{ marginBottom: 0, marginRight: '0.5rem'}} />
                         {directory.name}
                     </Button>
 
@@ -206,8 +210,8 @@ function OverviewPageContent() {
                         {parentDir.parentDirectoryId !== parentDir.id && (
                             <>
                                 <Dropdown.Item href={`/overview/${directory.parentDirectoryId}`}>
-                                    <ArrowLeft size={18} style={{ marginBottom: 2, marginRight: 8 }}/>
-                                    <Folder size={18} style={{ marginBottom: 2, marginRight: 8 }} />
+                                    <ArrowLeft size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }}/>
+                                    <FileEarmarkBarGraph size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }} />
                                     {parentDir.name}
                                 </Dropdown.Item>
                                 {directory.subDirectories.length > 0 && <Dropdown.Divider />}
@@ -215,7 +219,7 @@ function OverviewPageContent() {
                         )}
                         {directory.subDirectories.map((subDir) => (
                             <Dropdown.Item key={subDir.id} href={`/overview/${subDir.id}`}>
-                                <Folder size={18} style={{ marginBottom: 2, marginRight: 8 }} />
+                                <FileEarmarkBarGraph size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }} />
                                 {subDir.name}
                             </Dropdown.Item>
                         ))}
@@ -226,7 +230,7 @@ function OverviewPageContent() {
             <hr className="mb-0 pb-0 ms-3 me-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
                 {Array.from(allResources).map((item, index) => (
-                    <div key={index} style={{margin: 20}}>
+                    <div key={index} style={{margin: '1.25rem'}}>
                         <ResourceCircle
                             amount={((resourceMap.get(item)?.input ?? 0) - (resourceMap.get(item)?.output ?? 0))}
                             itemClassName={item}
