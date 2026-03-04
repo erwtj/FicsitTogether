@@ -85,6 +85,20 @@ export async function getProjectsRecursive(directoryId: string) {
     return res.rows;
 }
 
+export async function getChartsRecursive(directoryId: string): Promise<ChartDataDTO[]> {
+    const res = await pool.query<{ chart: string }>(`
+        WITH RECURSIVE subdirs(id) AS (
+            SELECT id FROM directories WHERE id = $1
+            UNION ALL
+            SELECT d.id FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
+        )
+        SELECT p.chart
+        FROM projects p
+        WHERE p.parent_directory IN (SELECT id FROM subdirs)
+    `, [directoryId]);
+    return res.rows.map(row => JSON.parse(row.chart) as ChartDataDTO);
+}
+
 export async function deleteProject(id: string) {
     await pool.query('DELETE FROM projects WHERE id = $1', [id]);
 }

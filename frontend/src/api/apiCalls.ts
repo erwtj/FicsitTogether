@@ -1,6 +1,6 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO} from "dtolib"
+import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO, type ChartDataDTO} from "dtolib"
 
 
 // API calls
@@ -35,6 +35,17 @@ export async function fetchSharedDirectories(auth: Auth0ContextType): Promise<Sh
         }
     });
     return response?.data as SharedDirectoryDTO[]
+}
+
+export async function fetchAllProjectsInDirectory(auth: Auth0ContextType, dirID: string): Promise<ChartDataDTO[]> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.get(`directories/${dirID}/charts`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response?.data as ChartDataDTO[]
 }
 
 // Directory management

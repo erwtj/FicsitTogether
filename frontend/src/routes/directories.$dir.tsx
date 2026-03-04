@@ -1,4 +1,4 @@
-import {createFileRoute, notFound} from '@tanstack/react-router'
+import {createFileRoute, notFound, Link} from '@tanstack/react-router'
 import {redirect} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 import {useState} from "react";
@@ -141,9 +141,16 @@ function DirectoryPageContent() {
         <>
             <BuyMeCoffeeWidget />
             <DirectoryTree dirTree={directory.directoryTree.tree} depthLimitReached={directory.directoryTree.depthLimitReached}/>
-            <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4">
+            <div className="d-flex flex-nowrap gap-3 justify-content-center mt-4 align-items-center">
                 <Folder size={32}/>
                 <h3 className="mb-0">{directory.name}</h3>
+                <Link
+                    to="/overview/$dir"
+                    params={{ dir: dirId }}
+                    className="btn btn-primary ms-3"
+                >
+                    View Overview
+                </Link>
             </div>
             <div key={"explorer"} className="d-flex flex-column p-5 gap-3 mx-lg-5 pt-4">
                 <div key={"directory-list"} className={"d-flex flex-wrap gap-3 justify-content-center"}

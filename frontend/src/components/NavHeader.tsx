@@ -13,7 +13,7 @@ function NavHeader() {
     return (
         <Navbar
             bg="dark"
-            className="border-bottom p-2 top-screen-navbar overflow-y-hidden"
+            className="border-bottom p-2 top-screen-navbar overflow-y-hidden "
             variant="dark"
             expand="lg"
             expanded={expanded}

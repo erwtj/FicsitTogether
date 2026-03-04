@@ -45,11 +45,6 @@
     "harvestableAmount": 2100
   },
   {
-    "className": "Desc_Water_C",
-    "displayName": "Water",
-    "harvestableAmount": 0
-  },
-  {
     "className": "Desc_LiquidOil_C",
     "displayName": "Crude Oil",
     "harvestableAmount": 9900
@@ -63,5 +58,15 @@
     "className": "Desc_SAM_C",
     "displayName": "SAM",
     "harvestableAmount": 10200
+  },
+  {
+    "className": "Desc_Water_C",
+    "displayName": "Water",
+    "harvestableAmount": 0
+  },
+  {
+    "className": "Desc_QuantumEnergy_C",
+    "displayName": "Excited Photonic Matter",
+    "harvestableAmount": 0
   }
 ]
