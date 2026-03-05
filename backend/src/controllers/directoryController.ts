@@ -196,6 +196,16 @@ export async function getDirectorySharedWith(req: Request, res: Response, next: 
     }
 }
 
+export async function getChartsInDirectory(req: Request, res: Response, next: NextFunction) {
+    try {
+        const directoryId = req.params.directoryId as string;
+        const charts = await projectRepository.getChartsRecursive(directoryId);
+        res.status(200).send(charts);
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function getSharedDirectories(req: Request, res: Response, next: NextFunction) {
     try {
         const userId = req.user.id;

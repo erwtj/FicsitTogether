@@ -11,54 +11,59 @@ export type ChartDTO = {
     chart: string;
 }
 
-export type ItemSpawnerNodeData = {
-    itemClassName: string;
-    outputAmount: number;
-}
-
 export type RecipeNodeData = {
     recipeClassName: string;
     somersloops: number;
-    percentages: number[];
-}
+    percentage: number[];
+};
+
+export type ItemSpawnerNodeData = {
+    itemClassName: string;
+    outputAmount: number; // Items (or mL for fluids) per minute this node provides
+};
+
+export type EndNodeData = {
+    itemClassName: string;
+    sinkOutput: boolean;
+};
 
 export type PowerNodeData = {
     recipeClassName: string;
-}
-
-export type outputNodeData = {
-    itemClassName: string;
-    convertToTickets: boolean;
-}
+};
 
 export type NodeDTO = {
     id: string;
-    type: string;
+    type: 'item-spawner-node' | 'recipe-node' | 'end-node' | 'power-node';
+
     position: {
         x: number;
         y: number;
     };
-    data: ItemSpawnerNodeData | RecipeNodeData | outputNodeData | PowerNodeData; // TODO: Maybe there is a better way?
-    selectedBy: string[]; // TODO: Idk if we want to do it this way?
+    data: ItemSpawnerNodeData | RecipeNodeData | EndNodeData | PowerNodeData;
+
+    width: number;
+    height: number;
 }
 
 export type EdgeDTO = {
     id: string;
+    type: string;
 
-    sourceNodeId: string;
-    sourceHandleId: string;
-    targetNodeId: string;
-    targetHandleId: string;
+    source: string;
+    target: string;
+    sourceHandle: string;
+    targetHandle: string;
 
     data: {
         throughput: number;
-        startHandleType: 'source' | 'target'; // Determines from which handle the node is driven
         movablePoints?: {
             id: string;
             x: number;
             y: number;
         }
     }
+
+    selected: boolean;
 }
 
 export type ChartDataDTO = {

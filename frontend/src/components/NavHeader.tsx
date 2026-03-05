@@ -13,7 +13,7 @@ function NavHeader() {
     return (
         <Navbar
             bg="dark"
-            className="border-bottom p-2 top-screen-navbar overflow-y-hidden"
+            className="border-bottom p-2 top-screen-navbar overflow-y-hidden no-drag"
             variant="dark"
             expand="lg"
             expanded={expanded}
@@ -52,11 +52,11 @@ function NavHeader() {
                                 <House className="me-2" size={16} />Home
                             </Link>
                         </Nav.Item>
-                        <Nav.Item className="nav-link d-flex align-items-center">
+                        <Nav.Item className="nav-link d-flex align-items-center disabled">
                             <Calculator className="me-2" size={16} />Recipe Calculator
                         </Nav.Item>
-                        <Nav.Item className="nav-link d-flex align-items-center">
-                            <Table className="me-2" size={16} />RSP Factor Table
+                        <Nav.Item className="nav-link d-flex align-items-center disabled" >
+                            <Table className="me-2 " size={16} />RSP Factor Table
                         </Nav.Item>
                     </Nav>
 
