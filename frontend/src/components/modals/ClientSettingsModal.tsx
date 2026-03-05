@@ -32,6 +32,14 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
         updateClientSettings({snapSize: snapSize});
     }
 
+    const setShowToolTips = (showToolTips: boolean) => {
+        updateClientSettings({showToolTips: showToolTips});
+    }
+
+    const setEnableIONetto = (enableIONetto: boolean) => {
+        updateClientSettings({enableIONetto: enableIONetto});
+    }
+
     const setShowWaterUsage = (showWaterUsage: boolean) => {
         updateClientSettings({showWaterUsage: showWaterUsage});
     }
@@ -39,6 +47,8 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
     const setShowPhotonUsage = (showPhotonUsage: boolean) => {
         updateClientSettings({showPhotonUsage: showPhotonUsage});
     }
+
+
 
     let snapSize = clientSettings.snapSize ?? 20;
     snapSize = snapSize < 0 ? 0 : snapSize;
@@ -62,6 +72,13 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                 </Form>
                 <hr/>
                 <Form onSubmit={handleSubmit}>
+                    <h5>Tooltips</h5>
+                    <Form.Check type="checkbox" id={"check-tooltips"} label="Show tooltips"
+                                checked={clientSettings.showToolTips}
+                                onChange={(e) => setShowToolTips(e.target.checked)}/>
+                </Form>
+                <hr/>
+                <Form onSubmit={handleSubmit}>
                     <div className={"d-flex justify-content-between align-items-baseline"}>
                         <h5>Snapping</h5>
                         <span className={"text-body-tertiary"} style={{fontSize: ".9rem"}}>(20 recommended)</span>
@@ -79,6 +96,15 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                                     value={snapSize} onChange={(e) => setSnapSize(parseInt(e.target.value))}/>
                     </div>
                 </Form>
+                <hr/>
+                <Form onSubmit={handleSubmit}>
+                    <h5>Side Panel</h5>
+                    <Form.Check type="checkbox" id={"check-ionetto"} label="Enable input/output summing"
+                                checked={clientSettings.enableIONetto}
+                                onChange={(e) => setEnableIONetto(e.target.checked)}/>
+                </Form>
+
+
                 <hr/>
                 <Form onSubmit={handleSubmit}>
                     <h5>Overview</h5>

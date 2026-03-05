@@ -6,9 +6,16 @@ export type ClientSettings = {
     // Minimap
     minimapEnabled: boolean;
     minimapColors: boolean;
+
+    // Handle ToolTips
+    showToolTips: boolean;
+
     // Dragging
     snappingEnabled: boolean;
     snapSize: number;
+
+    /* Side Panel */
+    enableIONetto: boolean;
 
     /* Overview */
     showWaterUsage: boolean;
@@ -18,8 +25,10 @@ export type ClientSettings = {
 const defaultClientSettings: ClientSettings = {
     minimapEnabled: true,
     minimapColors: true,
-    snappingEnabled: true,
+    snappingEnabled: false,
     snapSize: 20,
+    showToolTips: true,
+    enableIONetto: false,
     showWaterUsage: true,
     showPhotonUsage: true,
 };

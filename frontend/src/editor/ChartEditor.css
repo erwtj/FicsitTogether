@@ -58,6 +58,14 @@
     overflow: hidden;
 }
 
+.tooltip-inner {
+    color: white;
+}
+
+[data-bs-theme=dark] {
+    --bs-emphasis-color: #33363a !important;
+}
+
 .react-flow__node-default {
     width: auto !important;
 }
