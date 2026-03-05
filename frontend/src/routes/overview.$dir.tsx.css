@@ -1,3 +1,12 @@
+.resourceCircle {
+    width: 11.25rem;
+    height: 11.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin-top: 0.625rem;
+    margin-bottom: 1.25rem;
+}
+
 .circleImage {
     width: 6.25rem;
     height: 6.25rem;

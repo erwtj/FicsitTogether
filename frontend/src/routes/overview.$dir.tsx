@@ -15,7 +15,6 @@ type itemUsageData = {
     output: number,
 }
 
-
 export const Route = createFileRoute('/overview/$dir')({
     component: OverviewPage,
     staticData: {
@@ -91,17 +90,19 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
     const item = getItem(itemClassName)!;
     const maxAmount = resource.harvestableAmount;
 
-    amount /= isItemSolid(item) ? 1 : 1000;
+    const normalizedAmount = amount / (isItemSolid(item) ? 1 : 1000);
+    const displayAmount = roundTo3Decimals(normalizedAmount);
 
     const isInfinite = maxAmount === 0;
 
-    let percentage = +(((amount / maxAmount) * 100).toFixed(2));
+    let percentage = (normalizedAmount / maxAmount) * 100;
     if (isInfinite) {
         percentage = 100;
     }
     const warning = maxAmount > 0.001 && percentage > 100;
 
     const color = `hsl(${(1 - percentage / 100) * 120}, 75%, 50%)`;
+    const displayPercentage = percentage.toFixed(2);
 
     let circleStyle = buildStyles({
         pathColor: `${!isInfinite ? color : `#${item.fluidColor.slice(0, -2)}`}`,
@@ -118,15 +119,7 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
 
     return (
         <center>
-            <div style={{
-                width: '11.25rem',
-                height: '11.25rem',
-                paddingLeft: '0.5rem',
-                paddingRight: '0.5rem',
-                marginTop: '0.625rem',
-                marginBottom: '1.25rem',
-                userSelect: "none"
-            }}>
+            <div className="resourceCircle">
                 <CircularProgressbarWithChildren value={percentage} styles={circleStyle}>
                     <img
                         className="circleImage"
@@ -134,17 +127,17 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
                         alt="Image failed to load"
                         draggable={false}
                     />
-                    {<span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{!isInfinite ? percentage + "%" : ""}</span>}
+                    {<span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{!isInfinite ? displayPercentage + "%" : ""}</span>}
                 </CircularProgressbarWithChildren>
 
                 <center>
                     <div>
                         <h4 style={{
                             marginBottom: 0,
-                            fontSize: '1rem',
+                            fontSize: '.94rem',
                             marginTop: '0.5rem'
                         }} className={warning ? "text-danger" : ""}>{resource.displayName}</h4>
-                        <span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{amount} { !isInfinite ? `/ ${maxAmount}` : "/ ∞"}</span>
+                        <span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{displayAmount} { !isInfinite ? `/ ${maxAmount}` : "/ ∞"}</span>
                     </div>
                 </center>
             </div>
@@ -156,7 +149,7 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageDa
     const netAmount = itemUsageData.output - itemUsageData.input;
 
     return (
-        <Card key={itemClassName} className="itemCardOverview no-drag">
+        <Card key={itemClassName} className="itemCardOverview">
             <Card.Img variant="top" src={`/media/${item.icon}_256.webp`} className="itemCardImage mb-1" draggable={false} />
             <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '3rem' }}>
                 <Card.Title className="text-center m-0">
@@ -166,14 +159,12 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageDa
             <Card.Body className="text-center pt-0 pe-1 ps-1 flex-grow-1 d-flex flex-column justify-content-end">
                 Input : {countToDisplay(itemClassName, itemUsageData.input)} <br/>
                 Output : {countToDisplay(itemClassName, itemUsageData.output)} <br/>
-                <span className={netAmount < 0 ? "text-danger" : "text-success"}>
+                <span className={netAmount === 0 ? "text-body-tertiary" : netAmount < 0 ? "text-danger" : "text-success"}>
             Netto : {countToDisplay(itemClassName, netAmount)}
         </span>
             </Card.Body>
         </Card>
     )
-
-
 }
 
 
@@ -227,7 +218,7 @@ function OverviewPageContent() {
                 </Dropdown>
             </div>
             <h1 className="d-flex flex-nowrap  justify-content-center mt-4 align-items-center no-drag m-0 p-0">Used Resources</h1>
-            <hr className="mb-0 pb-0 ms-3 me-3 mt-2"/>
+            <hr className="mb-0 pb-0 mx-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
                 {Array.from(allResources).map((item, index) => (
                     <div key={index} style={{margin: '1.25rem'}}>
@@ -239,7 +230,7 @@ function OverviewPageContent() {
                 ))}
             </div>
             <h1 className="d-flex flex-nowrap  justify-content-center mt-4 align-items-center no-drag mt-5">Item Usage</h1>
-            <hr className="mb-4 pb-0 ms-3 me-3 mt-2"/>
+            <hr className="mb-4 pb-0 mx-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
                 {Array.from(itemMap.entries()).map(([itemClassName, usageData], index) => (
                     <div key={index} className="m-2">

@@ -1,4 +1,4 @@
-import type { ChartDataDTO, EdgeDTO, ItemSpawnerNodeData, NodeDTO, outputNodeData } from "dtolib";
+import type { ChartDataDTO, EdgeDTO, ItemSpawnerNodeData, NodeDTO, EndNodeData } from "dtolib";
 import { getItem } from "ficlib";
 
 const TICKET_ID = "Desc_ResourceSinkCoupon_C"
@@ -32,6 +32,7 @@ export function buildUsageMaps(
     const resourceMap = new Map<string, ItemUsageData>();
     const itemMap = new Map<string, ItemUsageData>();
     for (const chart of charts as ChartDataDTO[]) {
+        if (!chart.nodes || !chart.edges) continue;
 
         // Build a map of output node ids to their total throughput
         const outputNodes = new Map<string, number>();
@@ -54,7 +55,7 @@ export function buildUsageMaps(
                 addToMap(map, data.itemClassName, { input: data.outputAmount });
             }
             else if (node.type === "end-node") {
-                const data = node.data as outputNodeData;
+                const data = node.data as EndNodeData;
                 const className = data.itemClassName
 
                 if (!data.sinkOutput) {

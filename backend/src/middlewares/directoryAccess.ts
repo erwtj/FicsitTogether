@@ -16,12 +16,13 @@ export async function hasDirectoryAccess(user: User, directoryId: string): Promi
             SELECT id, parent_directory, owner, name
             FROM directories
             WHERE id = $1
-
+    
             UNION ALL
-
+    
             SELECT d.id, d.parent_directory, d.owner, d.name
             FROM directories d
             INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
+            WHERE d.id != d.parent_directory
         )
         SELECT 1 as result
         FROM parent_dirs pd
