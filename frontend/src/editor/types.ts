@@ -13,6 +13,7 @@ export type RecipeNodeData = {
 
     _factor?: NodeFactor; // Computed input/output factor based on building count and Somer Sloop bonus. Never written to Yjs
     _outputOverUsed?: Record<string, boolean>; // Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs
+    _inputTooLow?: Record<string, boolean>; // Per-input-handle assigned boolean. Key = handleId. Never written to Yjs
 };
 
 export type ItemSpawnerNodeData = {

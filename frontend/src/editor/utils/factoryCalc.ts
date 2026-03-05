@@ -1,67 +1,9 @@
 ﻿import { type Edge } from "@xyflow/react";
 import { type Recipe, getBuilding } from "ficlib";
-import { type NodeFactor, type ItemEdgeData } from "../types";
+import {type NodeFactor, type ItemEdgeData, type SloopData} from "../types";
 import {getItemIndexFromHandleId} from "./idUtils.ts";
 
-// ─── Somer Sloop helpers ─────────────────────────────────────────────────────
-
-/**
- * Factor when the bottleneck is determined by incoming belts (input-driven).
- * inputFactor stays as-is; sloops boost the outputFactor.
- */
-function sloopInputBased(
-    inputFactor: number,
-    somersloops: number,
-    percentage: number[],
-): NodeFactor {
-    let sloopBonus = 0;
-    percentage.forEach((pct, i) => {
-        const slots = Math.max(0, Math.min(2, somersloops - 2 * i));
-        sloopBonus += (slots / 2) * (pct / 100);
-    });
-    return { inputFactor, outputFactor: inputFactor + sloopBonus };
-}
-
-/**
- * Factor when driven by outgoing belt demand (output-driven).
- */
-function sloopOutputBased(
-    factor: number,
-    somersloops: number,
-    percentage: number[],
-    buildingSloopCount: number,
-): NodeFactor {
-    const baseClockFactor = percentage.reduce((a, v) => a + v, 0) / 100;
-    let sloopBonus = 0;
-    percentage.forEach((pct, i) => {
-        const slots = Math.max(0, Math.min(buildingSloopCount, somersloops - buildingSloopCount * i));
-        sloopBonus += (slots / buildingSloopCount) * (pct / 100);
-    });
-    if (factor > baseClockFactor + sloopBonus) {
-        return { inputFactor: factor - sloopBonus, outputFactor: factor };
-    }
-    return { inputFactor: baseClockFactor, outputFactor: baseClockFactor + sloopBonus };
-}
-
-/**
- * Factor when there are no connected edges at all.
- */
-function sloopEmptyBased(
-    somersloops: number,
-    percentage: number[],
-    buildingSloopCount: number,
-): NodeFactor {
-    const baseClockFactor = percentage.reduce((a, v) => a + v, 0) / 100;
-    let sloopBonus = 0;
-    percentage.forEach((pct, i) => {
-        const slots = Math.max(0, Math.min(buildingSloopCount, somersloops - buildingSloopCount * i));
-        sloopBonus += (slots / buildingSloopCount) * (pct / 100);
-    });
-    return { inputFactor: baseClockFactor, outputFactor: baseClockFactor + sloopBonus };
-}
-
 // ─── Main export ─────────────────────────────────────────────────────────────
-
 /**
  * Compute the inputFactor / outputFactor for a recipe node given the current
  * edge throughputs.  This is a pure function so it can be called in a selector
@@ -72,14 +14,28 @@ function sloopEmptyBased(
  */
 export function computeNodeFactor(
     recipe: Recipe,
-    somersloops: number,
-    percentage: number[],
+    sloopData: SloopData[] | undefined,
     incomingEdges: Edge<ItemEdgeData>[],
     outgoingEdges: Edge<ItemEdgeData>[],
 ): NodeFactor {
-    const craftsPerMinute = 60.0 / recipe.duration;
-    const building = getBuilding(recipe.producedIn);
-    const buildingSloopCount: number = building?.somersloopsNeeded ?? 2;
+    const craftsPerMinute = 60 / recipe.duration;
+    const building = getBuilding(recipe.producedIn)!;
+    const buildingSloopCount = building.somersloopsNeeded;
+
+    if (sloopData && sloopData.length > 0) {
+        let totalInputFactor = 0
+        let totalOutputFactor = 0
+
+        for (let i = 0; i < sloopData.length; i++) {
+            totalInputFactor += sloopData[i].overclockPercentage / 100;
+            totalOutputFactor += 1 + (sloopData[i].sloopAmount / buildingSloopCount) * sloopData[i].overclockPercentage / 100;
+        }
+
+        return {
+            inputFactor: totalInputFactor,
+            outputFactor: totalOutputFactor,
+        }
+    }
 
     // ── Input-driven: group incoming throughput by target handle ──
     if (incomingEdges.length > 0) {
@@ -100,9 +56,7 @@ export function computeNodeFactor(
 
         if (!isFinite(lowestFactor)) lowestFactor = 0;
 
-        return somersloops !== 0
-            ? sloopInputBased(lowestFactor, somersloops, percentage)
-            : { inputFactor: lowestFactor, outputFactor: lowestFactor };
+        return { inputFactor: lowestFactor, outputFactor: lowestFactor };
     }
 
     // ── Output-driven: infer factor from outgoing edge throughputs ──
@@ -121,15 +75,9 @@ export function computeNodeFactor(
         const sorted = [...byHandle.values()].sort((a, b) => a - b);
         const lowestFactor = sorted[0] ?? 1;
 
-        return somersloops !== 0
-            ? sloopOutputBased(lowestFactor, somersloops, percentage, buildingSloopCount)
-            : { inputFactor: lowestFactor, outputFactor: lowestFactor };
+        return { inputFactor: lowestFactor, outputFactor: lowestFactor };
     }
-
-    // ── No edges ──
-    return somersloops !== 0
-        ? sloopEmptyBased(somersloops, percentage, buildingSloopCount)
-        : { inputFactor: 1, outputFactor: 1 };
+    return { inputFactor: 1, outputFactor: 1 }
 }
 
 /** Total throughput consumed from `handleId` across `edges`. */

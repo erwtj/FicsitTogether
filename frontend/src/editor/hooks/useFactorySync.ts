@@ -24,7 +24,10 @@ function nodeDataFingerprint(nodes: Node[]): string {
         }
         if (n.type === "recipe-node") {
             const d = n.data as RecipeNodeData;
-            return `${n.id}:${d.recipeClassName}:${d.somersloops}:${d.percentage.join(",")}`;
+            const sloopDataStr = d.sloopData?.map(
+                (data => `${data.sloopAmount}-${data.overclockPercentage}`)).join(",")
+                ?? "";
+            return `${n.id}:${d.recipeClassName}:${sloopDataStr}`;
         }
         if (n.type === "power-node") {
             const d = n.data as PowerNodeData;
@@ -95,11 +98,18 @@ export function useFactorySync(
 
                     const factor = computeNodeFactor(
                         recipe,
-                        d.somersloops,
-                        d.percentage,
+                        d.sloopData,
                         incomingEdges,
                         outgoingEdges,
                     );
+
+                    const inputTooLow: Record<string, boolean> = {};
+                    recipe.input.forEach((input, i) => {
+                        const handleId = `${node.id}-input-handle-${i}`;
+                        const required = input.amount * (60 / recipe.duration) * factor.inputFactor;
+                        const usedIn = totalThroughputForHandle(incomingEdges, handleId, "target");
+                        inputTooLow[handleId] = (usedIn < (required - 0.001)) && (factor.inputFactor > 1);
+                    });
 
                     const outputOverUsed: Record<string, boolean> = {};
                     recipe.output.forEach((output, i) => {
@@ -111,6 +121,7 @@ export function useFactorySync(
 
                     const prevFactor = d._factor;
                     const prevOverUsed = d._outputOverUsed;
+                    const prevInputTooLow = d._inputTooLow;
                     const factorChanged =
                         !prevFactor ||
                         prevFactor.inputFactor !== factor.inputFactor ||
@@ -121,12 +132,18 @@ export function useFactorySync(
                             (k) => outputOverUsed[k] !== prevOverUsed[k],
                         );
 
-                    if (!factorChanged && !overUsedChanged) return node;
+                    const inputTooLowChanged =
+                        !prevInputTooLow ||
+                        Object.keys(inputTooLow).some(
+                            (k) => inputTooLow[k] !== prevInputTooLow[k],
+                        );
+
+                    if (!factorChanged && !overUsedChanged && !inputTooLowChanged) return node;
 
                     changed = true;
                     return {
                         ...node,
-                        data: { ...d, _factor: factor, _outputOverUsed: outputOverUsed },
+                        data: { ...d, _factor: factor, _outputOverUsed: outputOverUsed,  _inputTooLow: inputTooLow },
                     };
                 }
 

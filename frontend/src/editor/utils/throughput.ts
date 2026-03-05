@@ -57,7 +57,7 @@ export function maxSourceThroughput(
 
         const incomingEdges = allEdges.filter(e => e.target === sourceNode.id);
         const outgoingEdges = allEdges.filter(e => e.source === sourceNode.id);
-        const factor = computeNodeFactor(recipe, d.somersloops, d.percentage, incomingEdges, outgoingEdges);
+        const factor = computeNodeFactor(recipe, d.sloopData, incomingEdges, outgoingEdges);
 
         const output = recipe.output[handleIdx];
         if (!output) return null;
@@ -87,10 +87,9 @@ export function maxTargetThroughput(
     const incomingEdges = allEdges.filter(e => e.target === targetNode.id);
     const outgoingEdges = allEdges.filter(e => e.source === targetNode.id);
 
-    const sloops = isRecipeNode ? (d as RecipeNodeData).somersloops : 0;
-    const percentage: number[] = isRecipeNode ? (d as RecipeNodeData).percentage : [];
+    const sloopData = isRecipeNode ? (d as RecipeNodeData).sloopData : undefined;
 
-    const factor = computeNodeFactor(recipe, sloops, percentage, incomingEdges, outgoingEdges);
+    const factor = computeNodeFactor(recipe, sloopData, incomingEdges, outgoingEdges);
 
     const input = recipe.input[handleIdx];
     if (!input) return null;

@@ -184,7 +184,7 @@ export const ItemEdge = memo(function ItemEdge({
             setDragBuffer([...scratch]);
         }
 
-        //TODO: Fix the fact that mouseup deselects the edge
+
         function onMouseUp(upEvent: MouseEvent) {
             upEvent.stopPropagation();
             window.removeEventListener("mousemove", onMouseMove);

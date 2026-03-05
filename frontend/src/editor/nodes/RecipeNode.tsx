@@ -24,7 +24,9 @@ export const RecipeNode = memo(function RecipeNode({
     const isSlooped = sloopData && sloopData.length > 0;
     // Read pre-computed factor from data (pushed by useFactorySync) no edge store subscription
     const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
+
     const outputOverUsed: Record<string, boolean> = data._outputOverUsed ?? {};
+    const inputTooLow: Record<string, boolean> = data._inputTooLow ?? {};
 
     const craftsPerMinute = 60.0 / recipe.duration;
 
@@ -32,13 +34,15 @@ export const RecipeNode = memo(function RecipeNode({
         const item = getItem(input.name)!;
         const handleId = `${id}-input-handle-${i}`;
         const solid = isItemSolid(item);
+
         return {
             id: handleId,
             position: `${(100 / (recipe.input.length + 1)) * (i + 1)}%`,
             displayAmount: roundTo3Decimals(input.amount * craftsPerMinute * factor.inputFactor / (solid ? 1 : 1000)),
             item,
+            inputToLow: inputTooLow[handleId] ?? false,
         };
-    }), [recipe, id, craftsPerMinute, factor.inputFactor]);
+    }), [recipe, id, craftsPerMinute, factor.inputFactor, inputTooLow]);
 
     const outputHandles = useMemo(() => recipe.output.map((output, i) => {
         const item = getItem(output.name)!;
@@ -63,14 +67,18 @@ export const RecipeNode = memo(function RecipeNode({
         <div className="react-flow__node-default p-0">
             {inputHandles.map(h => (
                 <ItemHandle key={h.id} item={h.item} id={h.id} type="target"
-                            position={Position.Top} style={{ left: h.position }} />
+                            position={Position.Top} style={{ left: h.position }} inputTooLow={h.inputToLow} />
             ))}
 
             <Card className={isSlooped ? "slooping" : ""}>
                 <Card.Header style={{ height: "30px" }}>
                     {inputHandles.map(h => (
                         <span key={h.id} className="position-absolute"
-                              style={{ width: "100px", left: `calc(${h.position} - 50px)` }}>
+                              style={{ width: "100px",
+                                  left: `calc(${h.position} - 50px)`,
+                                  color: h.inputToLow ? "#ff5a5a" : "white"
+                        }}
+                        >
                             {h.displayAmount}
                         </span>
                     ))}
