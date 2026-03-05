@@ -37,9 +37,7 @@ export const EndNode = memo(function EndNode({ id, data }: NodeProps<EndNodeType
 
             <Card>
                 <Card.Header style={{height: "30px"}}>
-                    <span className={"text-center"}>
-                        {displayAmount}
-                    </span>
+                    <span className="text-center">{displayAmount} {!solid && " m³"}</span>
                 </Card.Header>
 
                 <Card.Body className="p-3 pt-2">

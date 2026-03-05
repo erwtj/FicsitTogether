@@ -8,7 +8,10 @@ import { type Node, type Edge } from "@xyflow/react";
 import { getRecipe } from "ficlib";
 import { computeNodeFactor } from "./factoryCalc";
 import { getItemIndexFromHandleId } from "./idUtils";
-import { type ItemEdgeData, type RecipeNodeData, type ItemSpawnerNodeData, type RecipeNodeType, type ItemSpawnerNodeType } from "../types";
+import {
+    type ItemEdgeData, type RecipeNodeData, type ItemSpawnerNodeData, type RecipeNodeType, type ItemSpawnerNodeType,
+    type AppNode, type PowerNodeData
+} from "../types";
 
 /** Sum of throughput already assigned to outgoing edges on a specific source handle. */
 export function usedSourceThroughput(
@@ -73,16 +76,21 @@ export function maxTargetThroughput(
     targetHandle: string,
     allEdges: Edge<ItemEdgeData>[],
 ): number | null {
-    if (targetNode.type !== "recipe-node") return null;
+    const isRecipeNode = targetNode.type === "recipe-node";
+    if (!isRecipeNode && targetNode.type !== "power-node") return null;
 
     const handleIdx = getItemIndexFromHandleId(targetHandle);
-    const d = (targetNode as RecipeNodeType).data as RecipeNodeData;
+    const d = (targetNode as AppNode).data as (RecipeNodeData | PowerNodeData);
     const recipe = getRecipe(d.recipeClassName);
     if (!recipe) return null;
 
     const incomingEdges = allEdges.filter(e => e.target === targetNode.id);
     const outgoingEdges = allEdges.filter(e => e.source === targetNode.id);
-    const factor = computeNodeFactor(recipe, d.somersloops, d.percentage, incomingEdges, outgoingEdges);
+
+    const sloops = isRecipeNode ? (d as RecipeNodeData).somersloops : 0;
+    const percentage: number[] = isRecipeNode ? (d as RecipeNodeData).percentage : [];
+
+    const factor = computeNodeFactor(recipe, sloops, percentage, incomingEdges, outgoingEdges);
 
     const input = recipe.input[handleIdx];
     if (!input) return null;
