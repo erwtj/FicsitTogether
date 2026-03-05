@@ -1,7 +1,8 @@
 import { Popover, OverlayTrigger } from "react-bootstrap";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { Auth0ContextType } from "../../auth/auth0.tsx";
 import Button from 'react-bootstrap/Button';
+import {ClientSettingsModal} from "../modals/ClientSettingsModal.tsx";
 
 export type UserPopoverProps = {
     auth0Context: Auth0ContextType
@@ -10,9 +11,12 @@ export type UserPopoverProps = {
 
 const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => {
     const { user } = auth0Context;
-    const [username, setUsername] = React.useState<string>(user!.name!);
+    const [username, setUsername] = useState<string>(user!.name!);
 
-    React.useEffect(() => {
+    const [showSettings, setShowSettings] = useState(false);
+    const [showPopover, setShowPopover] = useState(false);
+
+    useEffect(() => {
         if (auth0Context.getAccessTokenSilently) {
             auth0Context.getAccessTokenSilently()
             .then(token => {
@@ -27,6 +31,7 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
 
     const popover = (
         <Popover id="user-popover" style={{maxWidth: 'none'}}>
+            {/* Why not use a header? Because footer doesn't exist so we already have to manage <hr/> */}
             <Popover.Body className="text-center">
                 <img
                     src={user!.picture}
@@ -36,10 +41,15 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
                 />
 
                 <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
+
                 <p className="text-muted mb-1 fs-6">@{username}</p>
                 <h6 className="mb-3">{user!.email}</h6>
+
                 <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
 
+                <Button variant="secondary" className="w-100 mb-2 bg-body-tertiary" size="sm" onClick={() => {setShowSettings(true); setShowPopover(false);}}>
+                    Settings
+                </Button>
                 <Button variant="danger" className="w-100" size="sm" onClick={auth0Context.logout}>
                     Log out
                 </Button>
@@ -48,14 +58,20 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
     );
 
     return (
-        <OverlayTrigger
-            trigger="click"
-            placement="bottom-end"
-            overlay={popover}
-            rootClose // Closes when clicking outside
-        >
-            {children}
-        </OverlayTrigger>
+        <>
+            <OverlayTrigger
+                trigger="click"
+                placement="bottom-end"
+                overlay={popover}
+                show={showPopover}
+                onToggle={(isOpen) => setShowPopover(isOpen)}
+                rootClose
+            >
+                {children}
+            </OverlayTrigger>
+
+            <ClientSettingsModal show={showSettings} handleClose={() => setShowSettings(false)}/>
+        </>
     );
 };
 

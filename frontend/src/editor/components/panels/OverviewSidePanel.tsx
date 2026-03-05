@@ -6,6 +6,7 @@ import {
     BoxArrowInDown,
     Buildings,
     ChevronRight,
+    Gear,
     LightningFill,
 } from "react-bootstrap-icons";
 import { useNodes } from "@xyflow/react";
@@ -14,6 +15,7 @@ import { useYjsMetadata } from "../../hooks/useYjsMetadata";
 import {roundTo3Decimals, throughputToDisplay} from "../../../utils/throughputUtil";
 import "./OverviewSidePanel.css";
 import { Link } from "@tanstack/react-router";
+import {ClientSettingsModal} from "../../../components/modals/ClientSettingsModal.tsx";
 
 // ─── Item / Building list renderers ──────────────────────────────────────────
 
@@ -111,6 +113,7 @@ function DocumentInfoPanel({
 export function OverviewSidePanel() {
     const [showPanel, setShowPanel] = useState(false);
     const [showDocInfo, setShowDocInfo] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
     const handleShow = useCallback(() => setShowPanel(v => !v), []);
 
     const { metadata } = useYjsMetadata();
@@ -130,9 +133,10 @@ export function OverviewSidePanel() {
             />
 
             <DocumentInfoPanel show={showDocInfo} onHide={() => setShowDocInfo(false)} />
+            <ClientSettingsModal show={showSettings} handleClose={() => setShowSettings(false)} />
 
             <Offcanvas show={showPanel} onHide={handleShow} placement="start" scroll backdrop={false}>
-                <Offcanvas.Header closeButton>
+                <Offcanvas.Header>
                     <Offcanvas.Title>
                         {(metadata.parentDirectoryId && metadata.parentDirectoryId !== "") ?
                             <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary clickable-link"}>
@@ -148,6 +152,11 @@ export function OverviewSidePanel() {
                             : <span className="text-muted fst-italic clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>No name</span>
                         }
                     </Offcanvas.Title>
+                    <div className="d-flex flex-row align-items-center gap-2 ms-auto">
+                        <Gear size={20} className="text-body-secondary clickable-link ms-auto" role="button"
+                              onClick={() => setShowSettings(true)}/>
+                        <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowPanel(false)}></button>
+                    </div>
                 </Offcanvas.Header>
 
                 <Offcanvas.Body>

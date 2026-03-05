@@ -9,8 +9,9 @@ import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-pro
 import {isItemSolid, roundTo3Decimals} from "../utils/throughputUtil.ts";
 import {ArrowLeft, FileEarmarkBarGraph, Folder } from "react-bootstrap-icons";
 import {Button, ButtonGroup, Card, Dropdown } from "react-bootstrap";
+import {useClientSettings} from "../hooks/useClientSettings.ts";
 
-type itemUsageData = {
+type ItemUsageData = {
     input: number,
     output: number,
 }
@@ -63,8 +64,6 @@ function OverviewPage() {
         <OverviewPageContent key={dirId}/> // Force remount when directory changes to reset state
     );
 }
-
-const allResources: Set<string> = new Set(getAllResources().map((resource: Resource) => resource.className));
 
 
 function countToDisplay(itemClassName: string, amount: number): string {
@@ -144,7 +143,7 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
         </center>
     )
 }
-function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageData; itemClassName: string }) {
+function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: ItemUsageData; itemClassName: string }) {
     const item = getItem(itemClassName)!;
     const netAmount = itemUsageData.output - itemUsageData.input;
 
@@ -167,16 +166,25 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageDa
     )
 }
 
-
+const allResources: Set<string> = new Set(getAllResources().map((resource: Resource) => resource.className));
 
 function OverviewPageContent() {
     const { directory, parentDir, charts } = Route.useLoaderData();
+    const {clientSettings} = useClientSettings();
     const navigate = useNavigate();
 
     const { resourceMap, itemMap } = useMemo(() => {
-        if (!charts) return { resourceMap: new Map<string, itemUsageData>(), itemMap: new Map<string, itemUsageData>() };
+        if (!charts) return { resourceMap: new Map<string, ItemUsageData>(), itemMap: new Map<string, ItemUsageData>() };
         return buildUsageMaps(charts, allResources);
     }, [charts]);
+
+    const resources = useMemo(() => {
+        return Array.from(resourceMap);
+    }, [resourceMap])
+
+    const items = useMemo(() => {
+        return Array.from(itemMap.entries());
+    }, [itemMap]);
 
     const noDropDown = parentDir.id === parentDir.parentDirectoryId && directory.subDirectories.length === 0;
 
@@ -220,10 +228,11 @@ function OverviewPageContent() {
             <h1 className="d-flex flex-nowrap  justify-content-center mt-4 align-items-center no-drag m-0 p-0">Used Resources</h1>
             <hr className="mb-0 pb-0 mx-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
-                {Array.from(allResources).map((item, index) => (
+                {resources.map(([item, usage], index) => (
+                    (item !== "Desc_Water_C" || clientSettings.showWaterUsage) && (item !== "Desc_QuantumEnergy_C" || clientSettings.showPhotonUsage) &&
                     <div key={index} style={{margin: '1.25rem'}}>
                         <ResourceCircle
-                            amount={((resourceMap.get(item)?.input ?? 0) - (resourceMap.get(item)?.output ?? 0))}
+                            amount={usage.input - usage.output}
                             itemClassName={item}
                         />
                     </div>
@@ -232,7 +241,7 @@ function OverviewPageContent() {
             <h1 className="d-flex flex-nowrap  justify-content-center mt-4 align-items-center no-drag mt-5">Item Usage</h1>
             <hr className="mb-4 pb-0 mx-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
-                {Array.from(itemMap.entries()).map(([itemClassName, usageData], index) => (
+                {items.map(([itemClassName, usageData], index) => (
                     <div key={index} className="m-2">
                         <ItemCard itemUsageData={usageData} itemClassName={itemClassName}/>
                     </div>

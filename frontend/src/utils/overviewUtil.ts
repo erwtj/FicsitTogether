@@ -31,6 +31,11 @@ export function buildUsageMaps(
 ): { resourceMap: Map<string, ItemUsageData>; itemMap: Map<string, ItemUsageData> } {
     const resourceMap = new Map<string, ItemUsageData>();
     const itemMap = new Map<string, ItemUsageData>();
+
+    for (const resource of allResources) {
+        resourceMap.set(resource, { input: 0, output: 0 });
+    }
+
     for (const chart of charts as ChartDataDTO[]) {
         if (!chart.nodes || !chart.edges) continue;
 
