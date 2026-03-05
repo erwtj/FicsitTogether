@@ -2,10 +2,14 @@ import { type Node, type Edge } from "@xyflow/react";
 
 // Classnames are looked up via getWhatever() from ficlib
 
+export type SloopData = {
+    sloopAmount: number;
+    overclockPercentage: number;
+}
+
 export type RecipeNodeData = {
     recipeClassName: string;
-    somersloops: number;
-    percentage: number[];
+    sloopData?: SloopData[]
 
     _factor?: NodeFactor; // Computed input/output factor based on building count and Somer Sloop bonus. Never written to Yjs
     _outputOverUsed?: Record<string, boolean>; // Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs

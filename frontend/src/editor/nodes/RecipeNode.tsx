@@ -15,12 +15,14 @@ export const RecipeNode = memo(function RecipeNode({
     id,
     data,
 }: NodeProps<RecipeNodeType>) {
-    const { recipeClassName, somersloops, percentage } = data;
+    const { recipeClassName, sloopData } = data;
     useYjsMutation();
 
     const recipe = getRecipe(recipeClassName)!;
     const producedIn = getBuilding(recipe.producedIn)!;
 
+    const isSlooped = sloopData && sloopData.length > 0;
+    console.log("Rendering RecipeNode", { id, recipeClassName, sloopData });
     // Read pre-computed factor from data (pushed by useFactorySync) no edge store subscription
     const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
     const outputOverUsed: Record<string, boolean> = data._outputOverUsed ?? {};
@@ -54,7 +56,7 @@ export const RecipeNode = memo(function RecipeNode({
 
     const openSloopModal = () => {
         window.dispatchEvent(new CustomEvent("openSloopModal", {
-            detail: { nodeId: id, somersloops, percentage },
+            detail: { nodeId: id },
         }));
     };
 
@@ -65,7 +67,7 @@ export const RecipeNode = memo(function RecipeNode({
                             position={Position.Top} style={{ left: h.position }} />
             ))}
 
-            <Card className={somersloops !== 0 ? "slooping" : ""}>
+            <Card className={isSlooped ? "slooping" : ""}>
                 <Card.Header style={{ height: "30px" }}>
                     {inputHandles.map(h => (
                         <span key={h.id} className="position-absolute"
@@ -109,7 +111,7 @@ export const RecipeNode = memo(function RecipeNode({
                     ))}
                     {producedIn.somersloopsNeeded > 0 && (
                         <button className="sloopButton" onClick={openSloopModal}>
-                            <img className={somersloops === 0 ? "sloop-image" : "sloop-image sloop-active"}
+                            <img className={isSlooped ? "sloop-image sloop-active" : "sloop-image"}
                                  src="/media/FactoryGame/Prototype/WAT/UI/Wat_1_256.webp" alt="sloop" />
                         </button>
                     )}

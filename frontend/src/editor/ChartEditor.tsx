@@ -15,10 +15,13 @@ import { useNodeEdgeHandlers } from "./hooks/useNodeEdgeHandlers.ts";
 import { useConnectionValidation } from "./hooks/useConnectionValidation.ts";
 import { useFactorySync } from "./hooks/useFactorySync.ts";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
-import { useNodeModal } from "./hooks/useNodeModal.ts";
+import { useNodeModal } from "./hooks/modals/useNodeModal.ts";
 import type { Edge, NodeChange } from "@xyflow/react";
 import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
 import { Toast } from "react-bootstrap";
+import {useSloopModal} from "./hooks/modals/useSloopModal.ts";
+import {SloopModal} from "./components/modals/SloopModal.tsx";
+import {useYjsMutation} from "./hooks/useYjsMutation.ts";
 
 interface ChartEditorProps {
     projectId: string;
@@ -28,6 +31,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     const auth = useAuth0Context();
     const ydocRef = useRef<Y.Doc | null>(null);
 
+    const { updateNodeData } = useYjsMutation();
+
     const [token, setToken] = useState<string | null>(null);
     useEffect(() => {
         auth?.getAccessTokenSilently()?.then(setToken).catch(console.error);
@@ -36,6 +41,13 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     // Add node modal stuff (spawn, auto-connect logic, etc.)
     const { show, requiredInput, requiredOutput, onDropOnCanvas, onCanvasDoubleClick, onModalSubmit } =
         useNodeModal(ydocRef);
+
+    // Add sloop modal
+    const { show: showSloop, details: sloopDetails, onModalSubmit: onSloopModalSubmit } = useSloopModal(
+        useCallback((nodeId, data) => {
+            updateNodeData(nodeId, { sloopData: data });
+        }, [updateNodeData])
+    );
 
     // Manage node, edge state and handlers + send to useFactorySync and useYjsSync
     const { nodes, setNodes, edges, setEdges, onNodesChangeInternal, onEdgesChangeInternal, onConnect, onConnectStart, onConnectEnd } =
@@ -74,60 +86,70 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     }, [nodes, onNodesChangeInternal]);
 
     return (
-        <YjsContext.Provider value={ydocRef}>
-            <div style={{ width: "100%", height: "100vh" }}>
-                <ReactFlow
-                    style={{outline: "none"}}
-                    tabIndex={-1}
-                    nodes={nodes}
-                    edges={edges}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    defaultEdgeOptions={{ style: { strokeWidth: 1.75 } }}
-                    onNodesChange={onNodesChangeInternal}
-                    onEdgesChange={onEdgesChangeInternal}
-                    onConnect={onConnect}
-                    onConnectStart={onConnectStart}
-                    onConnectEnd={onConnectEnd}
-                    isValidConnection={isValidConnection}
-                    onDoubleClickCapture={onCanvasDoubleClick}
-                    zoomOnDoubleClick={false}
-                    nodeOrigin={[0.5, 0.0]}
-                    deleteKeyCode={['Backspace', 'Delete']}
-                    multiSelectionKeyCode={'Shift'}
-                    onKeyDownCapture={handleKeyDownCapture}
-                    fitView
-                >
-                    <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
-                    <MiniMap className="bg-body" position="top-right" nodeColor={nodeColor} />
-                    <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
-                        <OverviewSidePanel/>
-                    </Panel>
-                </ReactFlow>
+        <div style={{ width: "100%", height: "100vh" }}>
+            <ReactFlow
+                style={{outline: "none"}}
+                tabIndex={-1}
+                nodes={nodes}
+                edges={edges}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                defaultEdgeOptions={{ style: { strokeWidth: 1.75 } }}
+                onNodesChange={onNodesChangeInternal}
+                onEdgesChange={onEdgesChangeInternal}
+                onConnect={onConnect}
+                onConnectStart={onConnectStart}
+                onConnectEnd={onConnectEnd}
+                isValidConnection={isValidConnection}
+                onDoubleClickCapture={onCanvasDoubleClick}
+                zoomOnDoubleClick={false}
+                nodeOrigin={[0.5, 0.0]}
+                deleteKeyCode={['Backspace', 'Delete']}
+                multiSelectionKeyCode={'Shift'}
+                onKeyDownCapture={handleKeyDownCapture}
+                fitView
+            >
+                <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
+                <MiniMap className="bg-body" position="top-right" nodeColor={nodeColor} />
+                <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
+                    <OverviewSidePanel/>
+                </Panel>
+            </ReactFlow>
 
-                <div className="position-fixed top-0 end-0 p-3 z-1">
-                    <Toast show={!connected} className="delayed-appear">
-                        <Toast.Header closeButton={false}>
-                            <strong className={"text-warning me-auto"}>Warning</strong>
-                        </Toast.Header>
-                        <Toast.Body>
-                            Connection to server lost...
-                        </Toast.Body>
-                    </Toast>
-                </div>
-                
-                <RecipeModal
-                    key={`${show}-${requiredOutput}`}
-                    show={show}
-                    onModalSubmit={onModalSubmit}
-                    RequiredInput={requiredInput}
-                    RequiredOutput={requiredOutput}
-                />
+            <div className="position-fixed top-0 end-0 p-3 z-1">
+                <Toast show={!connected} className="delayed-appear">
+                    <Toast.Header closeButton={false}>
+                        <strong className={"text-warning me-auto"}>Warning</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                        Connection to server lost...
+                    </Toast.Body>
+                </Toast>
             </div>
-        </YjsContext.Provider>
+
+            <RecipeModal
+                key={`${show}-${requiredOutput}`}
+                show={show}
+                onModalSubmit={onModalSubmit}
+                RequiredInput={requiredInput}
+                RequiredOutput={requiredOutput}
+            />
+            <SloopModal
+                key={`${showSloop}-${sloopDetails?.nodeId}`}
+                show={showSloop}
+                nodeId={sloopDetails?.nodeId ?? ""}
+                onModalSubmit={onSloopModalSubmit}
+            />
+        </div>
     );
 }
 
 export default function ChartEditor(props: ChartEditorProps) {
-    return <ChartEditorInner {...props} />;
+    const ydocRef = useRef<Y.Doc | null>(null);
+
+    return (
+        <YjsContext.Provider value={ydocRef}>
+            <ChartEditorInner {...props} />)
+        </YjsContext.Provider>
+    );
 }

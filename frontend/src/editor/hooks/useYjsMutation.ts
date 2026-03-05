@@ -23,6 +23,7 @@ export function useYjsMutation() {
             if (node) {
                 nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
             }
+
         },
         [ydocRef],
     );
