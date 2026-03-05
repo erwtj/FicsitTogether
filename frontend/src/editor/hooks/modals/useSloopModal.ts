@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import type {SloopData} from "../../types.ts";
 
 export type OpenSloopModalDetails = {
     nodeId: string;
 }
 
-
-export function useSloopModal(onSubmitCallback: (nodeId: string, data: SloopData[] | null) => void) {
+export function useSloopModal() {
     const [show, setShow] = useState(false);
     const [details, setDetails] = useState<OpenSloopModalDetails | null>(null);
 
@@ -23,13 +21,10 @@ export function useSloopModal(onSubmitCallback: (nodeId: string, data: SloopData
         }
     }, [])
 
-    const onModalSubmit = useCallback((data: SloopData[] | null | undefined) => {
-        if (data !== undefined && details?.nodeId) {
-            onSubmitCallback(details.nodeId, data);
-        }
+    const onModalSubmit = useCallback(() => {
         setShow(false);
         setDetails(null);
-    }, [details, onSubmitCallback])
+    }, [])
 
     return {show, details, onModalSubmit}
 }

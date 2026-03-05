@@ -22,7 +22,6 @@ export const RecipeNode = memo(function RecipeNode({
     const producedIn = getBuilding(recipe.producedIn)!;
 
     const isSlooped = sloopData && sloopData.length > 0;
-    console.log("Rendering RecipeNode", { id, recipeClassName, sloopData });
     // Read pre-computed factor from data (pushed by useFactorySync) no edge store subscription
     const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
     const outputOverUsed: Record<string, boolean> = data._outputOverUsed ?? {};

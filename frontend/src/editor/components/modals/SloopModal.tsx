@@ -6,21 +6,21 @@ import { useState } from "react";
 import "./SloopModal.tsx.css"
 import {Card, Form, InputGroup, Modal } from "react-bootstrap";
 import {roundTo3Decimals} from "../../../utils/throughputUtil.ts";
-
+import {useYjsMutation} from "../../hooks/useYjsMutation.ts";
 
 const SOMERSLOOPIMAGE = "/media/FactoryGame/Prototype/WAT/UI/Wat_1_256.webp"
 
 export type SloopModalProps = {
     show: boolean;
     nodeId: string;
-    onModalSubmit: (data: SloopData[] | null | undefined) => void;
+    onModalSubmit: () => void;
 }
-
-
 
 export function SloopModal({ show, nodeId, onModalSubmit }: SloopModalProps) {
     const reactFlow = useReactFlow();
     const node = reactFlow.getNode(nodeId) as (RecipeNodeType | null);
+    
+    const {updateNodeData} = useYjsMutation(); 
 
     const [buildingAmount, setBuildingAmount] = useState<number>(node?.data.sloopData?.length ?? 0);
     const [sloopData, setSloopData] = useState<SloopData[] | null>(node?.data.sloopData ?? null);
@@ -34,11 +34,12 @@ export function SloopModal({ show, nodeId, onModalSubmit }: SloopModalProps) {
     const producedItem = getItem(recipe.output[0].name)!;
 
     const handleClose = () => {
-        onModalSubmit(undefined);
+        onModalSubmit();
     }
 
     const handleSubmit = () => {
-        onModalSubmit(sloopData);
+        updateNodeData(nodeId, { sloopData });
+        onModalSubmit();
     }
 
     const handleBuildingAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {

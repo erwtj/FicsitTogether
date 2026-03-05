@@ -17,6 +17,7 @@ export function useYjsMutation() {
     const updateNodeData = useCallback(
         (nodeId: string, patch: Record<string, unknown>) => {
             const doc = ydocRef.current;
+            console.log(doc);
             if (!doc) return;
             const nodeMap = doc.getMap<Node>("nodes");
             const node = nodeMap.get(nodeId);
