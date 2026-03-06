@@ -10,7 +10,7 @@ import {
     type EndNodeData,
     type PowerNodeData,
 } from "../types";
-import { generateNodeId, stripComputedFields } from "../utils/idUtils";
+import {generateEdgeId, generateNodeId, stripComputedFields} from "../utils/idUtils";
 import { getHandleItemClassName } from "../utils/throughput";
 
 type SpawnType = "recipe" | "item-spawner" | "item-end" | "power";
@@ -97,8 +97,10 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
                     ? [existingId, nodeId, handleId, newNodeHandle]
                     : [nodeId, existingId, newNodeHandle, handleId];
 
-                edgeMap.set(`edge-${Date.now()}`, {
-                    id: `edge-${Date.now()}`,
+                const edgeId = generateEdgeId();
+
+                edgeMap.set(edgeId, {
+                    id: edgeId,
                     type: "item-edge",
                     source, target, sourceHandle, targetHandle,
                     data: { throughput },
