@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import { Folder, People } from "react-bootstrap-icons";
 import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 import {
     fetchRoot,
@@ -52,7 +52,7 @@ export const Route = createFileRoute('/home')({
         } as DirectoryInfo));
 
         return { root, owned, shared };
-    }
+    }, staleTime: 0
 })
 
 function HomePage() {
@@ -61,7 +61,14 @@ function HomePage() {
     const { root, owned, shared } = Route.useLoaderData();
     const [ownedDirectories, setOwnedDirectories] = useState<DirectoryInfo[]>(owned);
     const [sharedDirectories, setSharedDirectories] = useState<DirectoryInfo[]>(shared);
-    
+
+    useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
+        setOwnedDirectories(owned);
+        setSharedDirectories(shared);
+        /* eslint-enable react-hooks/set-state-in-effect */
+    }, [owned, shared]);
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);

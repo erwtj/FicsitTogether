@@ -1,7 +1,7 @@
 import {createFileRoute, Link, notFound} from '@tanstack/react-router'
 import {redirect} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
     createDirectory,
     createProject,
@@ -50,7 +50,8 @@ export const Route = createFileRoute('/directories/$dir')({
         }
 
         return { user, directory }
-    }
+    },
+    staleTime: 0
 })
 
 function DirectoryPage() {
@@ -68,6 +69,11 @@ function DirectoryPageContent() {
 
     const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>(directory.subDirectories);
     const [projects, setProjects] = useState<ProjectDTO[]>(directory.projects);
+
+    useEffect(() => {
+        setSubDirectories(directory.subDirectories);
+        setProjects(directory.projects);
+    }, [directory]);
 
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
