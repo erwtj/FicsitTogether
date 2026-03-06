@@ -5,7 +5,7 @@ import {useEffect, useState} from "react";
 import {
     createDirectory,
     createProject,
-    deleteDirectory, deleteProject,
+    deleteDirectory, deleteProject, downloadProject, uploadProject,
     fetchDirectoryContent,
     fetchUser,
 } from "../api/apiCalls.ts";
@@ -19,6 +19,7 @@ import {ProjectCard, type ProjectInfo} from "../components/explorer/ProjectCard.
 import {AddProjectCard} from "../components/explorer/AddProjectCard.tsx";
 import DirectoryTree from "../components/explorer/DirectoryTree.tsx";
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
+import { Toast } from "react-bootstrap";
 
 export const Route = createFileRoute('/directories/$dir')({
     component: DirectoryPage,
@@ -81,6 +82,8 @@ function DirectoryPageContent() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
 
+    const [uploadError, setUploadError] = useState<string | null>(null);
+
     // Create Directory and Project flow
     const handleCreateDirectory = (name: string) => {
         createDirectory(auth, dirId, name)
@@ -98,6 +101,20 @@ function DirectoryPageContent() {
             )
             .catch(err => console.error('Error creating project:', err));
     }
+    const handleUploadProject = (file: File) => {
+        uploadProject(auth, dirId, file)
+            .then(newProject => {
+                setProjects(prev => [...prev, newProject]);
+            })
+            .catch((err) => {
+                if (err.response?.status === 400) {
+                    setUploadError('Invalid file format. Please upload a valid project JSON file.');
+                } else {
+                    setUploadError('An error occurred while uploading the project. Please try again.');
+                }
+                console.error('Error uploading project:', err)
+            });
+    }
 
     // Delete Directory and Project flow
     const handleDeleteDirectory = (directory: DirectoryInfo) => {
@@ -109,6 +126,15 @@ function DirectoryPageContent() {
         setSelectedDirectory(null)
         setSelectedProject(projectInfo);
         setShowDeleteModal(true);
+    }
+    const handleDownloadProject = async (projectInfo: ProjectInfo) => {
+        const response = await downloadProject(auth, projectInfo.id)
+        const url = URL.createObjectURL(response);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${projectInfo.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
     const handleDeleteConfirm = (shouldDelete: boolean) => {
         setShowDeleteModal(false);
@@ -186,12 +212,20 @@ function DirectoryPageContent() {
 
                     {projects.map((project) => {
                         return (
-                            <ProjectCard project={project} deleteProject={handleDeleteProject} key={project.id}/>
+                            <ProjectCard project={project} deleteProject={handleDeleteProject} downloadProject={handleDownloadProject} key={project.id}/>
                         )
                     })}
-                    <AddProjectCard onSubmit={handleCreateProject}/>
+                    <AddProjectCard onSubmit={handleCreateProject} onUpload={handleUploadProject}/>
                 </div>
             </div>
+
+            <Toast show={uploadError !== null} onClose={() => setUploadError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
+                <Toast.Header>
+                    <strong className="me-auto text-danger">Upload Error</strong>
+                </Toast.Header>
+                <Toast.Body>{uploadError}</Toast.Body>
+            </Toast>
+
             <ConfirmationModal
                 show={showDeleteModal}
                 title={`Delete "${selectedDirectory ? selectedDirectory.name : selectedProject?.name}"?`}

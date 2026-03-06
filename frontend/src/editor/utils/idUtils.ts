@@ -5,6 +5,11 @@ export function generateNodeId() {
     return `node-${id}`;
 }
 
+export function generateEdgeId() {
+    const id = crypto.randomUUID().replaceAll('-', '');
+    return `edge-${id}`;
+}
+
 // Handle id convention: `node-<nodeId>-(input|output)-handle-<index>`
 export function getItemIndexFromHandleId(handleId: string) {
     return parseInt(handleId?.split("-")[4] ?? "-1", 10);

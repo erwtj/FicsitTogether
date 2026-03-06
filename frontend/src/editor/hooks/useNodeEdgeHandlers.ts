@@ -13,6 +13,7 @@ import {
 } from "../utils/throughput";
 import type { PendingConnection } from "./useNodeSpawner";
 import { stripComputedFields } from "../utils/idUtils";
+import { generateEdgeId } from "../utils/idUtils";
 
 const LOCAL_ORIGIN = "local";
 
@@ -172,7 +173,7 @@ export function useNodeEdgeHandlers(
                 throughput = Math.max(0, max - usedTargetThroughput(allEdges, target, targetHandle));
         }
 
-        const edgeId = `edge-${Date.now()}`;
+        const edgeId = generateEdgeId();
         doc.getMap<Edge>("edges").set(edgeId, {
             id: edgeId,
             type: "item-edge",

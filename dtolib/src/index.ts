@@ -60,7 +60,7 @@ export type EdgeDTO = {
             id: string;
             x: number;
             y: number;
-        }
+        }[]
     }
 
     selected: boolean;

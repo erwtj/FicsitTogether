@@ -2,7 +2,7 @@ import {Folder, ThreeDotsVertical, } from "react-bootstrap-icons";
 import {Dropdown} from "react-bootstrap";
 import {useState} from "react";
 import {Card} from "react-bootstrap";
-import "./explorerComponents.css"
+import "./ExplorerComponents.css"
 import {Link} from "@tanstack/react-router";
 
 export type DirectoryInfo = {
@@ -31,8 +31,9 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
             key={directoryInfo.id}
         >
             <Link to={"/directories/$dir"} params={{ dir: directoryInfo.id }} className={"stretched-link"}></Link>
-            <div className={"d-flex flex-row gap-2 align-items-center justify-content-center w-100"}>
-                <Folder size={26} className={""}/>
+            <div className={"d-flex flex-row align-items-center justify-content-center w-100"}>
+                {/* We can not replace me-2 with gap-2, since this will cause the directory icon to shrink */}
+                <Folder size={26} className={"me-2"}/>
 
                 <div className={"d-flex flex-column align-items-start justify-content-center"}>
                     {directoryInfo.name.length === 0 ?
@@ -46,22 +47,22 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
                 </div>
                 <Dropdown className={"z-2 ms-auto"} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
-                                     className={"border-0 p-0 bg-transparent no-arrow align-top"}
+                                     className="dropdown-toggle p-0 no-arrow align-top"
                                      id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
                     >
-                        <ThreeDotsVertical size={20} className={"text-secondary ms-auto"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
+                        <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
-                    <Dropdown.Menu className={"position-fixed z-2"} >
+                    <Dropdown.Menu className={"position-fixed p-0 z-2"} >
                         {deleteDirectory && !directoryInfo.isShared && (
-                            <Dropdown.Item href={"#"} className={"delete-option"}
+                            <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
                                            onClick={() => deleteDirectory(directoryInfo)}>Delete</Dropdown.Item>
                         )}
                         {shareDirectory && !directoryInfo.isShared && (
-                            <Dropdown.Item href={"#"} className={"share-option"}
+                            <Dropdown.Item href={"#"} className={"dropdown-option share-option user-select-none"}
                                            onClick={() => shareDirectory(directoryInfo)}>Share</Dropdown.Item>
                         )}
                         {leaveDirectory && directoryInfo.isShared && (
-                            <Dropdown.Item href={"#"} className={"delete-option"}
+                            <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
                                            onClick={() => leaveDirectory(directoryInfo)}>Leave</Dropdown.Item>
                         )}
                     </Dropdown.Menu>

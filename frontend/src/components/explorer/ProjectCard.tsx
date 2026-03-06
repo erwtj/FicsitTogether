@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, Dropdown } from 'react-bootstrap';
 import { ThreeDotsVertical } from 'react-bootstrap-icons';
 import {Link} from "@tanstack/react-router";
+import "./ExplorerComponents.css";
 
 export type ProjectInfo = {
     id: string;
@@ -12,18 +13,18 @@ export type ProjectInfo = {
 export type ProjectProps = {
     project: ProjectInfo;
     deleteProject: (project: ProjectInfo) => void;
+    downloadProject: (project: ProjectInfo) => void;
 }
 
-
-export const ProjectCard = ({project, deleteProject}: ProjectProps) => {
+export const ProjectCard = ({project, deleteProject, downloadProject}: ProjectProps) => {
     const [showDropdown, setShowDropdown] = useState(false);
 
     return (
         <Card
-        onMouseLeave={() => setShowDropdown(false)}
-        className={"clickable-card p-3 d-flex d-flex flex-column"}
-        style={{width: "18rem", minHeight: "4rem", position: "relative"}}
-        key={project.id}
+            onMouseLeave={() => setShowDropdown(false)}
+            className={"clickable-card p-3 d-flex d-flex flex-column"}
+            style={{width: "18rem", minHeight: "4rem", position: "relative"}}
+            key={project.id}
         >
             <Link to={"/edit/$project"} params={{ project: project.id }} className={"stretched-link"}></Link>
             <Card.Title className={"d-flex align-items-center justify-content-between user-select-none"}>
@@ -33,14 +34,19 @@ export const ProjectCard = ({project, deleteProject}: ProjectProps) => {
                 }
                 <Dropdown className={"z-2 ms-auto"} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
-                                     className="border-0 p-0 bg-transparent no-arrow align-top"
+                                     className="dropdown-toggle p-0 no-arrow align-top"
                                      id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
                     >
-                        <ThreeDotsVertical size={20} className={"text-secondary ms-auto"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
+                        <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
-                    <Dropdown.Menu className={"position-fixed z-2"} >
-                        <Dropdown.Item href={"#"} className={"delete-option user-select-none"}
-                                       onClick={() => deleteProject(project)}>Delete
+                    <Dropdown.Menu className={"position-fixed p-0 z-2"} >
+                        <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
+                                       onClick={() => deleteProject(project)}>
+                            Delete
+                        </Dropdown.Item>
+                        <Dropdown.Item href={"#"} className={"dropdown-option download-option user-select-none"}
+                                       onClick={() => downloadProject(project)}>
+                            Download
                         </Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
@@ -52,5 +58,5 @@ export const ProjectCard = ({project, deleteProject}: ProjectProps) => {
                 }
             </Card.Text>
         </Card>
-    )
+    );
 }

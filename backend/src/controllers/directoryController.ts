@@ -4,6 +4,7 @@ import * as projectRepository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import {getUserByUsername} from "../repository/userRepository.js";
 import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO} from "dtolib";
+import {sanitizeChart} from "../utils/chartValidator.js";
 
 export async function getDirectory(req: Request, res: Response, next: NextFunction) {
     try {
@@ -212,6 +213,58 @@ export async function getSharedDirectories(req: Request, res: Response, next: Ne
         const sharedDirectories = await directoryRepository.getSharedDirectories(userId);
 
         res.status(200).send(sharedDirectories as SharedDirectoryDTO[]);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function uploadProject(req: Request, res: Response, next: NextFunction) {
+    try {
+        const directoryId = req.params.directoryId as string;
+        const file = (req as Request & { file?: Express.Multer.File }).file;
+
+        if (directoryId === req.user.root_directory) {
+            const error: AppError = new Error('Not allowed to upload projects to root directory!');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (!file) {
+            const error: AppError = new Error('No file uploaded.');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (file.mimetype !== 'application/json') {
+            const error: AppError = new Error('Invalid file type. Only JSON files are allowed.');
+            error.status = 400;
+            return next(error);
+        }
+
+        let projectData: { name?: unknown; description?: unknown; chart?: unknown };
+        try {
+            projectData = JSON.parse(file.buffer.toString('utf-8'));
+        } catch {
+            const error: AppError = new Error('Invalid JSON file.');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (typeof projectData.name !== 'string' || !projectData.name ||
+            typeof projectData.description !== 'string' || !projectData.chart) {
+            const error: AppError = new Error('Invalid project data. Missing required fields.');
+            error.status = 400;
+            return next(error);
+        }
+
+        const name = projectData.name.slice(0, 35);
+        const description = projectData.description.slice(0, 255);
+        const chart = sanitizeChart(projectData.chart);
+
+        const projectId = crypto.randomUUID();
+        await projectRepository.createProject(projectId, directoryId, name, description, chart);
+
+        res.status(201).send({ id: projectId, name, description, directoryId });
     } catch (error) {
         next(error);
     }

@@ -4,10 +4,8 @@ import type {AppError} from "../middlewares/errorHandler.js";
 import type {ProjectDTO} from "dtolib";
 
 const emptyChart = {nodes: [], edges: [], viewport: {x: 0, y: 0, zoom: 1}};
-const emptyJson = JSON.stringify(emptyChart); 
 
 // TODO: Allow marking project's as public via url, that way you can share files with other people without them being able to edit and without needing their username
-// TODO: Add project importing / exporting
 
 export async function createProject(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -34,7 +32,7 @@ export async function createProject(req: Request, res: Response, next: NextFunct
         }
         
         const uuid = crypto.randomUUID();
-        await repository.createProject(uuid, directoryId, name, description, emptyJson);
+        await repository.createProject(uuid, directoryId, name, description, emptyChart);
         
         res.status(201).send({
             id: uuid,
@@ -76,18 +74,28 @@ export async function deleteProject(req: Request, res: Response, next: NextFunct
     }
 }
 
-export async function getChart(req: Request, res: Response, next: NextFunction) {
+export async function downloadProject(req: Request, res: Response, next: NextFunction) {
     try {
         const id = req.params.projectId as string; // won't even route if no id is included
+        const project = await repository.getProject(id);
         const chart = await repository.getProjectChart(id);
 
-        if (!chart) { // Should be impossible due to checkProjectAccess middleware
+        if (!project || !chart) { // This could happen due to a race condition
             const error: AppError = new Error('Unauthorized');
             error.status = 401;
             return next(error);
         }
 
-        res.status(200).send(chart);
+        const plainName = `${project.name}.json`;
+        const encodedName = encodeURIComponent(plainName);
+        res.setHeader('Content-Disposition', `attachment; filename="${plainName}"; filename*=UTF-8''${encodedName}`);
+        res.setHeader('Content-Type', 'application/json');
+
+        res.status(200).json({
+            name: project.name,
+            description: project.description,
+            chart: chart,
+        });
     } catch (error) {
         next(error);
     }

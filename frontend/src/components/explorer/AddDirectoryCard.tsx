@@ -1,7 +1,7 @@
 import {FolderPlus} from "react-bootstrap-icons";
 import {Card} from "react-bootstrap";
 import {useState} from "react";
-import "./explorerComponents.css"
+import "./ExplorerComponents.css"
 
 
 export const AddDirectoryCard = ({onSubmit}: {onSubmit: (value: string) => void}) => {
@@ -31,7 +31,7 @@ export const AddDirectoryCard = ({onSubmit}: {onSubmit: (value: string) => void}
                 <button className="d-inline bg-transparent border-0 p-0 m-0" type="submit" disabled={directoryName.length === 0}>
                     <FolderPlus
                         size={26}
-                        className={directoryName.length === 0 ? "text-muted" : ""}
+                        className={directoryName.length === 0 ? "text-body-tertiary" : ""}
                     />
                 </button>
 

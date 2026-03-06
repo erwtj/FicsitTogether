@@ -16,7 +16,7 @@ export type Chart = {
 // this is just to speed up queries, why query the big chart json when we don't use it
 
 // Exception for create, which inits with an empty chart
-export async function createProject(id: string, directoryId: string, name: string, description: string, chart: string) {
+export async function createProject(id: string, directoryId: string, name: string, description: string, chart: any) {
     const json = JSON.stringify(chart);
     await pool.query(
         'INSERT INTO projects (id, parent_directory, name, description, chart) VALUES ($1, $2, $3, $4, $5)',

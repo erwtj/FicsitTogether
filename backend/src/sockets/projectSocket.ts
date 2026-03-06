@@ -13,6 +13,7 @@ import {
 } from 'y-protocols/awareness';
 import {hasProjectAccess} from "../middlewares/directoryAccess.js";
 import type {NodeDTO, EdgeDTO} from "dtolib";
+import {sanitizeChart} from "../utils/chartValidator.js";
 
 // Data for an authenticated user connected via websocket
 interface AuthenticatedWebSocket extends WebSocket {
@@ -29,6 +30,7 @@ interface ProjectContext {
     awareness: Awareness; // Contains online user info, selections, cursor position
     saveTimeout?: NodeJS.Timeout;
     nextClientId: number;
+    saveAbortController?: AbortController | undefined; // Abort the current in-flight save so a newer one can take over
 }
 
 const projectContextMap = new Map<string, ProjectContext>(); // projectId -> ProjectContext
@@ -37,24 +39,34 @@ const MESSAGE_SYNC = 0;      // Yjs document sync
 const MESSAGE_AWARENESS = 1;  // Awareness updates
 
 
-// TODO: Rewrite
-async function saveDocument(projectId: string, ydoc: Y.Doc) {
-    const nodes = Array.from(ydoc.getMap('nodes').values());
-    const edges = Array.from(ydoc.getMap('edges').values());
-    const metadata = Array.from(ydoc.getMap('metadata').entries());
+async function saveDocument(projectId: string, context: ProjectContext) {
+    // Abort any in-flight save — the new snapshot is always more up to date
+    context.saveAbortController?.abort();
+    const abortController = new AbortController();
+    context.saveAbortController = abortController;
 
-    const name = metadata.find(([key]) => key === 'name')?.[1] as string || '';
-    const description = metadata.find(([key]) => key === 'description')?.[1] as string || '';
+    // Snapshot Yjs state synchronously before any await
+    const nodesJson = context.doc.getMap('nodes').toJSON();
+    const edgesJson = context.doc.getMap('edges').toJSON();
+    const metadataJson = context.doc.getMap('metadata').toJSON();
 
-    const jsonData = { nodes, edges };
+    const name = (metadataJson['name'] as string) || '';
+    const description = (metadataJson['description'] as string) || '';
+    const jsonData = sanitizeChart({ nodes: Object.values(nodesJson), edges: Object.values(edgesJson) });
 
     try {
         await Promise.all([
             projectRepository.updateProjectChart(projectId, jsonData),
             projectRepository.updateProject(projectId, name, description),
         ]);
+
+        if (abortController.signal.aborted) return; // A newer save already took over
+        context.saveAbortController = undefined;
     } catch (error) {
-        console.error(`Error saving project: ${error}`);
+        if (!abortController.signal.aborted) {
+            console.error(`Error saving project ${projectId}:`, error);
+        }
+        // If aborted, silently discard, the newer save will persist the correct data
     }
 }
 
@@ -207,7 +219,7 @@ export function setupWebSocketServer(server: Server) {
 
                 if (context.saveTimeout) clearTimeout(context.saveTimeout);
                 context.saveTimeout = setTimeout(() => {
-                    saveDocument(ws.projectId, context.doc);
+                    saveDocument(ws.projectId, context);
                 }, 2000);
 
             } else if (messageType === MESSAGE_AWARENESS) {
@@ -226,7 +238,9 @@ export function setupWebSocketServer(server: Server) {
             removeAwarenessStates(context.awareness, [ws.clientId], null);
 
             if (context.clients.size === 0) {
-                saveDocument(ws.projectId, context.doc);
+                // Cancel any pending debounced save, we're saving right now
+                if (context.saveTimeout) clearTimeout(context.saveTimeout);
+                saveDocument(ws.projectId, context);
                 projectContextMap.delete(ws.projectId);
             }
         });
