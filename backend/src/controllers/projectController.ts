@@ -3,7 +3,7 @@ import * as repository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import type {ProjectDTO} from "dtolib";
 
-const emptyChart = {nodes: [], edges: [], viewport: {x: 0, y: 0, zoom: 1}};
+const emptyChart = {nodes: [], edges: []};
 
 // TODO: Allow marking project's as public via url, that way you can share files with other people without them being able to edit and without needing their username
 
