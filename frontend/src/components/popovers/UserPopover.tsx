@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import type { Auth0ContextType } from "../../auth/auth0.tsx";
 import Button from 'react-bootstrap/Button';
 import {ClientSettingsModal} from "../modals/ClientSettingsModal.tsx";
+import "./UserPopover.tsx.css";
+import { BoxArrowUpRight } from "react-bootstrap-icons";
 
 export type UserPopoverProps = {
     auth0Context: Auth0ContextType
@@ -33,12 +35,15 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
         <Popover id="user-popover" style={{maxWidth: 'none'}}>
             {/* Why not use a header? Because footer doesn't exist so we already have to manage <hr/> */}
             <Popover.Body className="text-center">
-                <img
-                    src={user!.picture}
-                    alt={user!.name}
-                    className="rounded-circle"
-                    style={{ width: '80px', height: '80px' }}
-                />
+                <a href="https://gravatar.com/profile" target="_blank" rel="noopener noreferrer" className="link-image">
+                    <img
+                        src={user!.picture}
+                        alt={user!.name}
+                        className="rounded-circle"
+                        style={{ width: '80px', height: '80px' }}
+                    />
+                    <BoxArrowUpRight className="link-image-hover"/>
+                </a>
 
                 <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
 

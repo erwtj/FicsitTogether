@@ -126,7 +126,7 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
                         alt="Image failed to load"
                         draggable={false}
                     />
-                    {<span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{!isInfinite ? displayPercentage + "%" : ""}</span>}
+                    {<span className={warning ? "no-drag text-danger" : "no-drag"} style={{ fontSize: '0.875rem' }}>{!isInfinite ? displayPercentage + "%" : ""}</span>}
                 </CircularProgressbarWithChildren>
 
                 <center>
