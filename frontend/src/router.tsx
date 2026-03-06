@@ -2,6 +2,7 @@ import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import type {Auth0ContextType} from './auth/auth0.tsx';
 import {NotFoundComponent} from "./components/404.tsx";
+import {ErrorComponent} from "./components/Error.tsx";
 
 // Define the router context interface
 export interface RouterContext {
@@ -21,6 +22,7 @@ export const router = createRouter({
     } as RouterContext,
     defaultPreload: false,
     defaultNotFoundComponent: NotFoundComponent,
+    defaultErrorComponent: ErrorComponent,
 });
 
 // Register the router instance for type safety
