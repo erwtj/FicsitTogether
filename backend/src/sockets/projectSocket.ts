@@ -12,7 +12,7 @@ import {
     removeAwarenessStates
 } from 'y-protocols/awareness';
 import {hasProjectAccess} from "../middlewares/directoryAccess.js";
-import type {NodeDTO, EdgeDTO} from "dtolib";
+import {type NodeDTO, type EdgeDTO, MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH} from "dtolib";
 import {sanitizeChart} from "../utils/chartValidator.js";
 
 // Data for an authenticated user connected via websocket
@@ -50,8 +50,8 @@ async function saveDocument(projectId: string, context: ProjectContext) {
     const edgesJson = context.doc.getMap('edges').toJSON();
     const metadataJson = context.doc.getMap('metadata').toJSON();
 
-    const name = (metadataJson['name'] as string) || '';
-    const description = (metadataJson['description'] as string) || '';
+    const name = (metadataJson['name'] as string).slice(0, MAX_NAME_LENGTH) || '';
+    const description = (metadataJson['description'] as string).slice(0, MAX_DESCRIPTION_LENGTH) || '';
     const jsonData = sanitizeChart({ nodes: Object.values(nodesJson), edges: Object.values(edgesJson) });
 
     try {

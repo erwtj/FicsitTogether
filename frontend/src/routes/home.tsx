@@ -15,6 +15,8 @@ import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
 import "./home.tsx.css";
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
+import { Toast } from "react-bootstrap";
+import { MAX_DIRECTORIES_PER_DIRECTORY } from "dtolib";
 
 export const Route = createFileRoute('/home')({
     beforeLoad: ({context}) => {
@@ -74,6 +76,8 @@ function HomePage() {
     const [showShareModal, setShowShareModal] = useState(false);
     
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
+    
+    const [apiError, setApiError] = useState<string | null>(null);
 
     const handleCreateDirectory = (name: string) => {
         createDirectory(auth, root.id, name)
@@ -85,7 +89,13 @@ function HomePage() {
             }]);
         }
         )
-        .catch(err => console.error('Error creating directory:', err));
+        .catch(err => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Cannot create this directory. Please try again.');
+            } else {
+                setApiError('An error occurred while creating the directory. Please try again.');
+            }
+        });
     };
 
     // Delete directory flow
@@ -104,7 +114,14 @@ function HomePage() {
                     console.error('Failed to delete directory');
                 }
             })
-            .catch(err => console.error('Error deleting directory:', err));
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Cannot delete this directory. Please try again.');
+                } else {
+                    setApiError('An error occurred while deleting the directory. Please try again.');
+                }
+                console.error('Error deleting directory:', err)
+            });
         }
         setSelectedDirectory(null);
     }
@@ -125,7 +142,14 @@ function HomePage() {
                     console.error('Failed to leave directory');
                 }
             })
-            .catch(err => console.error('Error leaving directory:', err));
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Cannot leave this directory. Please try again.');
+                } else {
+                    setApiError('An error occurred while leaving the directory. Please try again.');
+                }
+                console.error('Error leaving directory:', err)
+            });
         }
         setSelectedDirectory(null);
     }
@@ -154,7 +178,9 @@ function HomePage() {
                                 shareDirectory={(dir) => handleShareDirectory(dir)}
                             />
                         ))}
-                        <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                        {ownedDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
+                            <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                        }
                     </div>
                 </div>
 
@@ -175,6 +201,13 @@ function HomePage() {
                     </div>
                 </div>
             </div>
+
+            <Toast show={apiError !== null} onClose={() => setApiError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
+                <Toast.Header>
+                    <strong className="me-auto text-danger">An error occurred</strong>
+                </Toast.Header>
+                <Toast.Body>{apiError}</Toast.Body>
+            </Toast>
 
             <ConfirmationModal
                 show={showDeleteModal}

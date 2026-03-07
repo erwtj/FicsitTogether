@@ -16,6 +16,7 @@ import {roundTo3Decimals, throughputToDisplay} from "../../../utils/throughputUt
 import "./OverviewSidePanel.css";
 import { Link } from "@tanstack/react-router";
 import {ClientSettingsModal} from "../../../components/modals/ClientSettingsModal.tsx";
+import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "dtolib";
 
 // ─── Item / Building list renderers ──────────────────────────────────────────
 
@@ -87,6 +88,7 @@ function DocumentInfoPanel({
                             type="text"
                             className="form-control"
                             value={metadata.name}
+                            maxLength={MAX_NAME_LENGTH}
                             onChange={e => setName(e.target.value)}
                             placeholder="No name"
                         />
@@ -98,6 +100,7 @@ function DocumentInfoPanel({
                             className="form-control"
                             rows={4}
                             value={metadata.description}
+                            maxLength={MAX_DESCRIPTION_LENGTH}
                             onChange={e => setDescription(e.target.value)}
                             placeholder="No description"
                         />

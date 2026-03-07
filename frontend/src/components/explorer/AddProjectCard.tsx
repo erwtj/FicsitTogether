@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Card } from "react-bootstrap";
 import { FileEarmarkPlus, Upload } from "react-bootstrap-icons";
 import "./ExplorerComponents.css";
+import { MAX_NAME_LENGTH } from "dtolib";
 
 export const AddProjectCard = ({onSubmit, onUpload}: {onSubmit: (value: string) => void, onUpload: (file: File) => void}) => {
     const [projectName, setProjectName] = useState("");
@@ -53,12 +54,11 @@ export const AddProjectCard = ({onSubmit, onUpload}: {onSubmit: (value: string) 
                     onChange={(e) => setProjectName(e.target.value.trimStart())}
                     placeholder={"Project name"}
                     className={"border-0 border-bottom mb-0 fs-5"}
-                    maxLength={35}
+                    maxLength={MAX_NAME_LENGTH}
                     style={{
                         outline: "none",
                         width: "11rem",
                         background: "transparent",
-                        borderColor: "var(--bs-border-color)"
                     }}
                 />
             </form>
@@ -71,7 +71,7 @@ export const AddProjectCard = ({onSubmit, onUpload}: {onSubmit: (value: string) 
                 onChange={handleFileChange}
                 disabled={projectName.length !== 0}
             />
-            <Upload size={26} role="button" onClick={handleUpload}/>
+            <Upload size={26} role="button" className="mt-1 text-muted upload-button" onClick={handleUpload}/>
         </Card>
     )
 }

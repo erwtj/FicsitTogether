@@ -4,6 +4,14 @@ import * as projectRepository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import {getUserByUsername} from "../repository/userRepository.js";
 import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO} from "dtolib";
+import {
+    MAX_DESCRIPTION_LENGTH,
+    MAX_DIRECTORIES_PER_DIRECTORY,
+    MAX_DIRECTORY_DEPTH,
+    MAX_NAME_LENGTH,
+    MAX_PROJECTS_PER_DIRECTORY,
+    MAX_STORAGE_PER_USER_BYTES,
+} from "dtolib";
 import {sanitizeChart} from "../utils/chartValidator.js";
 
 export async function getDirectory(req: Request, res: Response, next: NextFunction) {
@@ -21,15 +29,15 @@ export async function getDirectory(req: Request, res: Response, next: NextFuncti
             subDirectories,
             projects,
             directoryTree,
-        } as unknown as DirectoryContentDTO);
+        } as DirectoryContentDTO);
     } catch (error) {
         next(error);
     }
 }
 
-export function getRootDirectory(req: Request, res: Response, next: NextFunction) {
+export async function getRootDirectory(req: Request, res: Response, next: NextFunction) {
     req.params.directoryId = req.user.root_directory;
-    getDirectory(req, res, next);
+    await getDirectory(req, res, next);
 }
 
 export async function createDirectory(req: Request, res: Response, next: NextFunction) {
@@ -43,8 +51,25 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
             return next(error);
         }
 
-        if (name.length > 20) {
-            const error: AppError = new Error('Directory name exceeds max length (20).');
+        if (name.length > MAX_NAME_LENGTH) {
+            const error: AppError = new Error(`Directory name exceeds max length (${MAX_NAME_LENGTH}).`);
+            error.status = 400;
+            return next(error);
+        }
+
+        const [parentDepth, siblingCount] = await Promise.all([
+            directoryRepository.getDirectoryDepth(parentDirectoryId),
+            directoryRepository.countDirectories(parentDirectoryId),
+        ]);
+
+        if (parentDepth >= MAX_DIRECTORY_DEPTH) {
+            const error: AppError = new Error(`Maximum directory depth of ${MAX_DIRECTORY_DEPTH} reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (siblingCount >= MAX_DIRECTORIES_PER_DIRECTORY) {
+            const error: AppError = new Error(`Maximum of ${MAX_DIRECTORIES_PER_DIRECTORY} directories per directory reached.`);
             error.status = 400;
             return next(error);
         }
@@ -240,6 +265,23 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
             error.status = 400;
             return next(error);
         }
+        
+        const [projectCount, storageUsed] = await Promise.all([
+            projectRepository.countProjectsInDirectory(directoryId),
+            projectRepository.getUserStorageUsed(req.user.id),
+        ]);
+
+        if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {
+            const error: AppError = new Error(`Maximum of ${MAX_PROJECTS_PER_DIRECTORY} projects per directory reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (storageUsed + file.size > MAX_STORAGE_PER_USER_BYTES) {
+            const error: AppError = new Error(`Storage limit of ${MAX_STORAGE_PER_USER_BYTES / (1024 * 1024)} MB per user reached.`);
+            error.status = 400;
+            return next(error);
+        }
 
         let projectData: { name?: unknown; description?: unknown; chart?: unknown };
         try {
@@ -257,8 +299,8 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
             return next(error);
         }
 
-        const name = projectData.name.slice(0, 35);
-        const description = projectData.description.slice(0, 255);
+        const name = projectData.name.slice(0, MAX_NAME_LENGTH);
+        const description = projectData.description.slice(0, MAX_DESCRIPTION_LENGTH);
         const chart = sanitizeChart(projectData.chart);
 
         const projectId = crypto.randomUUID();

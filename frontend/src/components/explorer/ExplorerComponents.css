@@ -105,3 +105,11 @@
     word-wrap: break-word;
     white-space: pre-wrap;
 }
+
+.upload-button:hover {
+    color: white !important;
+}
+
+.upload-button:active {
+    color: #a2a4a6 !important;
+}

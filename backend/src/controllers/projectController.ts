@@ -2,6 +2,7 @@
 import * as repository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import type {ProjectDTO} from "dtolib";
+import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH, MAX_PROJECTS_PER_DIRECTORY, MAX_STORAGE_PER_USER_BYTES} from "dtolib";
 
 const emptyChart = {nodes: [], edges: []};
 
@@ -19,8 +20,14 @@ export async function createProject(req: Request, res: Response, next: NextFunct
             return next(error);
         }
 
-        if (name.length > 35) {
-            const error: AppError = new Error('Directory name exceeds max length (35).');
+        if (name.length > MAX_NAME_LENGTH) {
+            const error: AppError = new Error(`Directory name exceeds max length (${MAX_NAME_LENGTH}).`);
+            error.status = 400;
+            return next(error);
+        }
+        
+        if (description.length > MAX_DESCRIPTION_LENGTH) {
+            const error: AppError = new Error(`Directory description exceeds max length (${MAX_DESCRIPTION_LENGTH}).`);
             error.status = 400;
             return next(error);
         }
@@ -30,7 +37,24 @@ export async function createProject(req: Request, res: Response, next: NextFunct
             error.status = 400;
             return next(error);
         }
-        
+
+        const [projectCount, storageUsed] = await Promise.all([
+            repository.countProjectsInDirectory(directoryId),
+            repository.getUserStorageUsed(req.user.id),
+        ]);
+
+        if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {
+            const error: AppError = new Error(`Maximum of ${MAX_PROJECTS_PER_DIRECTORY} projects per directory reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (storageUsed >= MAX_STORAGE_PER_USER_BYTES) {
+            const error: AppError = new Error(`Storage limit of ${MAX_STORAGE_PER_USER_BYTES / (1024 * 1024)} MB per user reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
         const uuid = crypto.randomUUID();
         await repository.createProject(uuid, directoryId, name, description, emptyChart);
         

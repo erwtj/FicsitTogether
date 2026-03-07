@@ -9,7 +9,8 @@ import {
     fetchDirectoryContent,
     fetchUser,
 } from "../api/apiCalls.ts";
-import {type DirectoryDTO, type ProjectDTO} from "dtolib";
+import {MAX_DIRECTORIES_PER_DIRECTORY, MAX_DIRECTORY_DEPTH,
+    MAX_PROJECTS_PER_DIRECTORY, type DirectoryDTO, type ProjectDTO} from "dtolib";
 import {Folder} from 'react-bootstrap-icons';
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
@@ -82,7 +83,7 @@ function DirectoryPageContent() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
 
-    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<string | null>(null);
 
     // Create Directory and Project flow
     const handleCreateDirectory = (name: string) => {
@@ -91,7 +92,14 @@ function DirectoryPageContent() {
                     setSubDirectories(prev => [...prev, newDir]);
                 }
             )
-            .catch(err => console.error('Error creating directory:', err));
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Invalid input. Please check your directory name and try again.');
+                } else {
+                    setApiError('An error occurred while creating the directory. Please try again.');
+                }
+                console.error('Error creating directory:', err)
+            });
     };
     const handleCreateProject = (name: string) => {
         createProject(auth, dirId, name)
@@ -99,7 +107,14 @@ function DirectoryPageContent() {
                     setProjects(prev => [...prev, newProject]);
                 }
             )
-            .catch(err => console.error('Error creating project:', err));
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Invalid input. Please check your project name and try again.');
+                } else {
+                    setApiError('An error occurred while creating the project. Please try again.');
+                }
+                console.error('Error creating project:', err)
+            });
     }
     const handleUploadProject = (file: File) => {
         uploadProject(auth, dirId, file)
@@ -108,9 +123,9 @@ function DirectoryPageContent() {
             })
             .catch((err) => {
                 if (err.response?.status === 400) {
-                    setUploadError('Invalid file format. Please upload a valid project JSON file.');
+                    setApiError(err.response.data?.message || 'Invalid file format. Please upload a valid project JSON file.');
                 } else {
-                    setUploadError('An error occurred while uploading the project. Please try again.');
+                    setApiError('An error occurred while uploading the project. Please try again.');
                 }
                 console.error('Error uploading project:', err)
             });
@@ -147,7 +162,14 @@ function DirectoryPageContent() {
                         console.error('Failed to delete directory');
                     }
                 })
-                .catch(err => console.error('Error deleting directory:', err));
+                .catch(err => {
+                    if (err.response?.status === 400) {
+                        setApiError(err.response.data?.message || 'Cannot delete this directory. Please try again.');
+                    } else {
+                        setApiError('An error occurred while deleting the directory. Please try again.');
+                    }
+                    console.error('Error deleting directory:', err)
+                });
         }
         else if (shouldDelete && selectedProject) {
             deleteProject(auth, selectedProject.id)
@@ -158,7 +180,14 @@ function DirectoryPageContent() {
                         console.error('Failed to delete project');
                     }
                 })
-                .catch(err => console.error('Error deleting project:', err));
+                .catch(err => {
+                    if (err.response?.status === 400) {
+                        setApiError(err.response.data?.message || 'Cannot delete this project. Please try again.');
+                    } else {
+                        setApiError('An error occurred while deleting the project. Please try again.');
+                    }
+                    console.error('Error deleting project:', err)
+                });
         }
         setSelectedDirectory(null);
         setSelectedProject(null);
@@ -172,7 +201,7 @@ function DirectoryPageContent() {
     return (
         <>
             <BuyMeCoffeeWidget />
-            <DirectoryTree dirTree={directory.directoryTree.tree} depthLimitReached={directory.directoryTree.depthLimitReached}/>
+            <DirectoryTree dirTree={directory.directoryTree}/>
             <div className="mt-4 align-items-center px-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
                 <div/>
                 <div className="d-flex flex-row flex-nowrap gap-3 align-items-center justify-content-center">
@@ -205,7 +234,9 @@ function DirectoryPageContent() {
                             />
                         )
                     })}
-                    <AddDirectoryCard onSubmit={handleCreateDirectory}/>
+                    {directory.directoryTree.length <= MAX_DIRECTORY_DEPTH && 
+                        subDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
+                        <AddDirectoryCard onSubmit={handleCreateDirectory}/>}
                 </div>
                 <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>
@@ -215,15 +246,16 @@ function DirectoryPageContent() {
                             <ProjectCard project={project} deleteProject={handleDeleteProject} downloadProject={handleDownloadProject} key={project.id}/>
                         )
                     })}
-                    <AddProjectCard onSubmit={handleCreateProject} onUpload={handleUploadProject}/>
+                    {projects.length < MAX_PROJECTS_PER_DIRECTORY &&
+                        <AddProjectCard onSubmit={handleCreateProject} onUpload={handleUploadProject}/>}
                 </div>
             </div>
 
-            <Toast show={uploadError !== null} onClose={() => setUploadError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
+            <Toast show={apiError !== null} onClose={() => setApiError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
                 <Toast.Header>
-                    <strong className="me-auto text-danger">Upload Error</strong>
+                    <strong className="me-auto text-danger">An error occurred</strong>
                 </Toast.Header>
-                <Toast.Body>{uploadError}</Toast.Body>
+                <Toast.Body>{apiError}</Toast.Body>
             </Toast>
 
             <ConfirmationModal

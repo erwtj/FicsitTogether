@@ -99,3 +99,28 @@ export async function getChartsRecursive(directoryId: string): Promise<ChartData
 export async function deleteProject(id: string) {
     await pool.query('DELETE FROM projects WHERE id = $1', [id]);
 }
+
+/**
+ * Returns the number of projects in a given directory.
+ */
+export async function countProjectsInDirectory(directoryId: string): Promise<number> {
+    const res = await pool.query<{ count: string }>(
+        'SELECT COUNT(*) AS count FROM projects WHERE parent_directory = $1',
+        [directoryId]
+    );
+    return parseInt(res.rows[0]?.count ?? '0', 10);
+}
+
+/**
+ * Returns the total storage used (in bytes) by all projects owned by a user,
+ * calculated as the byte length of the stored JSONB chart data.
+ */
+export async function getUserStorageUsed(userId: string): Promise<number> {
+    const res = await pool.query<{ total: string }>(`
+        SELECT COALESCE(SUM(octet_length(p.chart::text)), 0) AS total
+        FROM projects p
+        JOIN directories d ON p.parent_directory = d.id
+        WHERE d.owner = $1
+    `, [userId]);
+    return parseInt(res.rows[0]?.total ?? '0', 10);
+}
