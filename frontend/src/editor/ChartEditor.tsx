@@ -110,6 +110,10 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     </Panel>
                 </ReactFlow>
 
+                <div className="experimental-ribbon no-drag">
+                    Experimental
+                </div>
+                
                 <div className="position-fixed top-0 end-0 p-3 z-1">
                     <Toast show={!connected} className="delayed-appear">
                         <Toast.Header closeButton={false}>

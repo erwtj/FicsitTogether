@@ -81,6 +81,22 @@
     100% { opacity:1; }
 }
 
+.experimental-ribbon {
+    position: absolute;
+    top: 35px;
+    left: -150px;
+    width: 400px;
+    height: 30px;
+    background-color: rgba(255, 0, 0, 0.54);
+    color: #fff;
+    text-align: center;
+    font-size: 17px;
+    font-weight: bold;
+    z-index: 1000;
+    
+    rotate: -45deg;
+}
+
 @-webkit-keyframes fadein{
     0% { opacity:0; }
     66% { opacity:0; }
