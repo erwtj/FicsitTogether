@@ -238,7 +238,7 @@ function DirectoryPageContent() {
                         subDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
                         <AddDirectoryCard onSubmit={handleCreateDirectory}/>}
                 </div>
-                <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-3 mt-3 justify-content-center"}
+                <div key={"project-list"} className={"d-flex flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>
 
                     {projects.map((project) => {

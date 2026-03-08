@@ -45,14 +45,14 @@ export const DirectoryCard = ({directoryInfo, deleteDirectory, shareDirectory, l
                         <small className={"text-muted"}>Shared by: {directoryInfo.sharedBy}</small>
                     )}
                 </div>
-                <Dropdown className={"z-2 ms-auto"} show={showDropdown}>
+                <Dropdown className={"ms-auto"} style={{zIndex: showDropdown ? 3 : 2}} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
                                      className="dropdown-toggle p-0 no-arrow align-top"
                                      id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
                     >
                         <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
-                    <Dropdown.Menu className={"position-fixed p-0 z-2"} >
+                    <Dropdown.Menu className={"p-0 z-2"} popperConfig={{ strategy: 'fixed' }} renderOnMount>
                         {deleteDirectory && !directoryInfo.isShared && (
                             <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
                                            onClick={() => deleteDirectory(directoryInfo)}>Delete</Dropdown.Item>

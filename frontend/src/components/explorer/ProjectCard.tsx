@@ -32,14 +32,14 @@ export const ProjectCard = ({project, deleteProject, downloadProject}: ProjectPr
                     <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem", height: "1.7rem"}} key="name">No name</h5> :
                     <h5 className={"text-truncate mb-0"} style={{width: "14rem", height: "1.7rem"}} key="name">{project.name}</h5>
                 }
-                <Dropdown className={"z-2 ms-auto"} show={showDropdown}>
+                <Dropdown className={"ms-auto"} style={{zIndex: showDropdown ? 3 : 2}} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
                                      className="dropdown-toggle p-0 no-arrow align-top"
                                      id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
                     >
                         <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
-                    <Dropdown.Menu className={"position-fixed p-0 z-2"} >
+                    <Dropdown.Menu className={"p-0 z-2"} popperConfig={{ strategy: 'fixed' }} renderOnMount>
                         <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
                                        onClick={() => deleteProject(project)}>
                             Delete
