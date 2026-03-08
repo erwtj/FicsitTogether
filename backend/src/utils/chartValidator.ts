@@ -104,7 +104,7 @@ function sanitizeRecipeNodeData(raw: unknown): RecipeNodeData | null {
     if (percentage.length === 0) percentage = [100];
 
     // Validate somersloops doesn't exceed building's allowed max
-    const clampedSloops = Math.min(somersloops, maxSloops);
+    const clampedSloops = maxSloops === -1 ? 0 : Math.min(somersloops, maxSloops);
 
     return {
         recipeClassName: d.recipeClassName,
