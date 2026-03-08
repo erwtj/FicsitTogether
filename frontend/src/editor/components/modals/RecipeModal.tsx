@@ -92,7 +92,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
     }, [selectedItem, RequiredInput]);
 
     const powerRecipes = useMemo(() =>
-            selectedItem ? getRecipesByInputItem(selectedItem).filter(r => r.output.length === 0) : []
+            selectedItem ? getRecipesByInputItem(selectedItem).filter(r => r.output.length === 0 && r.input[0]?.name === selectedItem) : []
         , [selectedItem]);
 
     const selectedItemObj = useMemo(() =>
