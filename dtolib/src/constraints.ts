@@ -15,3 +15,8 @@ export const MAX_PROJECTS_PER_DIRECTORY = 20;   // Max projects inside a single 
 // TODO: Probably want to add somewhere a progress bar to show how much storage a user has left
 export const MAX_PROJECT_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB per project
 export const MAX_STORAGE_PER_USER_BYTES = 500 * 1024 * 1024; // 500 MB per user
+
+// Chart limits
+export const MAX_CHART_NODES = 2000;
+export const MAX_CHART_EDGES = 5000;
+export const MAX_MOVABLE_POINTS = 20; // Max movable (waypoint) points per edge

@@ -1,5 +1,6 @@
 ﻿import type { ChartDataDTO, NodeDTO, EdgeDTO, RecipeNodeData, ItemSpawnerNodeData, EndNodeData, PowerNodeData } from "dtolib";
 import { hasRecipe, getRecipe, hasItem, getBuilding } from "ficlib";
+import { MAX_CHART_NODES, MAX_CHART_EDGES, MAX_MOVABLE_POINTS } from "dtolib";
 
 // Maximum sensible values
 // TODO: Implement max in frontend
@@ -9,9 +10,6 @@ const MAX_THROUGHPUT = 1_000_000;
 const MAX_OUTPUT_AMOUNT = 1_000_000_000; // mL/min for fluids
 const MAX_SOMERSLOOPS = 4;
 const MAX_PERCENTAGE = 250;
-const MAX_MOVABLE_POINTS = 20;
-const MAX_NODES = 2000;
-const MAX_EDGES = 5000;
 const MAX_MOVABLE_POINT_COORD = 1_000_000;
 
 // Valid node types
@@ -284,7 +282,7 @@ export function sanitizeChart(raw: unknown): ChartDataDTO {
     const sanitizedNodes: NodeDTO[] = [];
     const handleMap = new Map<string, { inputs: Set<string>; outputs: Set<string> }>();
 
-    for (const rawNode of rawNodes.slice(0, MAX_NODES)) {
+    for (const rawNode of rawNodes.slice(0, MAX_CHART_NODES)) {
         const node = sanitizeNode(rawNode);
         if (!node) continue;
         if (seenNodeIds.has(node.id)) continue; // Remove duplicates
@@ -301,7 +299,7 @@ export function sanitizeChart(raw: unknown): ChartDataDTO {
     const seenEdgeIds = new Set<string>();
     const sanitizedEdges: EdgeDTO[] = [];
 
-    for (const rawEdge of rawEdges.slice(0, MAX_EDGES)) {
+    for (const rawEdge of rawEdges.slice(0, MAX_CHART_EDGES)) {
         const edge = sanitizeEdge(rawEdge, seenNodeIds, handleMap);
         if (!edge) continue;
         if (seenEdgeIds.has(edge.id)) continue; // Remove duplicates

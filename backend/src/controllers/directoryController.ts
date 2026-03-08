@@ -124,13 +124,13 @@ export async function shareDirectory(req: Request, res: Response, next: NextFunc
         }
 
         if (directoryId === req.user.root_directory) {
-            const error: AppError = new Error('Not allowed to share root directory!');
+            const error: AppError = new Error('Not allowed to share root directory.');
             error.status = 400;
             return next(error);
         }
 
         if (username === req.user.username) {
-            const error: AppError = new Error('Not allowed to share with yourself!');
+            const error: AppError = new Error('Not allowed to share with yourself.');
             error.status = 400;
             return next(error);
         }
@@ -149,6 +149,13 @@ export async function shareDirectory(req: Request, res: Response, next: NextFunc
         if (!user) {
             const error: AppError = new Error('User does not exist.');
             error.status = 404;
+            return next(error);
+        }
+
+        const alreadyShared = await directoryRepository.existsShare(directoryId, user.id);
+        if (alreadyShared) {
+            const error: AppError = new Error('Directory is already shared with this user.');
+            error.status = 400;
             return next(error);
         }
 
@@ -249,7 +256,7 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
         const file = (req as Request & { file?: Express.Multer.File }).file;
 
         if (directoryId === req.user.root_directory) {
-            const error: AppError = new Error('Not allowed to upload projects to root directory!');
+            const error: AppError = new Error('Not allowed to upload projects to root directory.');
             error.status = 400;
             return next(error);
         }

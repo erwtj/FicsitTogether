@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import * as Y from "yjs";
 import { type Edge } from "@xyflow/react";
 import { getRecipe } from "ficlib";
+import { MAX_CHART_NODES, MAX_CHART_EDGES } from "dtolib";
 import {
     type AppNode,
     type ItemEdgeData,
@@ -43,6 +44,10 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
             const nodeId = generateNodeId();
             const nodeMap = doc.getMap<AppNode>("nodes");
             const edgeMap = doc.getMap<Edge<ItemEdgeData>>("edges");
+
+            // Enforce chart limits
+            if (nodeMap.size >= MAX_CHART_NODES) return;
+            if (pendingConnection && edgeMap.size >= MAX_CHART_EDGES) return;
 
             // -- Build node ------------------------------------------------
             let newNode: AppNode | null = null;

@@ -6,6 +6,7 @@ import {
     useNodesState, useEdgesState, useReactFlow,
     type OnConnectStart,
 } from "@xyflow/react";
+import { MAX_CHART_EDGES } from "dtolib";
 import { type ItemEdgeData } from "../types";
 import {
     maxSourceThroughput, maxTargetThroughput,
@@ -154,6 +155,9 @@ export function useNodeEdgeHandlers(
 
         const { source, target, sourceHandle, targetHandle } = connection;
         if (!source || !target || !sourceHandle || !targetHandle) return;
+
+        const edgeMap = doc.getMap<Edge>("edges");
+        if (edgeMap.size >= MAX_CHART_EDGES) return;
 
         const sourceNode = reactFlow.getNode(source);
         const targetNode = reactFlow.getNode(target);
