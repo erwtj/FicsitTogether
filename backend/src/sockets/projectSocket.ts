@@ -50,8 +50,8 @@ async function saveDocument(projectId: string, context: ProjectContext) {
     const edgesJson = context.doc.getMap('edges').toJSON();
     const metadataJson = context.doc.getMap('metadata').toJSON();
 
-    const name = (metadataJson['name'] as string).slice(0, MAX_NAME_LENGTH) || '';
-    const description = (metadataJson['description'] as string).slice(0, MAX_DESCRIPTION_LENGTH) || '';
+    const name = (metadataJson['name'] as string | undefined)?.slice(0, MAX_NAME_LENGTH) || '';
+    const description = (metadataJson['description'] as string | undefined)?.slice(0, MAX_DESCRIPTION_LENGTH) || '';
     const jsonData = sanitizeChart({ nodes: Object.values(nodesJson), edges: Object.values(edgesJson) });
 
     try {
