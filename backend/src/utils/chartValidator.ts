@@ -3,7 +3,6 @@ import { hasRecipe, getRecipe, hasItem, getBuilding } from "ficlib";
 import { MAX_CHART_NODES, MAX_CHART_EDGES, MAX_MOVABLE_POINTS } from "dtolib";
 
 // Maximum sensible values
-// TODO: Implement max in frontend
 const MAX_COORD = 1_000_000;
 const MAX_NODE_SIZE = 10_000;
 const MAX_THROUGHPUT = 1_000_000;

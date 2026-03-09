@@ -116,7 +116,7 @@ export function setupWebSocketServer(server: Server) {
 
     server.on('upgrade', async (request, socket, head) => {
         try {
-            const projectId = request?.url?.slice(1);
+            const projectId = request?.url?.replace(/^\/ws\//, '');
             if (!projectId) {
                 socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                 socket.destroy();

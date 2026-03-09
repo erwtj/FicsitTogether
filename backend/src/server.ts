@@ -11,8 +11,8 @@ async function start() {
 
     if (config.https) {
         const options = {
-            key: fs.readFileSync('secret.key'),
-            cert: fs.readFileSync('secret.pem'),
+            key: fs.readFileSync('cert.key'),
+            cert: fs.readFileSync('cert.pem'),
         }
 
         const server = https.createServer(options, app);
