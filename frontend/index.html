@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.webp" />
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+            integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
+            crossorigin="anonymous"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ficsit Together</title>
+    <style>
+      #bmc-wbtn { display: none !important; }
+      body.show-bmc #bmc-wbtn { display: flex !important; }
+      #bmc-wbtn { width: 50px !important; height: 50px !important; }
+      #bmc-wbtn img { width: 100% !important; height: 100% !important; }
+      #bmc-wbtn > img,
+      #bmc-wbtn svg,
+      #bmc-wbtn .bmc-btn-icon {
+        width: 28px !important;
+        height: 28px !important;
+      }
+    </style>
+  </head>
+  <body data-bs-theme="dark" class="d-flex flex-fill">
+    <div id="root" class="d-flex flex-fill overflow-x-hidden"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="ikno" data-description="Support us on Buy me a coffee!" data-message="" data-color="#e26d13" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@auth0/auth0-react": "^2.13.0",
+    "@tanstack/react-router": "^1.159.5",
+    "@tanstack/react-router-devtools": "^1.159.5",
+    "@tanstack/router-devtools": "^1.159.5",
+    "@xyflow/react": "^12.10.0",
+    "axios": "^1.13.5",
+    "dtolib": "*",
+    "ficlib": "*",
+    "react": "^19.2.0",
+    "react-bootstrap": "^2.10.10",
+    "react-bootstrap-icons": "^1.11.6",
+    "react-circular-progressbar": "^2.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.0",
+    "yjs": "^13.6.29"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@tanstack/router-plugin": "^1.159.5",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.6.1"
+  }
+}

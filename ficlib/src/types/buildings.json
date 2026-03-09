@@ -1,0 +1,278 @@
+[
+  {
+    "className": "Build_OilRefinery_C",
+    "displayName": "Refinery",
+    "icon": "FactoryGame/Buildable/Factory/OilRefinery/UI/IconDesc_OilRefinery",
+    "powerConsumption": 30.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 200,
+    "somersloopsNeeded": 2
+  },
+  {
+    "className": "Build_FoundryMk1_C",
+    "displayName": "Foundry",
+    "icon": "FactoryGame/Buildable/Factory/FoundryMk1/UI/IconDesc_Foundry",
+    "powerConsumption": 16.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 90,
+    "somersloopsNeeded": 2
+  },
+  {
+    "className": "Build_Packager_C",
+    "displayName": "Packager",
+    "icon": "FactoryGame/Buildable/Factory/Packager/UI/IconDesc_Packager",
+    "powerConsumption": 10.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 64,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Build_ManufacturerMk1_C",
+    "displayName": "Manufacturer",
+    "icon": "FactoryGame/Buildable/Factory/ManufacturerMk1/UI/IconDesc_Manufacturer",
+    "powerConsumption": 55.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 360,
+    "somersloopsNeeded": 4
+  },
+  {
+    "className": "Build_AssemblerMk1_C",
+    "displayName": "Assembler",
+    "icon": "FactoryGame/Buildable/Factory/AssemblerMk1/UI/IconDesc_AssemblerMk1",
+    "powerConsumption": 15.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 150,
+    "somersloopsNeeded": 2
+  },
+  {
+    "className": "Build_Blender_C",
+    "displayName": "Blender",
+    "icon": "FactoryGame/Buildable/Factory/Blender/UI/IconDesc_Blender",
+    "powerConsumption": 75.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 288,
+    "somersloopsNeeded": 4
+  },
+  {
+    "className": "Build_SmelterMk1_C",
+    "displayName": "Smelter",
+    "icon": "FactoryGame/Buildable/Factory/SmelterMk1/UI/IconDesc_SmelterMk1",
+    "powerConsumption": 4.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 54,
+    "somersloopsNeeded": 1
+  },
+  {
+    "className": "Build_ConstructorMk1_C",
+    "displayName": "Constructor",
+    "icon": "FactoryGame/Buildable/Factory/ConstructorMk1/UI/IconDesc_ConstructorMk1",
+    "powerConsumption": 4.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 80,
+    "somersloopsNeeded": 1
+  },
+  {
+    "className": "Build_GeneratorCoal_C",
+    "displayName": "Coal-Powered Generator",
+    "icon": "FactoryGame/Buildable/Factory/GeneratorCoal/UI/IconDesc_CoalGenerator",
+    "powerConsumption": 0.0,
+    "powerProduction": 75.0,
+    "fuel": [
+      {
+        "mFuelClass": "Desc_Coal_C",
+        "mSupplementalResourceClass": "Desc_Water_C",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_CompactedCoal_C",
+        "mSupplementalResourceClass": "Desc_Water_C",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_PetroleumCoke_C",
+        "mSupplementalResourceClass": "Desc_Water_C",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      }
+    ],
+    "area": 0,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Build_GeneratorFuel_C",
+    "displayName": "Fuel-Powered Generator",
+    "icon": "FactoryGame/Buildable/Factory/GeneratorFuel/UI/FuelGenerator",
+    "powerConsumption": 0.0,
+    "powerProduction": 250.0,
+    "fuel": [
+      {
+        "mFuelClass": "Desc_LiquidFuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_LiquidTurboFuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_LiquidBiofuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_RocketFuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_IonizedFuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      }
+    ],
+    "area": 0,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Build_GeneratorBiomass_Automated_C",
+    "displayName": "Biomass Burner",
+    "icon": "FactoryGame/Buildable/Factory/GeneratorBiomass/UI/BiomassGenerator",
+    "powerConsumption": 0.0,
+    "powerProduction": 30.0,
+    "fuel": [
+      {
+        "mFuelClass": "Desc_Leaves_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_Wood_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_Mycelia_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_GenericBiomass_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_Biofuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      },
+      {
+        "mFuelClass": "Desc_PackagedBiofuel_C",
+        "mSupplementalResourceClass": "",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      }
+    ],
+    "area": 0,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Build_GeneratorNuclear_C",
+    "displayName": "Nuclear Power Plant",
+    "icon": "FactoryGame/Buildable/Factory/GeneratorNuclear/UI/NuclearPowerplant",
+    "powerConsumption": 0.0,
+    "powerProduction": 2500.0,
+    "fuel": [
+      {
+        "mFuelClass": "Desc_NuclearFuelRod_C",
+        "mSupplementalResourceClass": "Desc_Water_C",
+        "mByproduct": "Desc_NuclearWaste_C",
+        "mByproductAmount": "50"
+      },
+      {
+        "mFuelClass": "Desc_PlutoniumFuelRod_C",
+        "mSupplementalResourceClass": "Desc_Water_C",
+        "mByproduct": "Desc_PlutoniumWaste_C",
+        "mByproductAmount": "10"
+      },
+      {
+        "mFuelClass": "Desc_FicsoniumFuelRod_C",
+        "mSupplementalResourceClass": "Desc_Water_C",
+        "mByproduct": "",
+        "mByproductAmount": ""
+      }
+    ],
+    "area": 1548,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Build_QuantumEncoder_C",
+    "displayName": "Quantum Encoder",
+    "icon": "FactoryGame/Buildable/Factory/QuantumEncoder/UI/IconDesc_QuantumEncoder",
+    "powerConsumption": 2000.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 1100,
+    "somersloopsNeeded": 4
+  },
+  {
+    "className": "Build_Converter_C",
+    "displayName": "Converter",
+    "icon": "FactoryGame/Buildable/Factory/Converter/UI/IconDesc_Converter",
+    "powerConsumption": 400.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 256,
+    "somersloopsNeeded": 2
+  },
+  {
+    "className": "Build_HadronCollider_C",
+    "displayName": "Particle Accelerator",
+    "icon": "FactoryGame/Buildable/Factory/HadronCollider/UI/IconDesc_HadronCollider",
+    "powerConsumption": 1500.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 912,
+    "somersloopsNeeded": 4
+  },
+  {
+    "className": "Build_WaterPump_C",
+    "displayName": "Water Extractor",
+    "icon": "FactoryGame/Buildable/Factory/WaterPump/UI/Waterpump",
+    "powerConsumption": 20.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 390,
+    "somersloopsNeeded": -1
+  },
+  {
+    "className": "Desc_FrackingSmasher_C",
+    "displayName": "Resource Well Pressurizer",
+    "icon": "FactoryGame/Buildable/Factory/FrackingSmasher/UI/IconDesc_Smasher",
+    "powerConsumption": 150.0,
+    "powerProduction": 0.0,
+    "fuel": [],
+    "area": 400,
+    "somersloopsNeeded": -1
+  }
+]

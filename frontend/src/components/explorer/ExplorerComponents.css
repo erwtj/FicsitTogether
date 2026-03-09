@@ -1,0 +1,115 @@
+.no-arrow::after {
+    display: none !important;
+}
+
+.dropdown-toggle {
+    width: 1.75rem;
+    height: 1.75rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.25rem 0.5rem;
+    border-width: 0;
+    border-radius: 0.25rem;
+    background: transparent !important;
+    transition: background .1s ease-in-out, color .1s ease-in-out;
+
+    color: #fff !important;
+}
+
+.dropdown-toggle:hover {
+    background: #5a5a5a !important;
+}
+
+.dropdown-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 0.25rem;
+    transition: background .1s ease-in-out, color .1s ease-in-out;
+}
+
+.download-option:hover {
+    background-color: rgba(96, 96, 96, 0.49);
+}
+
+.download-option:active {
+    color: #dee2e6;
+}
+
+.delete-option:hover {
+    background-color: rgba(255, 61, 80, 0.49);
+}
+
+.delete-option:active {
+    background: #dc3545;
+    color: #dee2e6;
+}
+
+.share-option:hover {
+    background-color: rgba(46, 130, 255, 0.51);
+}
+
+.share-option:active {
+    background: #0d6efd;
+    color: #dee2e6;
+}
+
+.favorite-option:hover {
+    color: #ffc107;
+}
+
+.favorite-option:active {
+    background: #ffc107;
+    color: #dee2e6;
+}
+
+.clickable-card {
+    cursor: pointer;
+    transition: background .1s ease-in-out;
+}
+
+.clickable-card:hover {
+    background: #333;
+}
+
+.clickable-card .three-dot {
+    visibility: hidden;
+}
+
+.clickable-card > .three-dot {
+    margin-top: 0;
+    height: 0;
+}
+
+.clickable-card:hover .three-dot {
+    visibility: visible;
+    margin-top: 1.5rem;
+    height: auto;
+}
+
+.project-description {
+    line-height: 1.4;
+    max-height: calc(1.4em * 4);
+    padding-bottom: 0.2em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.upload-button:hover {
+    color: white !important;
+}
+
+.upload-button:active {
+    color: #a2a4a6 !important;
+}

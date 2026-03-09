@@ -1,0 +1,103 @@
+.recipe-dialog{
+    width: 60% !important;
+    max-width: 60% !important;
+    max-height: 90vh !important;
+}
+
+.itemCard, .recipeCard {
+    cursor: pointer;
+    border: 0;
+    border-radius: 10px;
+    background: #2d3233;
+
+    transition: background-color 0.1s;
+}
+
+.itemCard:hover, .recipeCard:hover {
+    background: #393d3f;
+}
+
+.itemCard {
+    width: 160px;
+}
+
+.recipeCard {
+    max-height: 200px;
+}
+
+.recipeBigIcon{
+    width: 48px;
+}
+
+.recipeSmallIcon{
+    width: 30px;
+    bottom: -15px;
+    left: -20px;
+    display: inline-block;
+    position: relative;
+
+    border-radius: 50%;
+    border: #ffffff solid 1px;
+    background: #212529;
+}
+
+.recipeTinyIcon{
+    width: 25px;
+    margin-right: 5px;
+}
+
+.recipeContainer {
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.left-col{
+    width: 80px;
+}
+
+.selected-card {
+    outline: 2px solid #78648f;
+}
+
+.categoryList {
+    list-style-type: none;
+    padding: 0;
+}
+
+.categoryList button {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.lightning {
+    color: #f0e68c;
+    border-radius: 0;
+    border: none;
+    background: none;
+}
+
+.clickable-link{
+    cursor: pointer;
+    text-decoration: none;
+    color: rgba(222, 226, 230, 0.75) !important;
+}
+
+.clickable-link:hover {
+    color: #ea80fc !important;
+    text-decoration: underline;
+}
+
+.recipe-dialog .modal-dialog {
+    max-height: 90vh; /* keep modal within viewport */
+}
+
+.recipe-dialog .modal-content {
+    max-height: 90vh;
+}
+
+.recipe-dialog .modal-body {
+    overflow-y: auto; /* scroll INSIDE modal */
+}

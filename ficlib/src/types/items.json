@@ -1,0 +1,1524 @@
+[
+  {
+    "className": "Desc_OreIron_C",
+    "displayName": "Iron Ore",
+    "icon": "FactoryGame/Resource/RawResources/Nodes/UI/IconDesc_iron_new",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1.0
+  },
+  {
+    "className": "Desc_Coal_C",
+    "displayName": "Coal",
+    "icon": "FactoryGame/Resource/RawResources/Coal/UI/IconDesc_CoalOre",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 300.0,
+    "resourceSinkPoints": 3.0
+  },
+  {
+    "className": "Desc_Water_C",
+    "displayName": "Water",
+    "icon": "FactoryGame/Resource/RawResources/Water/UI/LiquidWater_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "7AB0D400",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_NitrogenGas_C",
+    "displayName": "Nitrogen Gas",
+    "icon": "FactoryGame/Resource/Parts/PackagedNitrogen/UI/IconDesc_NitrogenGas",
+    "form": "RF_GAS",
+    "fluidColor": "59595900",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Sulfur_C",
+    "displayName": "Sulfur",
+    "icon": "FactoryGame/Resource/RawResources/Sulfur/UI/Sulfur",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 11.0
+  },
+  {
+    "className": "Desc_SAM_C",
+    "displayName": "SAM",
+    "icon": "FactoryGame/Resource/RawResources/SAM/UI/IconDesc_SameOre",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 20.0
+  },
+  {
+    "className": "Desc_OreBauxite_C",
+    "displayName": "Bauxite",
+    "icon": "FactoryGame/Resource/RawResources/Nodes/UI/IconDesc_Bauxite",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 8.0
+  },
+  {
+    "className": "Desc_OreGold_C",
+    "displayName": "Caterium Ore",
+    "icon": "FactoryGame/Resource/RawResources/Nodes/UI/IconDesc_CateriumOre",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 7.0
+  },
+  {
+    "className": "Desc_OreCopper_C",
+    "displayName": "Copper Ore",
+    "icon": "FactoryGame/Resource/RawResources/Nodes/UI/IconDesc_copper_new",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 3.0
+  },
+  {
+    "className": "Desc_RawQuartz_C",
+    "displayName": "Raw Quartz",
+    "icon": "FactoryGame/Resource/Parts/QuartzCrystal/UI/IconDesc_QuartzCrystal",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 15.0
+  },
+  {
+    "className": "Desc_Stone_C",
+    "displayName": "Limestone",
+    "icon": "FactoryGame/Resource/RawResources/Stone/UI/Stone",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2.0
+  },
+  {
+    "className": "Desc_OreUranium_C",
+    "displayName": "Uranium",
+    "icon": "FactoryGame/Resource/RawResources/OreUranium/UI/IconDesc_UraniumOre",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 35.0
+  },
+  {
+    "className": "Desc_LiquidOil_C",
+    "displayName": "Crude Oil",
+    "icon": "FactoryGame/Resource/RawResources/CrudeOil/UI/LiquidOil_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "19001900",
+    "energyValue": 0.32,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_NuclearWaste_C",
+    "displayName": "Uranium Waste",
+    "icon": "FactoryGame/Resource/Parts/NuclearWaste/UI/IconDesc_NuclearWaste",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_PlutoniumWaste_C",
+    "displayName": "Plutonium Waste",
+    "icon": "FactoryGame/Resource/Parts/NuclearWaste/UI/IconDesc_PlutoniumWaste",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Cement_C",
+    "displayName": "Concrete",
+    "icon": "FactoryGame/Resource/Parts/Cement/UI/IconDesc_Concrete",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 12.0
+  },
+  {
+    "className": "Desc_Silica_C",
+    "displayName": "Silica",
+    "icon": "FactoryGame/Resource/Parts/Silica/UI/IconDesc_Silica",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 20.0
+  },
+  {
+    "className": "Desc_IronPlate_C",
+    "displayName": "Iron Plate",
+    "icon": "FactoryGame/Resource/Parts/IronPlate/UI/IconDesc_IronPlates",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 6.0
+  },
+  {
+    "className": "Desc_SteelPlate_C",
+    "displayName": "Steel Beam",
+    "icon": "FactoryGame/Resource/Parts/SteelPlate/UI/IconDesc_SteelBeam",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 64.0
+  },
+  {
+    "className": "Desc_AluminumIngot_C",
+    "displayName": "Aluminum Ingot",
+    "icon": "FactoryGame/Resource/Parts/AluminumIngot/UI/IconDesc_AluminiumIngot",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 131.0
+  },
+  {
+    "className": "Desc_Battery_C",
+    "displayName": "Battery",
+    "icon": "FactoryGame/Resource/Parts/Battery/UI/IconDesc_Battery",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 6000.0,
+    "resourceSinkPoints": 465.0
+  },
+  {
+    "className": "Desc_Fuel_C",
+    "displayName": "Packaged Fuel",
+    "icon": "FactoryGame/Resource/Parts/Fuel/UI/IconDesc_Fuel",
+    "form": "RF_SOLID",
+    "fluidColor": "EB7D15FF",
+    "energyValue": 750.0,
+    "resourceSinkPoints": 270.0
+  },
+  {
+    "className": "Desc_PackagedIonizedFuel_C",
+    "displayName": "Packaged Ionized Fuel",
+    "icon": "FactoryGame/Resource/Parts/IonizedFuel/UI/IconDesc_IonizedRocketFuel",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 10000.0,
+    "resourceSinkPoints": 5246.0
+  },
+  {
+    "className": "Desc_PackagedRocketFuel_C",
+    "displayName": "Packaged Rocket Fuel",
+    "icon": "FactoryGame/Resource/Parts/RocketFuel/UI/IconDesc_PackagedRocketFuel",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 7200.0,
+    "resourceSinkPoints": 1028.0
+  },
+  {
+    "className": "Desc_TurboFuel_C",
+    "displayName": "Packaged Turbofuel",
+    "icon": "FactoryGame/Resource/Parts/Turbofuel/UI/IconDesc_TurboFuel",
+    "form": "RF_SOLID",
+    "fluidColor": "D4292EFF",
+    "energyValue": 2000.0,
+    "resourceSinkPoints": 570.0
+  },
+  {
+    "className": "Desc_HazmatFilter_C",
+    "displayName": "Iodine-Infused Filter",
+    "icon": "FactoryGame/Resource/Parts/IodineInfusedFilter/UI/IconDesc_HazmatFilter",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2274.0
+  },
+  {
+    "className": "Desc_CompactedCoal_C",
+    "displayName": "Compacted Coal",
+    "icon": "FactoryGame/Resource/Parts/CompactedCoal/UI/IconDesc_CompactedCoal",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 630.0,
+    "resourceSinkPoints": 28.0
+  },
+  {
+    "className": "Desc_PackagedOilResidue_C",
+    "displayName": "Packaged Heavy Oil Residue",
+    "icon": "FactoryGame/Resource/RawResources/CrudeOil/UI/OilResidue",
+    "form": "RF_SOLID",
+    "fluidColor": "6D2D78FF",
+    "energyValue": 400.0,
+    "resourceSinkPoints": 180.0
+  },
+  {
+    "className": "Desc_PetroleumCoke_C",
+    "displayName": "Petroleum Coke",
+    "icon": "FactoryGame/Resource/Parts/PetroleumCoke/UI/IconDesc_PetroleumCoke",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 180.0,
+    "resourceSinkPoints": 20.0
+  },
+  {
+    "className": "Desc_PackagedOil_C",
+    "displayName": "Packaged Oil",
+    "icon": "FactoryGame/Resource/RawResources/CrudeOil/UI/Oil",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 320.0,
+    "resourceSinkPoints": 180.0
+  },
+  {
+    "className": "Desc_IronRod_C",
+    "displayName": "Iron Rod",
+    "icon": "FactoryGame/Resource/Parts/IronRod/UI/IconDesc_IronRods",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 4.0
+  },
+  {
+    "className": "Desc_Wire_C",
+    "displayName": "Wire",
+    "icon": "FactoryGame/Resource/Parts/Wire/UI/IconDesc_Wire",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 6.0
+  },
+  {
+    "className": "Desc_Cable_C",
+    "displayName": "Cable",
+    "icon": "FactoryGame/Resource/Parts/Cable/UI/IconDesc_Cables",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 24.0
+  },
+  {
+    "className": "Desc_IronIngot_C",
+    "displayName": "Iron Ingot",
+    "icon": "FactoryGame/Resource/Parts/IronIngot/UI/IconDesc_IronIngot",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2.0
+  },
+  {
+    "className": "Desc_IronPlateReinforced_C",
+    "displayName": "Reinforced Iron Plate",
+    "icon": "FactoryGame/Resource/Parts/IronPlateReinforced/UI/IconDesc_ReinforcedIronPlates",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 120.0
+  },
+  {
+    "className": "Desc_Rotor_C",
+    "displayName": "Rotor",
+    "icon": "FactoryGame/Resource/Parts/Rotor/UI/IconDesc_Rotor",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 140.0
+  },
+  {
+    "className": "Desc_LiquidFuel_C",
+    "displayName": "Fuel",
+    "icon": "FactoryGame/Resource/Parts/Fuel/UI/IconDesc_LiquidFuel_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "EB7D1500",
+    "energyValue": 0.75,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_RocketFuel_C",
+    "displayName": "Rocket Fuel",
+    "icon": "FactoryGame/Resource/Parts/RocketFuel/UI/IconDesc_RocketFuelPipe",
+    "form": "RF_GAS",
+    "fluidColor": "BD251A00",
+    "energyValue": 3.6,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_CopperSheet_C",
+    "displayName": "Copper Sheet",
+    "icon": "FactoryGame/Resource/Parts/CopperSheet/UI/IconDesc_CopperSheet",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 24.0
+  },
+  {
+    "className": "Desc_ModularFrame_C",
+    "displayName": "Modular Frame",
+    "icon": "FactoryGame/Resource/Parts/ModularFrame/UI/IconDesc_ModularFrame",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 408.0
+  },
+  {
+    "className": "Desc_IronScrew_C",
+    "displayName": "Screw",
+    "icon": "FactoryGame/Resource/Parts/IronScrew/UI/IconDesc_IronScrews",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2.0
+  },
+  {
+    "className": "Desc_NitricAcid_C",
+    "displayName": "Nitric Acid",
+    "icon": "FactoryGame/Resource/Parts/NitricAcid/UI/IconDesc_NitricAcid",
+    "form": "RF_LIQUID",
+    "fluidColor": "D9D9A200",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_LiquidTurboFuel_C",
+    "displayName": "Turbofuel",
+    "icon": "FactoryGame/Resource/Parts/Turbofuel/UI/IconDesc_LiquidTurboFuel_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "D4292E00",
+    "energyValue": 2.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_GasTank_C",
+    "displayName": "Empty Fluid Tank",
+    "icon": "FactoryGame/Resource/Parts/GasTank/UI/IconDesc_PressureTank",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 170.0
+  },
+  {
+    "className": "Desc_CrystalOscillator_C",
+    "displayName": "Crystal Oscillator",
+    "icon": "FactoryGame/Resource/Parts/CrystalOscillator/UI/IconDesc_CrystalOscillator",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 3072.0
+  },
+  {
+    "className": "Desc_Motor_C",
+    "displayName": "Motor",
+    "icon": "FactoryGame/Resource/Parts/Motor/UI/IconDesc_Engine",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1520.0
+  },
+  {
+    "className": "Desc_DarkMatter_C",
+    "displayName": "Dark Matter Crystal",
+    "icon": "FactoryGame/Resource/Parts/TimeCrystal/UI/IconDesc_TimeCrystal",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1780.0
+  },
+  {
+    "className": "Desc_IonizedFuel_C",
+    "displayName": "Ionized Fuel",
+    "icon": "FactoryGame/Resource/Parts/IonizedFuel/UI/IconDesc_IonizedFuel",
+    "form": "RF_GAS",
+    "fluidColor": "D55F1A3C",
+    "energyValue": 5.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_ComputerSuper_C",
+    "displayName": "Supercomputer",
+    "icon": "FactoryGame/Resource/Parts/ComputerQuantum/UI/IconDesc_QuantumComputer",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 97352.0
+  },
+  {
+    "className": "Desc_CoolingSystem_C",
+    "displayName": "Cooling System",
+    "icon": "FactoryGame/Resource/Parts/CoolingSystem/UI/IconDesc_CoolingSystem",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 12006.0
+  },
+  {
+    "className": "Desc_FicsiteMesh_C",
+    "displayName": "Ficsite Trigon",
+    "icon": "FactoryGame/Resource/Parts/FicsiteMesh/UI/IconDesc_FicsiteMesh",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1291.0
+  },
+  {
+    "className": "Desc_MotorLightweight_C",
+    "displayName": "Turbo Motor",
+    "icon": "FactoryGame/Resource/Parts/TurboMotor/UI/IconDesc_TurboMotor",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 240496.0
+  },
+  {
+    "className": "Desc_TimeCrystal_C",
+    "displayName": "Time Crystal",
+    "icon": "FactoryGame/Resource/Parts/ExoticMatter/UI/IconDesc_ExoticMatter",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 960.0
+  },
+  {
+    "className": "Desc_DarkEnergy_C",
+    "displayName": "Dark Matter Residue",
+    "icon": "FactoryGame/Resource/Parts/DarkEnergy/UI/IconDesc_DarkEnergy",
+    "form": "RF_GAS",
+    "fluidColor": "FDAFF996",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_SAMIngot_C",
+    "displayName": "Reanimated SAM",
+    "icon": "FactoryGame/Resource/Parts/ReanimatedSAM/UI/IconDesc_ReanimatedSam",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 160.0
+  },
+  {
+    "className": "Desc_QuantumEnergy_C",
+    "displayName": "Excited Photonic Matter",
+    "icon": "FactoryGame/Resource/Parts/QuantumEnergy/IconDesc_QuantumEnergy",
+    "form": "RF_GAS",
+    "fluidColor": "76F5E85A",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Diamond_C",
+    "displayName": "Diamonds",
+    "icon": "FactoryGame/Resource/Parts/Diamond/UI/IconDesc_Diamonds",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 240.0
+  },
+  {
+    "className": "Desc_AluminumPlate_C",
+    "displayName": "Alclad Aluminum Sheet",
+    "icon": "FactoryGame/Resource/Parts/AluminumPlate/UI/IconDesc_AluminiumSheet",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 266.0
+  },
+  {
+    "className": "Desc_QuantumOscillator_C",
+    "displayName": "Superposition Oscillator",
+    "icon": "FactoryGame/Resource/Parts/SuperpositionOscillator/UI/IconDesc_SuperPositionOscillator",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 37292.0
+  },
+  {
+    "className": "Desc_TemporalProcessor_C",
+    "displayName": "Neural-Quantum Processor",
+    "icon": "FactoryGame/Resource/Parts/TemporalProcessor/UI/IconDesc_TemporalProcessor",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 248034.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_12_C",
+    "displayName": "AI Expansion Server",
+    "icon": "FactoryGame/Resource/Parts/AIExpansion/_UI/IconDesc_AIExpension",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 597652.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_6_C",
+    "displayName": "Magnetic Field Generator",
+    "icon": "FactoryGame/Resource/Parts/MagneticFieldGenerator/UI/IconDesc_MagneticFieldGenerator",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 11000.0
+  },
+  {
+    "className": "Desc_SAMFluctuator_C",
+    "displayName": "SAM Fluctuator",
+    "icon": "FactoryGame/Resource/Parts/SAMFluctuator/UI/IconDesc_SamFluctuator",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1968.0
+  },
+  {
+    "className": "Desc_SteelPipe_C",
+    "displayName": "Steel Pipe",
+    "icon": "FactoryGame/Resource/Parts/SteelPipe/UI/IconDesc_SteelPipe",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 24.0
+  },
+  {
+    "className": "Desc_ModularFrameFused_C",
+    "displayName": "Fused Modular Frame",
+    "icon": "FactoryGame/Resource/Parts/ModularFrameFused/UI/IconDesc_FusedModularFrame",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 62840.0
+  },
+  {
+    "className": "Desc_ModularFrameLightweight_C",
+    "displayName": "Radio Control Unit",
+    "icon": "FactoryGame/Resource/Parts/RadioControlUnit/UI/IconDesc_RadioControlUnit",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 32352.0
+  },
+  {
+    "className": "Desc_FicsiteIngot_C",
+    "displayName": "Ficsite Ingot",
+    "icon": "FactoryGame/Resource/Parts/FicsiteIngot/UI/IconDesc_FicsiteIngot",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1936.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_10_C",
+    "displayName": "Biochemical Sculptor",
+    "icon": "FactoryGame/Resource/Parts/BiochemicalSculptor/UI/IconDesc_BiochemicalSculptor",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 301778.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_7_C",
+    "displayName": "Assembly Director System",
+    "icon": "FactoryGame/Resource/Parts/AssemblyControlUnit/UI/IconDesc_AssemblyDirectorSystem",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 500176.0
+  },
+  {
+    "className": "Desc_GoldIngot_C",
+    "displayName": "Caterium Ingot",
+    "icon": "FactoryGame/Resource/Parts/GoldIngot/UI/IconDesc_CateriumIngot",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 42.0
+  },
+  {
+    "className": "Desc_FluidCanister_C",
+    "displayName": "Empty Canister",
+    "icon": "FactoryGame/Resource/Parts/FluidCanister/UI/IconDesc_EmptyCannister",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 60.0
+  },
+  {
+    "className": "Desc_CircuitBoard_C",
+    "displayName": "Circuit Board",
+    "icon": "FactoryGame/Resource/Parts/CircuitBoard/UI/IconDesc_CircuitBoard",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 696.0
+  },
+  {
+    "className": "Desc_Plastic_C",
+    "displayName": "Plastic",
+    "icon": "FactoryGame/Resource/Parts/Plastic/UI/IconDesc_Plastic",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 75.0
+  },
+  {
+    "className": "Desc_SteelPlateReinforced_C",
+    "displayName": "Encased Industrial Beam",
+    "icon": "FactoryGame/Resource/Parts/SteelPlateReinforced/UI/IconDesc_EncasedSteelBeam",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 528.0
+  },
+  {
+    "className": "Desc_Rubber_C",
+    "displayName": "Rubber",
+    "icon": "FactoryGame/Resource/Parts/Rubber/UI/IconDesc_Rubber",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 60.0
+  },
+  {
+    "className": "Desc_PolymerResin_C",
+    "displayName": "Polymer Resin",
+    "icon": "FactoryGame/Resource/Parts/PolymerResin/UI/IconDesc_PolymerResin",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 12.0
+  },
+  {
+    "className": "Desc_HeavyOilResidue_C",
+    "displayName": "Heavy Oil Residue",
+    "icon": "FactoryGame/Resource/Parts/HeavyOilResidue/UI/IconDesc_LiquidHeavyOilResidue_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "6D2D7800",
+    "energyValue": 0.4,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_QuartzCrystal_C",
+    "displayName": "Quartz Crystal",
+    "icon": "FactoryGame/Resource/Parts/QuartzCrystal/UI/IconDesc_QuartzResource",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 50.0
+  },
+  {
+    "className": "Desc_SteelIngot_C",
+    "displayName": "Steel Ingot",
+    "icon": "FactoryGame/Resource/Parts/SteelIngot/UI/IconDesc_SteelIngot",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 8.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_2_C",
+    "displayName": "Versatile Framework",
+    "icon": "FactoryGame/Resource/Parts/Skeletalframework/UI/IconDesc_SpelevatorPart_2",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1176.0
+  },
+  {
+    "className": "Desc_PackagedWater_C",
+    "displayName": "Packaged Water",
+    "icon": "FactoryGame/Resource/Parts/PackagedWater/UI/IconDesc_PackagedWater",
+    "form": "RF_SOLID",
+    "fluidColor": "7AB0D4FF",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 130.0
+  },
+  {
+    "className": "Desc_CopperIngot_C",
+    "displayName": "Copper Ingot",
+    "icon": "FactoryGame/Resource/Parts/CopperIngot/UI/IconDesc_CopperIngot",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 6.0
+  },
+  {
+    "className": "Desc_AluminumScrap_C",
+    "displayName": "Aluminum Scrap",
+    "icon": "FactoryGame/Resource/Parts/AluminumScrap/UI/IconDesc_AluminiumScrap",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 27.0
+  },
+  {
+    "className": "Desc_AluminumCasing_C",
+    "displayName": "Aluminum Casing",
+    "icon": "FactoryGame/Resource/Parts/AluminumCasing/UI/IconDesc_AluminiumCasing",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 393.0
+  },
+  {
+    "className": "Desc_AluminaSolution_C",
+    "displayName": "Alumina Solution",
+    "icon": "FactoryGame/Resource/Parts/Alumina/UI/LiquidAlumina_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "C1C1C100",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Computer_C",
+    "displayName": "Computer",
+    "icon": "FactoryGame/Resource/Parts/Computer/UI/IconDesc_Computer",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 8352.0
+  },
+  {
+    "className": "Desc_ModularFrameHeavy_C",
+    "displayName": "Heavy Modular Frame",
+    "icon": "FactoryGame/Resource/Parts/ModularFrameHeavy/UI/IconDesc_ModularFrameHeavy",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 10800.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_1_C",
+    "displayName": "Smart Plating",
+    "icon": "FactoryGame/Resource/Parts/SmartPlate/UI/IconDesc_SpelevatorPart_1",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 520.0
+  },
+  {
+    "className": "Desc_HighSpeedConnector_C",
+    "displayName": "High-Speed Connector",
+    "icon": "FactoryGame/Resource/Parts/HighSpeedConnector/UI/IconDesc_HighSpeedConnector",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 3776.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_3_C",
+    "displayName": "Automated Wiring",
+    "icon": "FactoryGame/Resource/Parts/AutomatedWiring/UI/SpelevatorPart_3",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1440.0
+  },
+  {
+    "className": "Desc_Stator_C",
+    "displayName": "Stator",
+    "icon": "FactoryGame/Resource/Parts/Stator/UI/IconDesc_Stator",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 240.0
+  },
+  {
+    "className": "Desc_CircuitBoardHighSpeed_C",
+    "displayName": "AI Limiter",
+    "icon": "FactoryGame/Resource/Parts/AIlimiter/UI/IconDesc_AILimiter",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 920.0
+  },
+  {
+    "className": "Desc_HighSpeedWire_C",
+    "displayName": "Quickwire",
+    "icon": "FactoryGame/Resource/Parts/HighSpeedWire/UI/IconDesc_Quickwire",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 17.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_4_C",
+    "displayName": "Modular Engine",
+    "icon": "FactoryGame/Resource/Parts/ModularEngine/UI/IconDesc_SpelevatorPart_4",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 9960.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_5_C",
+    "displayName": "Adaptive Control Unit",
+    "icon": "FactoryGame/Resource/Parts/ControlSystem/UI/IconDesc_SpelevatorPart_5",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 76368.0
+  },
+  {
+    "className": "Desc_PressureConversionCube_C",
+    "displayName": "Pressure Conversion Cube",
+    "icon": "FactoryGame/Resource/Parts/PressureConversionCube/UI/IconDesc_ConversionCube",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 255088.0
+  },
+  {
+    "className": "Desc_PlutoniumCell_C",
+    "displayName": "Encased Plutonium Cell",
+    "icon": "FactoryGame/Resource/Parts/PlutoniumCell/UI/IconDesc_EncasedPlutoniumCell",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_PlutoniumPellet_C",
+    "displayName": "Plutonium Pellet",
+    "icon": "FactoryGame/Resource/Parts/PlutoniumPellet/UI/IconDesc_PlutoniumPellet",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_NonFissibleUranium_C",
+    "displayName": "Non-Fissile Uranium",
+    "icon": "FactoryGame/Resource/Parts/Non-FissibleUranium/UI/IconDesc_NonFissileUranium",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_SulfuricAcid_C",
+    "displayName": "Sulfuric Acid",
+    "icon": "FactoryGame/Resource/Parts/SulfuricAcid/UI/IconDesc_LiquidSulfuricAcid_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "FFFF0000",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_CopperDust_C",
+    "displayName": "Copper Powder",
+    "icon": "FactoryGame/Resource/Parts/CopperDust/UI/IconDesc_CopperDust",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 72.0
+  },
+  {
+    "className": "Desc_AluminumPlateReinforced_C",
+    "displayName": "Heat Sink",
+    "icon": "FactoryGame/Resource/Parts/HeatSink/UI/IconDesc_Heatsink",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2804.0
+  },
+  {
+    "className": "Desc_ElectromagneticControlRod_C",
+    "displayName": "Electromagnetic Control Rod",
+    "icon": "FactoryGame/Resource/Parts/ElectromagneticControlRod/UI/IconDesc_ElectromagneticControlRod",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2560.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_9_C",
+    "displayName": "Nuclear Pasta",
+    "icon": "FactoryGame/Resource/Parts/NuclearPasta/UI/IconDesc_NuclearPasta",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 538976.0
+  },
+  {
+    "className": "Desc_UraniumCell_C",
+    "displayName": "Encased Uranium Cell",
+    "icon": "FactoryGame/Resource/Parts/UraniumCell/UI/IconDesc_NuclearCell",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 147.0
+  },
+  {
+    "className": "Desc_DissolvedSilica_C",
+    "displayName": "Dissolved Silica",
+    "icon": "FactoryGame/Resource/Parts/DissolvedSilica/UI/IconDesc_DissolvedSilica",
+    "form": "RF_LIQUID",
+    "fluidColor": "E2BEEE00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_8_C",
+    "displayName": "Thermal Propulsion Rocket",
+    "icon": "FactoryGame/Resource/Parts/ThermalAntimatterPropulsionRocket/UI/IconDesc_ThermalPropulsionRocket",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 728508.0
+  },
+  {
+    "className": "Desc_Gunpowder_C",
+    "displayName": "Black Powder",
+    "icon": "FactoryGame/Resource/Parts/GunPowder/UI/IconDesc_Gunpowder",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 14.0
+  },
+  {
+    "className": "Desc_Ficsonium_C",
+    "displayName": "Ficsonium",
+    "icon": "FactoryGame/Resource/Parts/Ficsonium/UI/IconDesc_FicsoniumCell",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_SingularityCell_C",
+    "displayName": "Singularity Cell",
+    "icon": "FactoryGame/Resource/Parts/SingularityCell/UI/IconDesc_SingularityCell",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 114675.0
+  },
+  {
+    "className": "Desc_SpaceElevatorPart_11_C",
+    "displayName": "Ballistic Warp Drive",
+    "icon": "FactoryGame/Resource/Parts/BallisticWarpdrive/UI/IconDesc_BallisticWarpDrive",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2895334.0
+  },
+  {
+    "className": "Desc_Filter_C",
+    "displayName": "Gas Filter",
+    "icon": "FactoryGame/Resource/Parts/Filter/UI/IconDesc_GasMaskFilter",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 608.0
+  },
+  {
+    "className": "Desc_AlienProtein_C",
+    "displayName": "Alien Protein",
+    "icon": "FactoryGame/Resource/Parts/AlienProtein/UI/IconDesc_AlienProtein",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Crystal_C",
+    "displayName": "Blue Power Slug",
+    "icon": "FactoryGame/Resource/Environment/Crystal/UI/PowerSlugGreen",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_AlienDNACapsule_C",
+    "displayName": "Alien DNA Capsule",
+    "icon": "FactoryGame/Resource/Parts/AlienDNACapsule/UI/IconDesc_AlienDNA",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_WAT2_C",
+    "displayName": "Mercer Sphere",
+    "icon": "FactoryGame/Prototype/WAT/UI/Wat_2",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Crystal_mk3_C",
+    "displayName": "Purple Power Slug",
+    "icon": "FactoryGame/Resource/Environment/Crystal/UI/PowerSlugPurple",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_Crystal_mk2_C",
+    "displayName": "Yellow Power Slug",
+    "icon": "FactoryGame/Resource/Environment/Crystal/UI/PowerSlugYellow",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_GunpowderMK2_C",
+    "displayName": "Smokeless Powder",
+    "icon": "FactoryGame/Resource/Parts/GunPowder/UI/IconDesc_GunpowderMk2",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 58.0
+  },
+  {
+    "className": "Desc_XmasStar_C",
+    "displayName": "FICSMAS Wonder Star",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Star",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 6540.0
+  },
+  {
+    "className": "Desc_XmasBallCluster_C",
+    "displayName": "FICSMAS Ornament Bundle",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Balls",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 100.0
+  },
+  {
+    "className": "Desc_XmasWreath_C",
+    "displayName": "FICSMAS Decoration",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Wreath",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 630.0
+  },
+  {
+    "className": "Desc_CandyCane_C",
+    "displayName": "Candy Cane",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_CanePart",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 6.0
+  },
+  {
+    "className": "Desc_Snow_C",
+    "displayName": "Actual Snow",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Snow",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 5.0
+  },
+  {
+    "className": "Desc_XmasBow_C",
+    "displayName": "FICSMAS Bow",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Bow",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 4.0
+  },
+  {
+    "className": "Desc_XmasBall3_C",
+    "displayName": "Copper FICSMAS Ornament",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_XmasBall_Yellow",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 32.0
+  },
+  {
+    "className": "Desc_XmasBall4_C",
+    "displayName": "Iron FICSMAS Ornament",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_XmasBall_Silver",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 18.0
+  },
+  {
+    "className": "Desc_XmasBranch_C",
+    "displayName": "FICSMAS Tree Branch",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Branch",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2.0
+  },
+  {
+    "className": "Desc_XmasBall1_C",
+    "displayName": "Red FICSMAS Ornament",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_XmasBall_Red",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 2.0
+  },
+  {
+    "className": "Desc_XmasBall2_C",
+    "displayName": "Blue FICSMAS Ornament",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_XmasBall_Blue",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1.0
+  },
+  {
+    "className": "Desc_Gift_C",
+    "displayName": "FICSMAS Gift",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_Gift",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1.0
+  },
+  {
+    "className": "Desc_Biofuel_C",
+    "displayName": "Solid Biofuel",
+    "icon": "FactoryGame/Resource/Parts/SolidBiofuel/UI/IconDesc_SolidBiofuel",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 450.0,
+    "resourceSinkPoints": 48.0
+  },
+  {
+    "className": "Desc_PackagedBiofuel_C",
+    "displayName": "Packaged Liquid Biofuel",
+    "icon": "FactoryGame/Resource/Parts/Turbofuel/UI/IconDesc_LiquidBiofuel",
+    "form": "RF_SOLID",
+    "fluidColor": "3A532AFF",
+    "energyValue": 750.0,
+    "resourceSinkPoints": 370.0
+  },
+  {
+    "className": "Desc_GenericBiomass_C",
+    "displayName": "Biomass",
+    "icon": "FactoryGame/Resource/Parts/GenericBiomass/UI/IconDesc_Biomass_Final",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 180.0,
+    "resourceSinkPoints": 12.0
+  },
+  {
+    "className": "Desc_Leaves_C",
+    "displayName": "Leaves",
+    "icon": "FactoryGame/Resource/Parts/GenericBiomass/IconDesc_Leaves",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 15.0,
+    "resourceSinkPoints": 3.0
+  },
+  {
+    "className": "Desc_Mycelia_C",
+    "displayName": "Mycelia",
+    "icon": "FactoryGame/Resource/Parts/GenericBiomass/UI/IconDesc_Mycelia",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 20.0,
+    "resourceSinkPoints": 10.0
+  },
+  {
+    "className": "Desc_Wood_C",
+    "displayName": "Wood",
+    "icon": "FactoryGame/Resource/Parts/GenericBiomass/UI/IconDesc_Wood",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 100.0,
+    "resourceSinkPoints": 30.0
+  },
+  {
+    "className": "Desc_LiquidBiofuel_C",
+    "displayName": "Liquid Biofuel",
+    "icon": "FactoryGame/Resource/Parts/BioFuel/UI/IconDesc_LiquidBiofuel_Pipe",
+    "form": "RF_LIQUID",
+    "fluidColor": "3B532C00",
+    "energyValue": 0.75,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_PackagedAlumina_C",
+    "displayName": "Packaged Alumina Solution",
+    "icon": "FactoryGame/Resource/Parts/Alumina/UI/IconDesc_PackagedAluminaSolution",
+    "form": "RF_SOLID",
+    "fluidColor": "3A532AFF",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 160.0
+  },
+  {
+    "className": "Desc_PackagedNitrogenGas_C",
+    "displayName": "Packaged Nitrogen Gas",
+    "icon": "FactoryGame/Resource/Parts/PackagedNitrogen/UI/IconDesc_PackagedNitrogen",
+    "form": "RF_SOLID",
+    "fluidColor": "3A532AFF",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 312.0
+  },
+  {
+    "className": "Desc_PackagedNitricAcid_C",
+    "displayName": "Packaged Nitric Acid",
+    "icon": "FactoryGame/Resource/Parts/NitricAcid/UI/IconDesc_PackagedNitricAcid",
+    "form": "RF_SOLID",
+    "fluidColor": "3A532AFF",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 412.0
+  },
+  {
+    "className": "Desc_PackagedSulfuricAcid_C",
+    "displayName": "Packaged Sulfuric Acid",
+    "icon": "FactoryGame/Resource/Parts/SulfuricAcid/UI/IconDesc_PckagedSulphuricAcid",
+    "form": "RF_SOLID",
+    "fluidColor": "3A532AFF",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 152.0
+  },
+  {
+    "className": "Desc_Fabric_C",
+    "displayName": "Fabric",
+    "icon": "FactoryGame/Resource/Parts/GenericBiomass/UI/IconDesc_Fabric",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 140.0
+  },
+  {
+    "className": "Desc_HogParts_C",
+    "displayName": "Hog Remains",
+    "icon": "FactoryGame/Resource/Parts/AnimalParts/UI/IconDesc_HogPart",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_SpitterParts_C",
+    "displayName": "Spitter Remains",
+    "icon": "FactoryGame/Resource/Parts/AnimalParts/UI/IconDesc_SpitterPart",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_StingerParts_C",
+    "displayName": "Stinger Remains",
+    "icon": "FactoryGame/Resource/Environment/AnimalParts/UI/IconDesc_StingerPart",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_HatcherParts_C",
+    "displayName": "Hatcher Remains",
+    "icon": "FactoryGame/Resource/Environment/AnimalParts/UI/IconDesc_HatcherPart",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_NuclearFuelRod_C",
+    "displayName": "Uranium Fuel Rod",
+    "icon": "FactoryGame/Resource/Parts/NuclearFuelRod/UI/IconDesc_NuclearFuelRod",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 750000.0,
+    "resourceSinkPoints": 43468.0
+  },
+  {
+    "className": "Desc_PlutoniumFuelRod_C",
+    "displayName": "Plutonium Fuel Rod",
+    "icon": "FactoryGame/Resource/Parts/PlutoniumFuelRods/UI/IconDesc_PlutoniumFuelRod",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 1500000.0,
+    "resourceSinkPoints": 153184.0
+  },
+  {
+    "className": "Desc_FicsoniumFuelRod_C",
+    "displayName": "Ficsonium Fuel Rod",
+    "icon": "FactoryGame/Resource/Parts/FicsoniumFuelRod/UI/IconDesc_FicsoniumFuelRod",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 150000.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_CartridgeChaos_C",
+    "displayName": "Turbo Rifle Ammo",
+    "icon": "FactoryGame/Equipment/Rifle/UI/IconDesc_TurboRifle",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 120.0
+  },
+  {
+    "className": "Desc_CartridgeStandard_C",
+    "displayName": "Rifle Ammo",
+    "icon": "FactoryGame/Equipment/Rifle/UI/IconDesc_Rifle",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 25.0
+  },
+  {
+    "className": "Desc_Rebar_Explosive_C",
+    "displayName": "Explosive Rebar",
+    "icon": "FactoryGame/Equipment/RebarGun/UI/IconDesc_ExpRebar",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 360.0
+  },
+  {
+    "className": "Desc_Rebar_Stunshot_C",
+    "displayName": "Stun Rebar",
+    "icon": "FactoryGame/Equipment/RebarGun/UI/IconDesc_StunRebar",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 186.0
+  },
+  {
+    "className": "Desc_CartridgeSmartProjectile_C",
+    "displayName": "Homing Rifle Ammo",
+    "icon": "FactoryGame/Equipment/Rifle/UI/IconDesc_HomingRifle",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 855.0
+  },
+  {
+    "className": "Desc_NobeliskCluster_C",
+    "displayName": "Cluster Nobelisk",
+    "icon": "FactoryGame/Resource/Parts/NobeliskExplosive/UI/IconDesc_Cluster",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1376.0
+  },
+  {
+    "className": "Desc_NobeliskExplosive_C",
+    "displayName": "Nobelisk",
+    "icon": "FactoryGame/Resource/Parts/NobeliskExplosive/UI/IconDesc_Explosive",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 152.0
+  },
+  {
+    "className": "Desc_NobeliskGas_C",
+    "displayName": "Gas Nobelisk",
+    "icon": "FactoryGame/Resource/Parts/NobeliskExplosive/UI/IconDesc_Gas",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 544.0
+  },
+  {
+    "className": "Desc_NobeliskNuke_C",
+    "displayName": "Nuke Nobelisk",
+    "icon": "FactoryGame/Resource/Parts/NobeliskExplosive/UI/IconDesc_Nuke",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 19600.0
+  },
+  {
+    "className": "Desc_NobeliskShockwave_C",
+    "displayName": "Pulse Nobelisk",
+    "icon": "FactoryGame/Resource/Parts/NobeliskExplosive/UI/IconDesc_Shock",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 1533.0
+  },
+  {
+    "className": "Desc_Fireworks_Projectile_01_C",
+    "displayName": "Sweet Fireworks",
+    "icon": "FactoryGame/Events/Christmas/Fireworks/UI/IconDesc_Rocket01",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 60.0
+  },
+  {
+    "className": "Desc_Fireworks_Projectile_02_C",
+    "displayName": "Fancy Fireworks",
+    "icon": "FactoryGame/Events/Christmas/Fireworks/UI/IconDesc_Rocket02",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 40.0
+  },
+  {
+    "className": "Desc_Fireworks_Projectile_03_C",
+    "displayName": "Sparkly Fireworks",
+    "icon": "FactoryGame/Events/Christmas/Fireworks/UI/IconDesc_Rocket03",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 32.0
+  },
+  {
+    "className": "Desc_SnowballProjectile_C",
+    "displayName": "Snowball",
+    "icon": "FactoryGame/Events/Christmas/Parts/UI/IconDesc_SnowballProjectile",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 30.0
+  },
+  {
+    "className": "Desc_SpikedRebar_C",
+    "displayName": "Iron Rebar",
+    "icon": "FactoryGame/Equipment/RebarGun/UI/IconDesc_Rebar",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 8.0
+  },
+  {
+    "className": "Desc_AlienPowerFuel_C",
+    "displayName": "Alien Power Matrix",
+    "icon": "FactoryGame/Resource/Parts/AlienPowerMatrix/UI/IconDesc_AlienPowerMatrix",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 210.0
+  },
+  {
+    "className": "Desc_CrystalShard_C",
+    "displayName": "Power Shard",
+    "icon": "FactoryGame/Resource/Environment/Crystal/UI/PowerShard",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+  {
+    "className": "Desc_WAT1_C",
+    "displayName": "Somersloop",
+    "icon": "FactoryGame/Prototype/WAT/UI/Wat_1",
+    "form": "RF_SOLID",
+    "fluidColor": "FFFFFF00",
+    "energyValue": 0.0,
+    "resourceSinkPoints": 0.0
+  },
+
+  {
+    "className": "Desc_ResourceSinkCoupon_C",
+    "displayName": "AWESOME Sink points",
+    "icon": "FactoryGame/Resource/Parts/ResourceSinkCoupon/UI/IconDesc_Ficsit_Coupon",
+    "form": "RF_SOLID",
+    "fluidColor": "00000000",
+    "energyValue": 0.0,
+    "resourceSinkPoints": -1
+  }
+]
