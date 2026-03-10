@@ -190,6 +190,7 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
                     SELECT d.id, d.parent_directory, d.owner
                     FROM directories d
                              INNER JOIN check_access ca ON d.id = ca.parent_directory
+                    WHERE d.id != d.parent_directory
                 )
                 SELECT 1
                 FROM check_access ca
