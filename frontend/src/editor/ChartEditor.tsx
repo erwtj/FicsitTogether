@@ -132,7 +132,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     key={`${showSloop}-${sloopDetails?.nodeId}`}
                     show={showSloop}
                     nodeId={sloopDetails?.nodeId ?? ""}
-                    onModalSubmit={onSloopModalSubmit}
+                    onModalClose={onSloopModalSubmit}
                 />
             </div>
         </YjsContext.Provider>

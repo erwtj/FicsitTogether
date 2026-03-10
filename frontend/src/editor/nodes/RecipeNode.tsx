@@ -67,7 +67,7 @@ export const RecipeNode = memo(function RecipeNode({
         <div className="react-flow__node-default p-0">
             {inputHandles.map(h => (
                 <ItemHandle key={h.id} item={h.item} id={h.id} type="target"
-                            position={Position.Top} style={{ left: h.position }} inputTooLow={h.inputToLow} />
+                            position={Position.Top} style={{ left: h.position }} />
             ))}
 
             <Card className={isSlooped ? "slooping" : ""}>

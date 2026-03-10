@@ -1,5 +1,5 @@
 ﻿
-.inputCardImage {
+.buildingCardImage {
     width: 100%;
     height: auto;
     border-radius: 10px;
@@ -8,15 +8,15 @@
     margin-bottom: 0;
 }
 
-.inputCardTitle {
+.buildingCardTitle {
     font-size: 1.5rem;
     font-family: 'Roboto', sans-serif;
     color: #fff;
     margin-top: 0px;
 }
 
-.inputCard {
-    max-width: 220px;
+.buildingCard {
+    width: 220px;
     cursor: pointer;
     background: #202428 !important;
     border: 1px solid #3a4048 !important;
@@ -27,11 +27,24 @@
     transition: background-color 0.1s;
 }
 
-.inputCard:hover {
+.buildingCard.addBuildingCard {
+    border: 1px dashed #6c757d !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: stretch;
+    min-height: 100%;
+}
+
+.addBuildingCard:hover .addBuildingCardContent {
+    color: #d0d4db !important;
+    filter: brightness(1.4);
+}
+
+.buildingCard:hover {
     background: #393d3f;
 }
 
-.inputCard-inputField {
+.buildingCard-inputField {
     width: 55%;
     padding: 10px;
     border: none;
@@ -44,8 +57,25 @@
     text-align: center;
 
 }
-.inputCard-inputField:focus {
+.buildingCard-inputField:focus {
     outline: none;
+}
+
+.removeBuildingButton {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    color: white;
 }
 
 .somersloopInput {
@@ -80,4 +110,12 @@
     font-family: 'Roboto', sans-serif;
     user-select: none;
     text-align: center;
+}
+
+.somersloopInput .form-control[readonly] {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-secondary-color);
+    opacity: 1;
+    cursor: default;
+    pointer-events: none;
 }

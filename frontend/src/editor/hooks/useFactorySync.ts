@@ -103,6 +103,14 @@ export function useFactorySync(
                         outgoingEdges,
                     );
 
+                    const rawFactor = computeNodeFactor(
+                        recipe,
+                        d.sloopData,
+                        incomingEdges,
+                        outgoingEdges,
+                        true
+                    );
+
                     const inputTooLow: Record<string, boolean> = {};
                     recipe.input.forEach((input, i) => {
                         const handleId = `${node.id}-input-handle-${i}`;
@@ -120,12 +128,21 @@ export function useFactorySync(
                     });
 
                     const prevFactor = d._factor;
+                    const prevRawFactor = d._rawFactor;
                     const prevOverUsed = d._outputOverUsed;
                     const prevInputTooLow = d._inputTooLow;
+
+
+
+
                     const factorChanged =
                         !prevFactor ||
                         prevFactor.inputFactor !== factor.inputFactor ||
                         prevFactor.outputFactor !== factor.outputFactor;
+                    const rawFactorChanged =
+                        !prevRawFactor ||
+                        prevRawFactor.inputFactor !== rawFactor.inputFactor ||
+                        prevRawFactor.outputFactor !== rawFactor.outputFactor;
                     const overUsedChanged =
                         !prevOverUsed ||
                         Object.keys(outputOverUsed).some(
@@ -138,12 +155,12 @@ export function useFactorySync(
                             (k) => inputTooLow[k] !== prevInputTooLow[k],
                         );
 
-                    if (!factorChanged && !overUsedChanged && !inputTooLowChanged) return node;
+                    if (!factorChanged && !overUsedChanged && !inputTooLowChanged && !rawFactorChanged) return node;
 
                     changed = true;
                     return {
                         ...node,
-                        data: { ...d, _factor: factor, _outputOverUsed: outputOverUsed,  _inputTooLow: inputTooLow },
+                        data: { ...d, _factor: factor, _rawFactor: rawFactor, _outputOverUsed: outputOverUsed,  _inputTooLow: inputTooLow },
                     };
                 }
 

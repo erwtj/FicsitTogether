@@ -7,10 +7,9 @@ export type ItemHandleData = {
     id: string;
     position: Position;
     type: "source" | "target";
-    inputTooLow?: boolean;
 } & HandleProps & React.HTMLAttributes<HTMLDivElement>;
 
-export function ItemHandle({ item, id, position, type, inputTooLow, ...rest }: ItemHandleData) {
+export function ItemHandle({ item, id, position, type, ...rest }: ItemHandleData) {
     return(
         <Handle
             type={type}
@@ -19,16 +18,12 @@ export function ItemHandle({ item, id, position, type, inputTooLow, ...rest }: I
             item-class={item.className}
             {...rest}
         >
-            <div className="handleWrapper">
-                <img
-                    src={`/media/${item.icon}_256.webp`}
-                    alt={item.displayName}
-                    className="handleIcon"
-                    draggable="false"
-                />
-
-                {inputTooLow && <div className="handleOverlay radar"/>}
-            </div>
+            <img
+                src={`/media/${item.icon}_256.webp`}
+                alt={item.displayName}
+                className="handleIcon"
+                draggable="false"
+            />
         </Handle>
     );
 }
