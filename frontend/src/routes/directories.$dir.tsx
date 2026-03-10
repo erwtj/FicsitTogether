@@ -201,7 +201,7 @@ function DirectoryPageContent() {
     return (
         <>
             <BuyMeCoffeeWidget />
-            <DirectoryTree dirTree={directory.directoryTree}/>
+            <DirectoryTree dirTree={directory.directoryTree} to="directories"/>
             <div className="mt-4 align-items-center px-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
                 <div/>
                 <div className="d-flex flex-row flex-nowrap gap-3 align-items-center justify-content-center">
@@ -221,6 +221,7 @@ function DirectoryPageContent() {
                     {subDirectories.map((directory) => {
                         return (
                             <DirectoryCard
+                                to="directories"
                                 directoryInfo={
                                     {
                                         id: directory.id,

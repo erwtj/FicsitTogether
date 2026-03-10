@@ -171,7 +171,7 @@ function HomePage() {
                     </h4>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {ownedDirectories.map(dirInfo => (
-                            <DirectoryCard
+                            <DirectoryCard to="directories"
                                 key={dirInfo.id}
                                 directoryInfo={dirInfo}
                                 deleteDirectory={(dir) => handleDeleteDirectory(dir)}
@@ -192,7 +192,7 @@ function HomePage() {
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {sharedDirectories.length > 0 ?
                             sharedDirectories.map(dirInfo => (
-                                <DirectoryCard key={dirInfo.id} directoryInfo={dirInfo}
+                                <DirectoryCard to="directories" key={dirInfo.id} directoryInfo={dirInfo}
                                                leaveDirectory={(dir) => handleLeaveDirectory(dir)}/>
                             ))
                             :

@@ -39,10 +39,7 @@ function LoginComponent() {
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>
                     <Card.Title className="fs-2">Welcome to Ficsit Together</Card.Title>
                     {error ? (
-                        <Alert variant="danger" className="text-start mt-2 mb-3">
-                            <Alert.Heading className="fs-6 fw-bold">
-                                {error === 'access_denied' ? 'Access denied' : error}
-                            </Alert.Heading>
+                        <Alert variant="warning" className="text-start mt-2 mb-3 py-2">
                             {error_description && <p className="mb-0 small">{decodeURIComponent(error_description)}</p>}
                         </Alert>
                     ) : (
