@@ -1,9 +1,17 @@
 import { createFileRoute, redirect} from '@tanstack/react-router';
 import LoginButton from '../components/buttons/LoginButton';
 import Card from 'react-bootstrap/Card';
+import Alert from 'react-bootstrap/Alert';
 import './login.tsx.css'
+import {z} from 'zod';
+
+const loginSearchSchema = z.object({
+    error: z.string().optional(),
+    error_description: z.string().optional(),
+});
 
 export const Route = createFileRoute('/login')({
+    validateSearch: loginSearchSchema,
     beforeLoad: ({context}) => {
         if (context.auth && context.auth.isAuthenticated) {
             throw redirect({to: '/home', replace: true});
@@ -21,6 +29,8 @@ const img_id = Math.floor(Math.random() * 3); // Make sure to update '3' when ad
 const random_img = `/media/login-backgrounds/${img_id}.webp`;
 
 function LoginComponent() {
+    const { error, error_description } = Route.useSearch();
+
     return (
         <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-black">
             <div id="background-img" className="h-100 w-100 position-absolute" style={{backgroundImage: `url(${random_img})`}}/>
@@ -28,10 +38,19 @@ function LoginComponent() {
                 <Card.Body className="text-center">
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>
                     <Card.Title className="fs-2">Welcome to Ficsit Together</Card.Title>
-                    <Card.Text className="mb-4">
-                        Get started by signing in to your account
-                    </Card.Text>
-                    <LoginButton className="w-75"/>
+                    {error ? (
+                        <Alert variant="danger" className="text-start mt-2 mb-3">
+                            <Alert.Heading className="fs-6 fw-bold">
+                                {error === 'access_denied' ? 'Access denied' : error}
+                            </Alert.Heading>
+                            {error_description && <p className="mb-0 small">{decodeURIComponent(error_description)}</p>}
+                        </Alert>
+                    ) : (
+                        <Card.Text className="mb-4">
+                            Get started by signing in to your account
+                        </Card.Text>
+                    )}
+                    <LoginButton className="w-75" prompt={error ? 'login' : undefined}/>
                 </Card.Body>
             </Card>
         </div>

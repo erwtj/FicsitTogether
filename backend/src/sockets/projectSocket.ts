@@ -45,13 +45,18 @@ async function saveDocument(projectId: string, context: ProjectContext) {
     const abortController = new AbortController();
     context.saveAbortController = abortController;
 
+    if (!context.doc.getMap('nodes') || !context.doc.getMap('edges') || !context.doc.getMap('metadata')) {
+        console.warn(`Project ${projectId} is missing required Yjs maps, skipping save.`);
+        return;
+    }
+
     // Snapshot Yjs state synchronously before any await
     const nodesJson = context.doc.getMap('nodes').toJSON();
     const edgesJson = context.doc.getMap('edges').toJSON();
     const metadataJson = context.doc.getMap('metadata').toJSON();
 
-    const name = (metadataJson['name'] as string).slice(0, MAX_NAME_LENGTH) || '';
-    const description = (metadataJson['description'] as string).slice(0, MAX_DESCRIPTION_LENGTH) || '';
+    const name = (metadataJson['name'] as string | undefined)?.slice(0, MAX_NAME_LENGTH) || '';
+    const description = (metadataJson['description'] as string | undefined)?.slice(0, MAX_DESCRIPTION_LENGTH) || '';
     const jsonData = sanitizeChart({ nodes: Object.values(nodesJson), edges: Object.values(edgesJson) });
 
     try {
@@ -116,7 +121,7 @@ export function setupWebSocketServer(server: Server) {
 
     server.on('upgrade', async (request, socket, head) => {
         try {
-            const projectId = request?.url?.replace(/^\/ws\//, '');
+            const projectId = request?.url?.slice(1);
             if (!projectId) {
                 socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                 socket.destroy();
@@ -182,7 +187,7 @@ export function setupWebSocketServer(server: Server) {
         try {
             context = await createContext(ws.projectId);
             ws.clientId = context.nextClientId++;
-            context?.clients.add(ws);
+            context.clients.add(ws);
 
             const stateVector = Y.encodeStateAsUpdate(context.doc);
             const syncMessage = new Uint8Array([MESSAGE_SYNC, ...stateVector]);
@@ -198,6 +203,12 @@ export function setupWebSocketServer(server: Server) {
             ws.close(1008, 'Connection failed.');
             return;
         }
+
+        const interval = setInterval(() => {
+            if (ws.readyState === ws.OPEN) {
+                ws.ping()
+            }
+        }, 30000)
 
         ws.on('message', (data) => {
             if (!(data instanceof Buffer || data instanceof ArrayBuffer)) {
@@ -233,15 +244,19 @@ export function setupWebSocketServer(server: Server) {
             }
         });
 
-        ws.on('close', () => {
+        ws.on('close', async () => {
+            clearInterval(interval);
+
             context.clients.delete(ws);
             removeAwarenessStates(context.awareness, [ws.clientId], null);
 
             if (context.clients.size === 0) {
-                // Cancel any pending debounced save, we're saving right now
+                // Cancel any pending debounced save and do a final save now
                 if (context.saveTimeout) clearTimeout(context.saveTimeout);
-                saveDocument(ws.projectId, context);
+                // Remove from map immediately so no new clients create a stale context,
+                // but await the save before fully tearing down so it completes cleanly
                 projectContextMap.delete(ws.projectId);
+                await saveDocument(ws.projectId, context);
             }
         });
     });

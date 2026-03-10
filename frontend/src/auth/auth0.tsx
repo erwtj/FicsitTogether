@@ -5,7 +5,7 @@ import { User } from '@auth0/auth0-react'
 export interface Auth0ContextType  {
     isAuthenticated: boolean
     user: User | undefined
-    login: () => void
+    login: (prompt?: 'login' | 'none' | 'consent' | 'select_account') => void
     logout: () => void
     isLoading: boolean
     getAccessTokenSilently: () => Promise<string>
@@ -18,7 +18,7 @@ function Auth0ContextProvider({ children }: { children: React.ReactNode }) {
     const contextValue = {
         isAuthenticated,
         user,
-        login: () => loginWithRedirect(),
+        login: (prompt?: 'login' | 'none' | 'consent' | 'select_account') => loginWithRedirect(prompt ? { authorizationParams: { prompt } } : undefined),
         logout: () => logout({ logoutParams: { returnTo: window.location.origin } }),
         isLoading,
         getAccessTokenSilently
