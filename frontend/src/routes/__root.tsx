@@ -2,9 +2,28 @@ import { createRootRouteWithContext, redirect, Outlet, useRouterState} from '@ta
 import {type RouterContext} from '../router';
 import {useEffect} from "react";
 import NavHeader from "../components/NavHeader.tsx";
+import {z} from 'zod';
+
+const rootSearchSchema = z.object({
+    error: z.string().optional(),
+    error_description: z.string().optional(),
+}).passthrough();
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-    beforeLoad: ({context, location}) => {
+    validateSearch: rootSearchSchema,
+    beforeLoad: ({context, location, search}) => {
+        // Auth0 error callback — redirect to login so the error is shown there
+        if (search.error) {
+            if (location.pathname !== '/login') {
+                throw redirect({
+                    to: '/login',
+                    search: { error: search.error, error_description: search.error_description },
+                    replace: true,
+                });
+            }
+            return;
+        }
+
         if (location.pathname === '/login') {
             return;
         }

@@ -24,7 +24,8 @@
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0",
-    "yjs": "^13.6.29"
+    "yjs": "^13.6.29",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

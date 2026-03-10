@@ -4,9 +4,10 @@ import Button from 'react-bootstrap/Button';
 
 interface LoginButtonProps {
     className?: string;
+    prompt?: 'login' | 'none' | 'consent' | 'select_account';
 }
 
-const LoginButton = ({className}: LoginButtonProps) => {
+const LoginButton = ({className, prompt}: LoginButtonProps) => {
     const { auth } = Route.useRouteContext();
 
     if (!auth) {
@@ -15,7 +16,7 @@ const LoginButton = ({className}: LoginButtonProps) => {
 
     const login = auth.login
     return (
-        <Button variant="primary" size="lg" className={className} onClick={() => login()}>
+        <Button variant="primary" size="lg" className={className} onClick={() => login(prompt)}>
             Login
         </Button>
     );
