@@ -24,14 +24,10 @@ import { Toast } from "react-bootstrap";
 
 export const Route = createFileRoute('/directories/$dir')({
     component: DirectoryPage,
-    beforeLoad: ({context}) => {
-        if (!context.auth?.isAuthenticated) {
-            throw redirect({to: '/login', replace: true});
-        }
-    },
     staticData: {
         showNav: true,
-        title: "Ficsit Together | Directories"
+        title: "Ficsit Together | Directories",
+        requireAuth: true
     },
     loader: async ({context, params: {dir}}) => {
         const { auth } = context;

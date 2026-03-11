@@ -20,7 +20,8 @@ export const Route = createFileRoute('/overview/$dir')({
     component: OverviewPage,
     staticData: {
         showNav: true,
-        title: "Ficsit Together | Overview"
+        title: "Ficsit Together | Overview",
+        requireAuth: true
     },
     loader: async ({context, params: {dir}}) => {
         const { auth } = context;

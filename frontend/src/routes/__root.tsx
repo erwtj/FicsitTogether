@@ -11,8 +11,8 @@ const rootSearchSchema = z.object({
 
 export const Route = createRootRouteWithContext<RouterContext>()({
     validateSearch: rootSearchSchema,
-    beforeLoad: ({context, location, search}) => {
-        // Auth0 error callback — redirect to login so the error is shown there
+    beforeLoad: ({context, location, search, matches}) => {
+        // Auth0 error callback, redirect to login so the error is shown there
         if (search.error) {
             if (location.pathname !== '/login') {
                 throw redirect({
@@ -24,28 +24,34 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             return;
         }
 
-        if (location.pathname === '/login') {
-            return;
+        if (location.pathname === '/') {
+            if (context.auth && context.auth.isAuthenticated) {
+                throw redirect({
+                    to: '/home',
+                    replace: true,
+                });
+            } else {
+                throw redirect({
+                    to: '/login',
+                    replace: true,
+                });
+            }
         }
 
-        if (!context.auth || !context.auth.isAuthenticated) {
+        // If any matched route requires auth and the user isn't logged in, redirect to login
+        const requiresAuth = matches.some((match) => match.staticData?.requireAuth);
+        if (requiresAuth && !context.auth?.isAuthenticated) {
             throw redirect({
                 to: '/login',
                 replace: true,
             });
-        }
-
-        if (context.auth && context.auth.isAuthenticated && location.pathname === '/') {
-            throw redirect({
-                to: '/home',
-                replace: true,
-            })
         }
     },
     component: RootComponent,
     staticData: {
         showNav: false,
         title: 'Ficsit Together',
+        requireAuth: false,
     }
 });
 
@@ -56,7 +62,7 @@ function RootComponent() {
     });
 
     useEffect(() => {
-        document.title = state.matches[1]?.staticData?.title || 'Satisfactory Charter';
+        document.title = state.matches[1]?.staticData?.title || 'Ficsit Together';
     }, [state]);
 
     return (

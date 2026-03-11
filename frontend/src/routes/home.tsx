@@ -19,15 +19,11 @@ import { Toast } from "react-bootstrap";
 import { MAX_DIRECTORIES_PER_DIRECTORY } from "dtolib";
 
 export const Route = createFileRoute('/home')({
-    beforeLoad: ({context}) => {
-        if (!context.auth?.isAuthenticated) {
-            throw redirect({to: '/login', replace: true});
-        }
-    },
     component: HomePage,
     staticData: {
         title: "Ficsit Together | Home",
         showNav: true,
+        requireAuth: true
     },
     loader: async ({context}) => {
         const {auth} = context;

@@ -22,6 +22,7 @@ export const Route = createFileRoute('/login')({
     staticData : {
         title: "Ficsit Together | Login",
         showNav: false,
+        requireAuth: false,
     }
 });
 
@@ -47,7 +48,7 @@ function LoginComponent() {
                             Get started by signing in to your account
                         </Card.Text>
                     )}
-                    <LoginButton className="w-75" prompt={error ? 'login' : undefined}/>
+                    <LoginButton className="w-75 slooping" prompt={error ? 'login' : undefined}/>
                 </Card.Body>
             </Card>
         </div>
