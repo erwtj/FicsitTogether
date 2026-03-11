@@ -13,10 +13,14 @@ export type ChartDTO = {
     chart: string;
 }
 
+export type SloopData = {
+    sloopAmount: number;
+    overclockPercentage: number;
+}
+
 export type RecipeNodeData = {
     recipeClassName: string;
-    somersloops: number;
-    percentage: number[];
+    sloopData?: SloopData[]
 };
 
 export type ItemSpawnerNodeData = {

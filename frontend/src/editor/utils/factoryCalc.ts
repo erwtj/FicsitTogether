@@ -1,67 +1,70 @@
 ﻿import { type Edge } from "@xyflow/react";
 import { type Recipe, getBuilding } from "ficlib";
-import { type NodeFactor, type ItemEdgeData } from "../types";
+import {type NodeFactor, type ItemEdgeData, type SloopData} from "../types";
 import {getItemIndexFromHandleId} from "./idUtils.ts";
 
-// ─── Somer Sloop helpers ─────────────────────────────────────────────────────
-
-/**
- * Factor when the bottleneck is determined by incoming belts (input-driven).
- * inputFactor stays as-is; sloops boost the outputFactor.
- */
-function sloopInputBased(
-    inputFactor: number,
-    somersloops: number,
-    percentage: number[],
+// ─── Slooping Calculations ─────────────────────────────────────────────────────────────
+function inputBasedSloopingFactor(
+    recipe: Recipe,
+    sloopData: SloopData[],
+    incomingEdges: Edge<ItemEdgeData>[],
 ): NodeFactor {
-    let sloopBonus = 0;
-    percentage.forEach((pct, i) => {
-        const slots = Math.max(0, Math.min(2, somersloops - 2 * i));
-        sloopBonus += (slots / 2) * (pct / 100);
-    });
-    return { inputFactor, outputFactor: inputFactor + sloopBonus };
-}
+    const building = getBuilding(recipe.producedIn);
+    const somersloopsNeeded = building?.somersloopsNeeded ?? 1;
 
-/**
- * Factor when driven by outgoing belt demand (output-driven).
- */
-function sloopOutputBased(
-    factor: number,
-    somersloops: number,
-    percentage: number[],
-    buildingSloopCount: number,
-): NodeFactor {
-    const baseClockFactor = percentage.reduce((a, v) => a + v, 0) / 100;
-    let sloopBonus = 0;
-    percentage.forEach((pct, i) => {
-        const slots = Math.max(0, Math.min(buildingSloopCount, somersloops - buildingSloopCount * i));
-        sloopBonus += (slots / buildingSloopCount) * (pct / 100);
-    });
-    if (factor > baseClockFactor + sloopBonus) {
-        return { inputFactor: factor - sloopBonus, outputFactor: factor };
+    const inputFactor = inputBasedFactor(recipe, incomingEdges);
+    const totalOverclockPercentage = sloopData.reduce((sum, data) => sum + data.overclockPercentage, 0);
+    const missingInputFactor = inputFactor.inputFactor - (totalOverclockPercentage / 100);
+
+    const totalEffectivePercentage = sloopData.reduce((sum, data) => sum + ((1 + (data.sloopAmount / somersloopsNeeded)) * data.overclockPercentage), 0);
+    const outputFactor = totalEffectivePercentage > 0 ? totalEffectivePercentage / 100 : 1;
+
+    if (inputFactor.inputFactor < 0 || outputFactor + missingInputFactor < 0) {
+        return { inputFactor: 0, outputFactor: 0 };
     }
-    return { inputFactor: baseClockFactor, outputFactor: baseClockFactor + sloopBonus };
+
+    return { inputFactor: inputFactor.inputFactor, outputFactor: outputFactor + missingInputFactor };
 }
 
-/**
- * Factor when there are no connected edges at all.
- */
-function sloopEmptyBased(
-    somersloops: number,
-    percentage: number[],
-    buildingSloopCount: number,
+function outputBasedSloopingFactor(
+    recipe: Recipe,
+    sloopData: SloopData[],
+    outgoingEdges: Edge<ItemEdgeData>[],
 ): NodeFactor {
-    const baseClockFactor = percentage.reduce((a, v) => a + v, 0) / 100;
-    let sloopBonus = 0;
-    percentage.forEach((pct, i) => {
-        const slots = Math.max(0, Math.min(buildingSloopCount, somersloops - buildingSloopCount * i));
-        sloopBonus += (slots / buildingSloopCount) * (pct / 100);
-    });
-    return { inputFactor: baseClockFactor, outputFactor: baseClockFactor + sloopBonus };
+    const building = getBuilding(recipe.producedIn);
+    const somersloopsNeeded = building?.somersloopsNeeded ?? 1;
+
+    const outputFactor = outputBasedFactor(recipe, outgoingEdges);
+    const totalEffectivePercentage = sloopData.reduce((sum, data) => sum + ((1 + (data.sloopAmount / somersloopsNeeded)) * data.overclockPercentage), 0);
+    const missingOutputFactor = outputFactor.outputFactor - (totalEffectivePercentage / 100);
+
+    const totalOverclockPercentage = sloopData.reduce((sum, data) => sum + data.overclockPercentage, 0);
+    const inputFactor = totalOverclockPercentage > 0 ? totalOverclockPercentage / 100 : 1;
+
+    if (inputFactor + missingOutputFactor < 0 || outputFactor.outputFactor < 0) {
+        return { inputFactor: 0, outputFactor: 0 };
+    }
+
+    return { inputFactor: inputFactor + missingOutputFactor, outputFactor: outputFactor.outputFactor };
 }
+
+function emptySloopingFactor(
+    recipe: Recipe,
+    sloopData: SloopData[]
+): NodeFactor {
+    const building = getBuilding(recipe.producedIn);
+    const somersloopsNeeded = building?.somersloopsNeeded ?? 1;
+    const totalOverclockPercentage = sloopData.reduce((sum, data) => sum + data.overclockPercentage, 0);
+    const totalEffectivePercentage = sloopData.reduce((sum, data) => sum + ((1 + (data.sloopAmount / somersloopsNeeded)) * data.overclockPercentage), 0);
+    const inputFactor = totalOverclockPercentage > 0 ? totalOverclockPercentage / 100 : 1;
+    const outputFactor = totalEffectivePercentage > 0 ? totalEffectivePercentage / 100 : 1;
+
+    return { inputFactor: inputFactor, outputFactor: outputFactor };
+}
+
+
 
 // ─── Main export ─────────────────────────────────────────────────────────────
-
 /**
  * Compute the inputFactor / outputFactor for a recipe node given the current
  * edge throughputs.  This is a pure function so it can be called in a selector
@@ -72,65 +75,72 @@ function sloopEmptyBased(
  */
 export function computeNodeFactor(
     recipe: Recipe,
-    somersloops: number,
-    percentage: number[],
+    sloopData: SloopData[] | undefined,
     incomingEdges: Edge<ItemEdgeData>[],
     outgoingEdges: Edge<ItemEdgeData>[],
+    isRawFactor = false,
 ): NodeFactor {
-    const craftsPerMinute = 60.0 / recipe.duration;
-    const building = getBuilding(recipe.producedIn);
-    const buildingSloopCount: number = building?.somersloopsNeeded ?? 2;
+
+    // ── Sloop-driven: calculate the factor based in slooping settings ──
+    if (sloopData && sloopData.length > 0 && !isRawFactor) {
+        if (incomingEdges.length > 0) return inputBasedSloopingFactor(recipe, sloopData, incomingEdges);
+        if (outgoingEdges.length > 0) return outputBasedSloopingFactor(recipe, sloopData, outgoingEdges);
+        return emptySloopingFactor(recipe, sloopData);
+    }
 
     // ── Input-driven: group incoming throughput by target handle ──
-    if (incomingEdges.length > 0) {
-        const byHandle = new Map<string, number>();
-        for (const edge of incomingEdges) {
-            const h = edge.targetHandle ?? "";
-            byHandle.set(h, (byHandle.get(h) ?? 0) + (edge.data?.throughput ?? 0));
-        }
-
-        let lowestFactor = Infinity;
-        byHandle.forEach((throughput, handleId) => {
-            const idx = getItemIndexFromHandleId(handleId);
-            const inputItem = recipe.input[idx];
-            if (!inputItem) return;
-            const required = inputItem.amount * craftsPerMinute;
-            if (required > 0) lowestFactor = Math.min(lowestFactor, throughput / required);
-        });
-
-        if (!isFinite(lowestFactor)) lowestFactor = 0;
-
-        return somersloops !== 0
-            ? sloopInputBased(lowestFactor, somersloops, percentage)
-            : { inputFactor: lowestFactor, outputFactor: lowestFactor };
-    }
+    if (incomingEdges.length > 0) return inputBasedFactor(recipe, incomingEdges, isRawFactor);
 
     // ── Output-driven: infer factor from outgoing edge throughputs ──
-    if (outgoingEdges.length > 0) {
-        const byHandle = new Map<string, number>();
-        for (const edge of outgoingEdges) {
-            const h = edge.sourceHandle ?? "";
-            const idx = getItemIndexFromHandleId(h);
-            const outputItem = recipe.output[idx];
-            if (!outputItem) continue;
-            const rateAtOne = outputItem.amount * craftsPerMinute;
-            const factor = rateAtOne > 0 ? (edge.data?.throughput ?? 0) / rateAtOne : 0;
-            byHandle.set(h, (byHandle.get(h) ?? 0) + factor);
-        }
+    if (outgoingEdges.length > 0) return outputBasedFactor(recipe, outgoingEdges, isRawFactor);
 
-        const sorted = [...byHandle.values()].sort((a, b) => a - b);
-        const lowestFactor = sorted[0] ?? 1;
+    // ── No edges and no slooping, so we assume a factor of 1 (or 0 for raw factor) ──
+    return { inputFactor: !isRawFactor ? 1 : 0, outputFactor: !isRawFactor ? 1 : 0 }
+}
 
-        return somersloops !== 0
-            ? sloopOutputBased(lowestFactor, somersloops, percentage, buildingSloopCount)
-            : { inputFactor: lowestFactor, outputFactor: lowestFactor };
+/**Input based Factor **/
+function inputBasedFactor(recipe: Recipe, incomingEdges: Edge<ItemEdgeData>[], isRawFactor = false): NodeFactor {
+    const craftsPerMinute = 60 / recipe.duration;
+    const byHandle = new Map<string, number>();
+    for (const edge of incomingEdges) {
+        const h = edge.targetHandle ?? "";
+        byHandle.set(h, (byHandle.get(h) ?? 0) + (edge.data?.throughput ?? 0));
     }
 
-    // ── No edges ──
-    return somersloops !== 0
-        ? sloopEmptyBased(somersloops, percentage, buildingSloopCount)
-        : { inputFactor: 1, outputFactor: 1 };
+    let lowestFactor = Infinity;
+    byHandle.forEach((throughput, handleId) => {
+        const idx = getItemIndexFromHandleId(handleId);
+        const inputItem = recipe.input[idx];
+        if (!inputItem) return;
+        const required = inputItem.amount * craftsPerMinute;
+        if (required > 0) lowestFactor = Math.min(lowestFactor, throughput / required);
+    });
+
+    if (!isFinite(lowestFactor)) lowestFactor = 0;
+
+    return { inputFactor: lowestFactor, outputFactor: !isRawFactor ? lowestFactor : 0 };
 }
+
+/**Output based Factor **/
+function outputBasedFactor(recipe: Recipe, outgoingEdges: Edge<ItemEdgeData>[], isRawFactor = false): NodeFactor {
+    const craftsPerMinute = 60 / recipe.duration;
+    const byHandle = new Map<string, number>();
+    for (const edge of outgoingEdges) {
+        const h = edge.sourceHandle ?? "";
+        const idx = getItemIndexFromHandleId(h);
+        const outputItem = recipe.output[idx];
+        if (!outputItem) continue;
+        const rateAtOne = outputItem.amount * craftsPerMinute;
+        const factor = rateAtOne > 0 ? (edge.data?.throughput ?? 0) / rateAtOne : 0;
+        byHandle.set(h, (byHandle.get(h) ?? 0) + factor);
+    }
+
+    const sorted = [...byHandle.values()].sort((a, b) => a - b);
+    const lowestFactor = sorted[0] ?? 1;
+
+    return {inputFactor: !isRawFactor ? lowestFactor : 0, outputFactor: lowestFactor};
+}
+
 
 /** Total throughput consumed from `handleId` across `edges`. */
 export function totalThroughputForHandle(

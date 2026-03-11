@@ -15,10 +15,12 @@ import { useNodeEdgeHandlers } from "./hooks/useNodeEdgeHandlers.ts";
 import { useConnectionValidation } from "./hooks/useConnectionValidation.ts";
 import { useFactorySync } from "./hooks/useFactorySync.ts";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
-import { useNodeModal } from "./hooks/useNodeModal.ts";
+import { useNodeModal } from "./hooks/modals/useNodeModal.ts";
 import type { Edge, NodeChange } from "@xyflow/react";
 import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
 import { Toast } from "react-bootstrap";
+import {useSloopModal} from "./hooks/modals/useSloopModal.ts";
+import {SloopModal} from "./components/modals/SloopModal.tsx";
 import {useClientSettings} from "../hooks/useClientSettings.ts";
 
 interface ChartEditorProps {
@@ -39,6 +41,9 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     // Add node modal stuff (spawn, auto-connect logic, etc.)
     const { show, requiredInput, requiredOutput, onDropOnCanvas, onCanvasDoubleClick, onModalSubmit } =
         useNodeModal(ydocRef);
+
+    // Add sloop modal
+    const { show: showSloop, details: sloopDetails, onModalSubmit: onSloopModalSubmit } = useSloopModal();
 
     // Manage node, edge state and handlers + send to useFactorySync and useYjsSync
     const { nodes, setNodes, edges, setEdges, onNodesChangeInternal, onEdgesChangeInternal, onConnect, onConnectStart, onConnectEnd } =
@@ -132,11 +137,19 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     RequiredInput={requiredInput}
                     RequiredOutput={requiredOutput}
                 />
+                <SloopModal
+                    key={`${showSloop}-${sloopDetails?.nodeId}`}
+                    show={showSloop}
+                    nodeId={sloopDetails?.nodeId ?? ""}
+                    onModalClose={onSloopModalSubmit}
+                />
             </div>
         </YjsContext.Provider>
     );
 }
 
 export default function ChartEditor(props: ChartEditorProps) {
-    return <ChartEditorInner {...props} />;
+    return (
+        <ChartEditorInner {...props} />
+    );
 }

@@ -24,7 +24,10 @@ function nodeDataFingerprint(nodes: Node[]): string {
         }
         if (n.type === "recipe-node") {
             const d = n.data as RecipeNodeData;
-            return `${n.id}:${d.recipeClassName}:${d.somersloops}:${d.percentage.join(",")}`;
+            const sloopDataStr = d.sloopData?.map(
+                (data => `${data.sloopAmount}-${data.overclockPercentage}`)).join(",")
+                ?? "";
+            return `${n.id}:${d.recipeClassName}:${sloopDataStr}`;
         }
         if (n.type === "power-node") {
             const d = n.data as PowerNodeData;
@@ -95,10 +98,17 @@ export function useFactorySync(
 
                     const factor = computeNodeFactor(
                         recipe,
-                        d.somersloops,
-                        d.percentage,
+                        d.sloopData,
                         incomingEdges,
                         outgoingEdges,
+                    );
+
+                    const rawFactor = computeNodeFactor(
+                        recipe,
+                        d.sloopData,
+                        incomingEdges,
+                        outgoingEdges,
+                        true
                     );
 
                     const outputOverUsed: Record<string, boolean> = {};
@@ -110,23 +120,29 @@ export function useFactorySync(
                     });
 
                     const prevFactor = d._factor;
+                    const prevRawFactor = d._rawFactor;
                     const prevOverUsed = d._outputOverUsed;
+
                     const factorChanged =
                         !prevFactor ||
                         prevFactor.inputFactor !== factor.inputFactor ||
                         prevFactor.outputFactor !== factor.outputFactor;
+                    const rawFactorChanged =
+                        !prevRawFactor ||
+                        prevRawFactor.inputFactor !== rawFactor.inputFactor ||
+                        prevRawFactor.outputFactor !== rawFactor.outputFactor;
                     const overUsedChanged =
                         !prevOverUsed ||
                         Object.keys(outputOverUsed).some(
                             (k) => outputOverUsed[k] !== prevOverUsed[k],
                         );
 
-                    if (!factorChanged && !overUsedChanged) return node;
+                    if (!factorChanged && !overUsedChanged && !rawFactorChanged) return node;
 
                     changed = true;
                     return {
                         ...node,
-                        data: { ...d, _factor: factor, _outputOverUsed: outputOverUsed },
+                        data: { ...d, _factor: factor, _rawFactor: rawFactor, _outputOverUsed: outputOverUsed },
                     };
                 }
 

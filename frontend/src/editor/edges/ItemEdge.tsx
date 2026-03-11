@@ -185,7 +185,7 @@ export const ItemEdge = memo(function ItemEdge({
             scratch[idx] = { ...origin, x: origin.x + dx, y: origin.y + dy };
             setDragBuffer([...scratch]);
         }
-
+        
         function onMouseUp(upEvent: MouseEvent) {
             upEvent.stopPropagation();
             window.removeEventListener("mousemove", onMouseMove);

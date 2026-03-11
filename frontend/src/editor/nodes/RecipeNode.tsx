@@ -1,10 +1,10 @@
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { type NodeProps, Position } from "@xyflow/react";
 import { Card } from "react-bootstrap";
 import { getRecipe, getBuilding, getItem } from "ficlib";
 import { ItemHandle } from "../handles/ItemHandle";
 import { useYjsMutation } from "../hooks/useYjsMutation";
-import { roundTo3Decimals, isItemSolid } from "../../utils/throughputUtil.ts";
+import {roundTo3Decimals, isItemSolid, roundTo4Decimals} from "../../utils/throughputUtil.ts";
 import { type RecipeNodeType, type NodeFactor } from "../types";
 
 import "./RecipeNode.css";
@@ -15,22 +15,48 @@ export const RecipeNode = memo(function RecipeNode({
     id,
     data,
 }: NodeProps<RecipeNodeType>) {
-    const { recipeClassName, somersloops, percentage } = data;
-    useYjsMutation();
+    const { recipeClassName, sloopData } = data;
+    const { updateNodeData } = useYjsMutation();
 
     const recipe = getRecipe(recipeClassName)!;
     const producedIn = getBuilding(recipe.producedIn)!;
 
+    const isSlooped = sloopData && sloopData.length > 0;
     // Read pre-computed factor from data (pushed by useFactorySync) no edge store subscription
     const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
     const outputOverUsed: Record<string, boolean> = useMemo(() => data._outputOverUsed ?? {}, [data._outputOverUsed]);
 
     const craftsPerMinute = 60.0 / recipe.duration;
 
+    // Reset the slooping if factor drops below sloop required threshold 
+    useEffect(() => {
+        const sloopData = data?.sloopData ?? [];
+        if (sloopData.length === 0) return;
+
+        const rawFactor = data?._rawFactor ?? { inputFactor: 1, outputFactor: 1 };
+        const somersloopsNeeded = producedIn.somersloopsNeeded ?? 1;
+
+        let isInvalid = false;
+
+        if (rawFactor?.inputFactor != 0) {
+            const total = roundTo4Decimals(sloopData.reduce((sum: number, d) => sum + d.overclockPercentage, 0));
+            isInvalid = total - roundTo4Decimals((rawFactor?.inputFactor ?? 1) * 100) > 0.000099;
+        } else if (rawFactor?.outputFactor != 0) {
+            const total = roundTo4Decimals(sloopData.reduce((sum: number, d) => sum + ((1 + (d.sloopAmount / somersloopsNeeded)) * d.overclockPercentage), 0));
+            isInvalid = total - roundTo4Decimals((rawFactor?.outputFactor ?? 1) * 100) > 0.000099;
+        }
+
+        if (isInvalid) {
+            updateNodeData(id, { sloopData: [] });
+        }
+    }, [data?._rawFactor, data?._rawFactor?.inputFactor, data?._rawFactor?.outputFactor, data?.sloopData, id, producedIn.somersloopsNeeded, updateNodeData]);
+
+
     const inputHandles = useMemo(() => recipe.input.map((input, i) => {
         const item = getItem(input.name)!;
         const handleId = `${id}-input-handle-${i}`;
         const solid = isItemSolid(item);
+
         return {
             id: handleId,
             position: `${(100 / (recipe.input.length + 1)) * (i + 1)}%`,
@@ -54,7 +80,7 @@ export const RecipeNode = memo(function RecipeNode({
 
     const openSloopModal = () => {
         window.dispatchEvent(new CustomEvent("openSloopModal", {
-            detail: { nodeId: id, somersloops, percentage },
+            detail: { nodeId: id },
         }));
     };
 
@@ -65,11 +91,14 @@ export const RecipeNode = memo(function RecipeNode({
                             position={Position.Top} style={{ left: h.position }} />
             ))}
 
-            <Card className={somersloops !== 0 ? "slooping" : ""}>
+            <Card className={isSlooped ? "slooping" : ""}>
                 <Card.Header style={{ height: "30px" }}>
                     {inputHandles.map(h => (
                         <span key={h.id} className="position-absolute"
-                              style={{ width: "100px", left: `calc(${h.position} - 50px)` }}>
+                              style={{ width: "100px",
+                                  left: `calc(${h.position} - 50px)`,
+                        }}
+                        >
                             {h.displayAmount}
                         </span>
                     ))}
@@ -109,7 +138,7 @@ export const RecipeNode = memo(function RecipeNode({
                     ))}
                     {producedIn.somersloopsNeeded > 0 && (
                         <button className="sloopButton" onClick={openSloopModal}>
-                            <img className={somersloops === 0 ? "sloop-image" : "sloop-image sloop-active"}
+                            <img className={isSlooped ? "sloop-image sloop-active" : "sloop-image"}
                                  src="/media/FactoryGame/Prototype/WAT/UI/Wat_1_256.webp" alt="sloop" />
                         </button>
                     )}

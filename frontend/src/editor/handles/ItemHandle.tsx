@@ -23,7 +23,12 @@ export function ItemHandle({ item, id, position, type, ...rest }: ItemHandleData
             item-class={item.className}
             {...rest}
         >
-            <img src={`/media/${item.icon}_256.webp`} alt={item.displayName} className="handleIcon" draggable="false" />
+            <img
+                src={`/media/${item.icon}_256.webp`}
+                alt={item.displayName}
+                className="handleIcon"
+                draggable="false"
+            />
         </Handle>
     );
 
