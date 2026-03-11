@@ -25,12 +25,11 @@ export const RecipeNode = memo(function RecipeNode({
     // Read pre-computed factor from data (pushed by useFactorySync) no edge store subscription
     const factor: NodeFactor = data._factor ?? DEFAULT_FACTOR;
 
-    const outputOverUsed: Record<string, boolean> = data._outputOverUsed ?? {};
-    const inputTooLow: Record<string, boolean> = data._inputTooLow ?? {};
+    const outputOverUsed: Record<string, boolean> = useMemo(() => data._outputOverUsed ?? {}, [data._outputOverUsed]);
 
     const craftsPerMinute = 60.0 / recipe.duration;
 
-    // Reset the slooping data when the factor changes
+    // Reset the slooping if factor drops below sloop required threshold 
     useEffect(() => {
         const sloopData = data?.sloopData ?? [];
         if (sloopData.length === 0) return;
@@ -64,9 +63,8 @@ export const RecipeNode = memo(function RecipeNode({
             position: `${(100 / (recipe.input.length + 1)) * (i + 1)}%`,
             displayAmount: roundTo3Decimals(input.amount * craftsPerMinute * factor.inputFactor / (solid ? 1 : 1000)),
             item,
-            inputToLow: inputTooLow[handleId] ?? false,
         };
-    }), [recipe, id, craftsPerMinute, factor.inputFactor, inputTooLow]);
+    }), [recipe, id, craftsPerMinute, factor.inputFactor]);
 
     const outputHandles = useMemo(() => recipe.output.map((output, i) => {
         const item = getItem(output.name)!;

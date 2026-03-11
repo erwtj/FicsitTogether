@@ -1,6 +1,5 @@
 import {useNodes} from "@xyflow/react";
-import type {SloopData} from "../../types.ts";
-import type {RecipeNodeType} from "../../types.ts";
+import type {RecipeNodeType, SloopData} from "../../types.ts";
 import {getBuilding, getItem, getRecipe } from "ficlib";
 import {useMemo, useState } from "react";
 import "./SloopModal.tsx.css"
@@ -15,11 +14,10 @@ export type SloopModalProps = {
     nodeId: string;
     onModalClose: () => void;
 }
-// TODO: When input or output factor gets to low for overclock reset the overclock data to be empty
+
 export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
-    // We need to use usenodes and not getNode because the component needs to be reRendered when the node changes (getNode is 1 update behind)
     const nodes = useNodes()
-    const node = nodes.find(n => n.id === nodeId) as (RecipeNodeType | null) ?? null;
+    const node = useMemo(() => nodes.find(n => n.id === nodeId) as (RecipeNodeType | null) ?? null, [nodes, nodeId]);
 
     const {updateNodeData} = useYjsMutation();
 
@@ -42,14 +40,10 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
         else if (rawFactor?.outputFactor != 0) {
             const somersloopsNeeded = building?.somersloopsNeeded ?? 1;
             const totalEffectivePercentage = allSloopData.reduce((sum, data) => sum + ((1 + (data.sloopAmount / somersloopsNeeded)) * data.overclockPercentage), 0);
-            console.log("total factor: ", roundTo4Decimals(totalEffectivePercentage));
-            console.log("Output factor:", roundTo4Decimals((rawFactor?.outputFactor ?? 1) * 100));
             return [roundTo4Decimals(totalEffectivePercentage) - roundTo4Decimals((rawFactor?.outputFactor ?? 1) * 100) <= 0.000099, 'output']
         }
         else return [true, 'none']
     }, [allSloopData, building?.somersloopsNeeded, rawFactor?.inputFactor, rawFactor?.outputFactor]);
-
-
 
     const handleSloopDataChange = (index: number, newSloopData: SloopData) => {
         setAllSloopData(prev => {
@@ -167,16 +161,14 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
                         </Tooltip>
                     }
                 >
-                <span>
                 <button
                     className="btn btn-primary"
                     onClick={handleSubmit}
                     disabled={!dataIsValid}
                     style={!dataIsValid ? { pointerEvents: 'none' } : undefined}
                 >
-                Save changes
-            </button>
-            </span>
+                    Save changes
+                </button>
                 </OverlayTrigger>
             </Modal.Footer>
         </Modal>

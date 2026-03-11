@@ -25,7 +25,7 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
         setLocalData(sloopData);
     }, [sloopData]);
 
-    const producedPerPrecentage = useMemo(() => (recipe.output[0].amount * 60 / recipe.duration) / 100, [recipe]);
+    const producedPerPercentage = useMemo(() => (recipe.output[0].amount * 60 / recipe.duration) / 100, [recipe]);
 
     const handleDataChange = (newData: Partial<SloopData>) => {
         const updatedData = { ...localData, ...newData };
@@ -83,9 +83,9 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
                         </OverlayTrigger>
                     </InputGroup.Text>
                     <Form.Control
-                        value={sloopData.overclockPercentage === 0 ? "" : cleanThroughputToDisplay(producedItem.className, sloopData.overclockPercentage * producedPerPrecentage)}
+                        value={sloopData.overclockPercentage === 0 ? "" : cleanThroughputToDisplay(producedItem.className, sloopData.overclockPercentage * producedPerPercentage)}
                         onChange = {(e) => {
-                            const newPercentage = Number(e.target.value) / producedPerPrecentage;
+                            const newPercentage = Number(e.target.value) / producedPerPercentage;
                             handleDataChange({ overclockPercentage: Math.max(0, Math.min(250, newPercentage)) });
                         }}
                         type="number"
