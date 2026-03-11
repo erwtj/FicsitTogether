@@ -30,6 +30,7 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
     const syncedRef = useRef(false);
 
     const sendUpdate = useCallback((update: Uint8Array) => {
+        console.log("Sending local update")
         const ws = wsRef.current;
         if (ws?.readyState === WebSocket.OPEN && syncedRef.current) {
             const message = new Uint8Array([MESSAGE_SYNC, ...update]);
@@ -166,9 +167,21 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
                 const content = message.slice(1);
 
                 if (messageType === MESSAGE_SYNC) {
+                    // Capture what the server knows before merging its state in
+                    const serverStateVector = Y.encodeStateVectorFromUpdate(content);
+                    // Compute what the local doc has that the server is missing (e.g. offline edits)
+                    const localDiff = Y.encodeStateAsUpdate(doc, serverStateVector);
+
                     Y.applyUpdate(doc, content);
-                    // Mark as synced after the first state update from the server.
-                    // Only now is it safe to send local changes outward.
+
+                    // Send the diff back so the server learns about any offline changes.
+                    // Only send if there is actually something new (an empty update is 2 bytes).
+                    if (localDiff.length > 2) {
+                        const diffMessage = new Uint8Array([MESSAGE_SYNC, ...localDiff]);
+                        ws.send(diffMessage);
+                    }
+
+                    // Mark as synced — from this point on all local changes are forwarded normally.
                     syncedRef.current = true;
                 } else if (messageType === MESSAGE_AWARENESS) {
                     // TODO: Do some shit with awareness
