@@ -5,6 +5,7 @@ import "../SloopModal.tsx.css";
 import {useEffect, useMemo, useState } from "react";
 import {cleanThroughputToDisplay} from "../../../../utils/throughputUtil.ts";
 import {X} from "react-bootstrap-icons";
+import {useClientSettings} from "../../../../hooks/useClientSettings.ts";
 const SOMERSLOOPIMAGE = "/media/FactoryGame/Prototype/WAT/UI/Wat_1_256.webp"
 
 export type BuildingCardProps = {
@@ -20,6 +21,8 @@ export type BuildingCardProps = {
 
 export function BuildingCard({ index, building, recipe, producedItem, sloopData, onSloopDataChange, onCardRemove}: BuildingCardProps) {
     const [localData, setLocalData] = useState<SloopData>(sloopData);
+    
+    const {clientSettings} = useClientSettings();
 
     useEffect(() => {
         setLocalData(sloopData);
@@ -32,9 +35,6 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
         setLocalData(updatedData);
         onSloopDataChange(index, updatedData);
     }
-
-    // TODO: implement the user settings
-    const showTooltip = true
 
     return (
         <Card key={index} className={`buildingCard text-center`}>
@@ -54,7 +54,7 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
                     <InputGroup.Text className="w-25 p-1">
                         <OverlayTrigger
                             placement="left"
-                            show={showTooltip ? undefined : false}
+                            show={clientSettings.showToolTips ? undefined : false}
                             overlay={<Tooltip id="sloop-tooltip">Somersloop count</Tooltip>}
                         ><img alt="somer sloop" className="w-100 h-100 p-0" src={SOMERSLOOPIMAGE}/>
                         </OverlayTrigger>
@@ -76,7 +76,7 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
                     <InputGroup.Text className="w-25 p-1">
                         <OverlayTrigger
                             placement="left"
-                            show={showTooltip ? undefined : false}
+                            show={clientSettings.showToolTips ? undefined : false}
                             overlay={<Tooltip id="sloop-tooltip">Items produced</Tooltip>}
                         >
                         <img alt="somer sloop" className="w-100 h-100 p-0" src={`/media/${producedItem.icon}_256.webp`}/>
@@ -101,7 +101,7 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
                     <InputGroup.Text className="w-25 p-1">
                         <OverlayTrigger
                             placement="left"
-                            show={showTooltip ? undefined : false}
+                            show={clientSettings.showToolTips ? undefined : false}
                             overlay={<Tooltip id="sloop-tooltip">Overclock</Tooltip>}
                         >
                             <img alt="somer sloop" className="w-100 h-100 p-0" src="/media/Clock_speed.webp"/>
@@ -124,7 +124,7 @@ export function BuildingCard({ index, building, recipe, producedItem, sloopData,
                     <InputGroup.Text className="w-25 p-1">
                         <OverlayTrigger
                             placement="left"
-                            show={showTooltip ? undefined : false}
+                            show={clientSettings.showToolTips ? undefined : false}
                             overlay={<Tooltip id="sloop-tooltip">Effective overclock</Tooltip>}
                         >
                             <img alt="somer sloop" className="w-100 h-100 p-0" src="/media/AlienOverclocking.webp"/>

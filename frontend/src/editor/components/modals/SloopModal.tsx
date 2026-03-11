@@ -8,6 +8,7 @@ import {useYjsMutation} from "../../hooks/useYjsMutation.ts";
 import {AddBuildingCard} from "./SloopModalComponents/AddbuildingCard.tsx";
 import {BuildingCard} from "./SloopModalComponents/BuildingCard.tsx";
 import {roundTo4Decimals} from "../../../utils/throughputUtil.ts";
+import {useClientSettings} from "../../../hooks/useClientSettings.ts";
 
 export type SloopModalProps = {
     show: boolean;
@@ -18,6 +19,8 @@ export type SloopModalProps = {
 export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
     const nodes = useNodes()
     const node = useMemo(() => nodes.find(n => n.id === nodeId) as (RecipeNodeType | null) ?? null, [nodes, nodeId]);
+    
+    const {clientSettings} = useClientSettings();
 
     const {updateNodeData} = useYjsMutation();
 
@@ -70,9 +73,6 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
         onModalClose();
     }
 
-    //TODO: implement the user settings
-    const showTooltip = true
-
     return (
         <Modal size="xl" show={show} onHide={handleClose} scrollable>
             <Modal.Header closeButton>
@@ -84,15 +84,15 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
                         <span className="text-muted d-flex align-items-center gap-2">
                             <OverlayTrigger
                                 placement="left"
-                                show={showTooltip ? undefined : false}
+                                show={clientSettings.showToolTips ? undefined : false}
                                 overlay={<Tooltip id="sloop-tooltip">Overclock</Tooltip>}
                             >
-                            <img alt="somer sloop"
-                                 className="p-0"
-                                 src="/media/Clock_speed.webp"
-                                 style={{width: 24, height: 24}}
-
-                            />
+                                <img alt="somer sloop"
+                                     className="p-0"
+                                     src="/media/Clock_speed.webp"
+                                     style={{width: 24, height: 24}}
+    
+                                />
                             </OverlayTrigger>
                             <span>Total overclock:</span>
                             <span className={`fw-bold ${dataIsValid ? "text-success" : "text-danger"}`}>
@@ -108,22 +108,21 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
                         <span className="text-muted d-flex align-items-center gap-2">
                             <OverlayTrigger
                                 placement="left"
-                                show={showTooltip ? undefined : false}
+                                show={clientSettings.showToolTips ? undefined : false}
                                 overlay={<Tooltip id="sloop-tooltip">Effective overclock</Tooltip>}
                             >
-                            <img alt="somer sloop"
-                                 className="p-0"
-                                 src="/media/AlienOverclocking.webp"
-                                 style={{width: 24, height: 24}}
-
-                            />
+                                <img alt="somer sloop"
+                                     className="p-0"
+                                     src="/media/AlienOverclocking.webp"
+                                     style={{width: 24, height: 24}}
+                                />
                             </OverlayTrigger>
                             <span>Total effective overclock:</span>
                             <span className={`fw-bold ${dataIsValid ? "text-success" : "text-danger"}`}>
                                 {roundTo4Decimals(allSloopData.reduce((sum, data) => sum + (data.overclockPercentage * (1 + data.sloopAmount/building.somersloopsNeeded)), 0))}
                                 <span className="me-1">%</span>
                                 <span>{dataIsValid ? "<" : ">"}</span>
-                                <span className="fw-bold ms-1">{roundTo4Decimals((rawFactor?.outputFactor ?? 1) * 100)}</span>
+                                <span className="ms-1">{roundTo4Decimals((rawFactor?.outputFactor ?? 1) * 100)}</span>
                                 <span>%</span>
                             </span>
                         </span>
@@ -161,14 +160,17 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
                         </Tooltip>
                     }
                 >
-                <button
-                    className="btn btn-primary"
-                    onClick={handleSubmit}
-                    disabled={!dataIsValid}
-                    style={!dataIsValid ? { pointerEvents: 'none' } : undefined}
-                >
-                    Save changes
-                </button>
+                    {/* For some fucking reason span is required for tooltip */}
+                    <span>
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleSubmit}
+                            disabled={!dataIsValid}
+                            style={!dataIsValid ? { pointerEvents: 'none' } : undefined}
+                        >
+                            Save changes
+                        </button>
+                    </span>
                 </OverlayTrigger>
             </Modal.Footer>
         </Modal>
