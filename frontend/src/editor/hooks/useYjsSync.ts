@@ -25,10 +25,13 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
     const [connected, setConnected] = useState(false);
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const destroyedRef = useRef(false);
+    // Only true after the server's initial state has been received and applied.
+    // No local updates are sent until this is set (prevents a blank doc from wiping the server)
+    const syncedRef = useRef(false);
 
     const sendUpdate = useCallback((update: Uint8Array) => {
         const ws = wsRef.current;
-        if (ws?.readyState === WebSocket.OPEN) {
+        if (ws?.readyState === WebSocket.OPEN && syncedRef.current) {
             const message = new Uint8Array([MESSAGE_SYNC, ...update]);
             ws.send(message);
         }
@@ -125,6 +128,9 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
         const connect = () => {
             if (destroyedRef.current) return;
 
+            // Not synced until the server sends us its initial state
+            syncedRef.current = false;
+
             const ws = new WebSocket(
                 `${import.meta.env.VITE_WS_URL}/${projectId}`,
                 [`bearer.${token}`]
@@ -143,6 +149,7 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
 
             ws.onclose = () => {
                 setConnected(false);
+                syncedRef.current = false;
                 wsRef.current = null;
                 if (!destroyedRef.current) {
                     console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
@@ -160,6 +167,9 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
 
                 if (messageType === MESSAGE_SYNC) {
                     Y.applyUpdate(doc, content);
+                    // Mark as synced after the first state update from the server.
+                    // Only now is it safe to send local changes outward.
+                    syncedRef.current = true;
                 } else if (messageType === MESSAGE_AWARENESS) {
                     // TODO: Do some shit with awareness
                     console.log("Awareness update received");
