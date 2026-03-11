@@ -171,3 +171,32 @@ export async function fetchUser(auth: Auth0ContextType): Promise<FullUserInfoDTO
 
     return response?.data as FullUserInfoDTO;
 }
+
+export async function downloadProject(auth: Auth0ContextType, projID: string): Promise<any> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.get(`projects/${projID}/download`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        responseType: 'blob',
+    });
+
+    return response.data;
+}
+
+export async function uploadProject(auth: Auth0ContextType, directoryId: string, file: File): Promise<ProjectDTO> {
+    const token = await auth.getAccessTokenSilently();
+
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    const response = await api.post(`directories/${directoryId}/upload`, formData, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+
+    return response.data as ProjectDTO;
+}

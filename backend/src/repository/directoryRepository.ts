@@ -31,7 +31,38 @@ type DirectoryTreeRow = {
     depth: number;
 }
 
-const MAX_TREE_DEPTH = 12;
+
+/**
+ * Returns how many levels deep a directory is below the owner's root directory.
+ * Root directory itself returns 0.
+ */
+export async function getDirectoryDepth(directoryId: string): Promise<number> {
+    const res = await pool.query<{ depth: number }>(`
+        WITH RECURSIVE ancestry(id, parent_directory, depth) AS (
+            SELECT id, parent_directory, 0
+            FROM directories
+            WHERE id = $1
+            UNION ALL
+            SELECT d.id, d.parent_directory, a.depth + 1
+            FROM directories d
+                INNER JOIN ancestry a ON d.id = a.parent_directory
+            WHERE d.id != d.parent_directory -- stop at root (root's parent is itself)
+        )
+        SELECT MAX(depth) AS depth FROM ancestry
+    `, [directoryId]);
+    return res.rows[0]?.depth ?? 0;
+}
+
+/**
+ * Returns the number of immediate subdirectories inside a directory (excluding itself).
+ */
+export async function countDirectories(parentDirectoryId: string): Promise<number> {
+    const res = await pool.query<{ count: string }>(
+        'SELECT COUNT(*) AS count FROM directories WHERE parent_directory = $1 AND id != $1',
+        [parentDirectoryId]
+    );
+    return parseInt(res.rows[0]?.count ?? '0', 10);
+}
 
 export async function createDirectory(id: string, parentDirectoryId: string, owner: string, name: string) {
     await pool.query(
@@ -131,7 +162,7 @@ export async function existsShare(directoryId: string, userId: string) {
     return res.rowCount! > 0;
 }
 
-export async function getDirectoryTree(directoryId: string, userId: string): Promise<{ tree: DirectoryMinimalInfo[], depthLimitReached: boolean }> {
+export async function getDirectoryTree(directoryId: string, userId: string): Promise<DirectoryMinimalInfo[]> {
     const res = await pool.query<DirectoryTreeRow>(`
         WITH RECURSIVE parent_dirs(id, parent_directory, owner, name, depth) AS (
             SELECT id, parent_directory, owner, name, 0
@@ -143,7 +174,7 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
             SELECT d.id, d.parent_directory, d.owner, d.name, pd.depth + 1
             FROM directories d
                      INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
-            WHERE pd.depth < $2
+            WHERE d.id != d.parent_directory
         ),
         accessible_parents AS (
             SELECT DISTINCT pd.id, pd.parent_directory, pd.owner, pd.name, pd.depth
@@ -159,20 +190,19 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
                     SELECT d.id, d.parent_directory, d.owner
                     FROM directories d
                              INNER JOIN check_access ca ON d.id = ca.parent_directory
+                    WHERE d.id != d.parent_directory
                 )
                 SELECT 1
                 FROM check_access ca
-                LEFT JOIN share_directories sd ON sd.directory = ca.id AND sd."user" = $3
-                WHERE ca.owner = $4 OR sd."user" IS NOT NULL
+                LEFT JOIN share_directories sd ON sd.directory = ca.id AND sd."user" = $2
+                WHERE ca.owner = $3 OR sd."user" IS NOT NULL
             )
         )
         SELECT id, name, depth
         FROM accessible_parents
         WHERE id != parent_directory
         ORDER BY depth DESC
-    `, [directoryId, MAX_TREE_DEPTH, userId, userId]);
+    `, [directoryId, userId, userId]);
 
-    const depthLimitReached = res.rows.some(r => r.depth >= MAX_TREE_DEPTH);
-    const tree = res.rows.map(({ id, name }) => ({ id, name }));
-    return { tree, depthLimitReached };
+    return res.rows.map(({ id, name }) => ({ id, name }));
 }

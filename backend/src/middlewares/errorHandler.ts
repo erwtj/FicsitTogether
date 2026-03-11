@@ -11,7 +11,9 @@ export const errorHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    console.error(err);
+    if (err.status !== 404 && err.status !== 401 && err.status !== 403 && err.status !== 400 && err.status !== 415) {
+        console.error('Unexpected error:', err);
+    }
 
     let message;
 

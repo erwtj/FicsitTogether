@@ -1,6 +1,8 @@
 ﻿import { Handle, type HandleProps, Position } from '@xyflow/react';
 import { type Item } from "ficlib";
 import React from "react";
+import {useClientSettings} from "../../hooks/useClientSettings.ts";
+import {OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export type ItemHandleData = {
     item: Item;
@@ -10,7 +12,10 @@ export type ItemHandleData = {
 } & HandleProps & React.HTMLAttributes<HTMLDivElement>;
 
 export function ItemHandle({ item, id, position, type, ...rest }: ItemHandleData) {
-    return(
+
+    const { clientSettings } = useClientSettings()
+
+    const handleComponent = (
         <Handle
             type={type}
             position={position}
@@ -25,5 +30,16 @@ export function ItemHandle({ item, id, position, type, ...rest }: ItemHandleData
                 draggable="false"
             />
         </Handle>
+    );
+
+    return clientSettings.showToolTips ? (
+        <OverlayTrigger
+            placement={type === "source" ? "bottom" : "top"}
+            overlay={<Tooltip id={`tooltip-${id}`} className={"item-tooltip"}>{item.displayName}</Tooltip>}
+        >
+            {handleComponent}
+        </OverlayTrigger>
+    ) : (
+        handleComponent
     );
 }

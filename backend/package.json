@@ -9,6 +9,7 @@
   "dependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/multer": "^2.0.0",
     "@types/node": "^25.2.1",
     "@types/ws": "^8.18.1",
     "argon2": "^0.44.0",
@@ -20,10 +21,13 @@
     "ficlib": "*",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2",
+    "lib0": "^0.2.117",
+    "multer": "^2.1.1",
     "pg": "^8.19.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "ws": "^8.19.0",
+    "y-protocols": "^1.0.7",
     "y-websocket": "^3.0.0",
     "yjs": "^13.6.29"
   },

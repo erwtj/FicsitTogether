@@ -1,15 +1,16 @@
 import {createFileRoute, Link, notFound} from '@tanstack/react-router'
 import {redirect} from "@tanstack/react-router";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
     createDirectory,
     createProject,
-    deleteDirectory, deleteProject,
+    deleteDirectory, deleteProject, downloadProject, uploadProject,
     fetchDirectoryContent,
     fetchUser,
 } from "../api/apiCalls.ts";
-import {type DirectoryDTO, type ProjectDTO} from "dtolib";
+import {MAX_DIRECTORIES_PER_DIRECTORY, MAX_DIRECTORY_DEPTH,
+    MAX_PROJECTS_PER_DIRECTORY, type DirectoryDTO, type ProjectDTO} from "dtolib";
 import {Folder} from 'react-bootstrap-icons';
 import {DirectoryCard, type DirectoryInfo} from "../components/explorer/DirectoryCard.tsx";
 import {AddDirectoryCard} from "../components/explorer/AddDirectoryCard.tsx";
@@ -19,17 +20,14 @@ import {ProjectCard, type ProjectInfo} from "../components/explorer/ProjectCard.
 import {AddProjectCard} from "../components/explorer/AddProjectCard.tsx";
 import DirectoryTree from "../components/explorer/DirectoryTree.tsx";
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
+import { Toast } from "react-bootstrap";
 
 export const Route = createFileRoute('/directories/$dir')({
     component: DirectoryPage,
-    beforeLoad: ({context}) => {
-        if (!context.auth?.isAuthenticated) {
-            throw redirect({to: '/login', replace: true});
-        }
-    },
     staticData: {
         showNav: true,
-        title: "Ficsit Together | Directories"
+        title: "Ficsit Together | Directories",
+        requireAuth: true
     },
     loader: async ({context, params: {dir}}) => {
         const { auth } = context;
@@ -50,7 +48,8 @@ export const Route = createFileRoute('/directories/$dir')({
         }
 
         return { user, directory }
-    }
+    },
+    staleTime: 0
 })
 
 function DirectoryPage() {
@@ -69,11 +68,18 @@ function DirectoryPageContent() {
     const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>(directory.subDirectories);
     const [projects, setProjects] = useState<ProjectDTO[]>(directory.projects);
 
+    useEffect(() => {
+        setSubDirectories(directory.subDirectories);
+        setProjects(directory.projects);
+    }, [directory]);
+
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+
+    const [apiError, setApiError] = useState<string | null>(null);
 
     // Create Directory and Project flow
     const handleCreateDirectory = (name: string) => {
@@ -82,7 +88,14 @@ function DirectoryPageContent() {
                     setSubDirectories(prev => [...prev, newDir]);
                 }
             )
-            .catch(err => console.error('Error creating directory:', err));
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Invalid input. Please check your directory name and try again.');
+                } else {
+                    setApiError('An error occurred while creating the directory. Please try again.');
+                }
+                console.error('Error creating directory:', err)
+            });
     };
     const handleCreateProject = (name: string) => {
         createProject(auth, dirId, name)
@@ -90,7 +103,28 @@ function DirectoryPageContent() {
                     setProjects(prev => [...prev, newProject]);
                 }
             )
-            .catch(err => console.error('Error creating project:', err));
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Invalid input. Please check your project name and try again.');
+                } else {
+                    setApiError('An error occurred while creating the project. Please try again.');
+                }
+                console.error('Error creating project:', err)
+            });
+    }
+    const handleUploadProject = (file: File) => {
+        uploadProject(auth, dirId, file)
+            .then(newProject => {
+                setProjects(prev => [...prev, newProject]);
+            })
+            .catch((err) => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Invalid file format. Please upload a valid project JSON file.');
+                } else {
+                    setApiError('An error occurred while uploading the project. Please try again.');
+                }
+                console.error('Error uploading project:', err)
+            });
     }
 
     // Delete Directory and Project flow
@@ -104,6 +138,15 @@ function DirectoryPageContent() {
         setSelectedProject(projectInfo);
         setShowDeleteModal(true);
     }
+    const handleDownloadProject = async (projectInfo: ProjectInfo) => {
+        const response = await downloadProject(auth, projectInfo.id)
+        const url = URL.createObjectURL(response);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${projectInfo.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
     const handleDeleteConfirm = (shouldDelete: boolean) => {
         setShowDeleteModal(false);
         if (shouldDelete && selectedDirectory) {
@@ -115,7 +158,14 @@ function DirectoryPageContent() {
                         console.error('Failed to delete directory');
                     }
                 })
-                .catch(err => console.error('Error deleting directory:', err));
+                .catch(err => {
+                    if (err.response?.status === 400) {
+                        setApiError(err.response.data?.message || 'Cannot delete this directory. Please try again.');
+                    } else {
+                        setApiError('An error occurred while deleting the directory. Please try again.');
+                    }
+                    console.error('Error deleting directory:', err)
+                });
         }
         else if (shouldDelete && selectedProject) {
             deleteProject(auth, selectedProject.id)
@@ -126,7 +176,14 @@ function DirectoryPageContent() {
                         console.error('Failed to delete project');
                     }
                 })
-                .catch(err => console.error('Error deleting project:', err));
+                .catch(err => {
+                    if (err.response?.status === 400) {
+                        setApiError(err.response.data?.message || 'Cannot delete this project. Please try again.');
+                    } else {
+                        setApiError('An error occurred while deleting the project. Please try again.');
+                    }
+                    console.error('Error deleting project:', err)
+                });
         }
         setSelectedDirectory(null);
         setSelectedProject(null);
@@ -140,7 +197,7 @@ function DirectoryPageContent() {
     return (
         <>
             <BuyMeCoffeeWidget />
-            <DirectoryTree dirTree={directory.directoryTree.tree} depthLimitReached={directory.directoryTree.depthLimitReached}/>
+            <DirectoryTree dirTree={directory.directoryTree} to="directories"/>
             <div className="mt-4 align-items-center px-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
                 <div/>
                 <div className="d-flex flex-row flex-nowrap gap-3 align-items-center justify-content-center">
@@ -160,6 +217,7 @@ function DirectoryPageContent() {
                     {subDirectories.map((directory) => {
                         return (
                             <DirectoryCard
+                                to="directories"
                                 directoryInfo={
                                     {
                                         id: directory.id,
@@ -173,19 +231,30 @@ function DirectoryPageContent() {
                             />
                         )
                     })}
-                    <AddDirectoryCard onSubmit={handleCreateDirectory}/>
+                    {directory.directoryTree.length <= MAX_DIRECTORY_DEPTH && 
+                        subDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
+                        <AddDirectoryCard onSubmit={handleCreateDirectory}/>}
                 </div>
-                <div key={"project-list"} className={"d-flex flex-row flex-wrap gap-3 mt-3 justify-content-center"}
+                <div key={"project-list"} className={"d-flex flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>
 
                     {projects.map((project) => {
                         return (
-                            <ProjectCard project={project} deleteProject={handleDeleteProject} key={project.id}/>
+                            <ProjectCard project={project} deleteProject={handleDeleteProject} downloadProject={handleDownloadProject} key={project.id}/>
                         )
                     })}
-                    <AddProjectCard onSubmit={handleCreateProject}/>
+                    {projects.length < MAX_PROJECTS_PER_DIRECTORY &&
+                        <AddProjectCard onSubmit={handleCreateProject} onUpload={handleUploadProject}/>}
                 </div>
             </div>
+
+            <Toast show={apiError !== null} onClose={() => setApiError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
+                <Toast.Header>
+                    <strong className="me-auto text-danger">An error occurred</strong>
+                </Toast.Header>
+                <Toast.Body>{apiError}</Toast.Body>
+            </Toast>
+
             <ConfirmationModal
                 show={showDeleteModal}
                 title={`Delete "${selectedDirectory ? selectedDirectory.name : selectedProject?.name}"?`}

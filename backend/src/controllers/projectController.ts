@@ -2,12 +2,11 @@
 import * as repository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import type {ProjectDTO} from "dtolib";
+import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH, MAX_PROJECTS_PER_DIRECTORY, MAX_STORAGE_PER_USER_BYTES} from "dtolib";
 
-const emptyChart = {nodes: [], edges: [], viewport: {x: 0, y: 0, zoom: 1}};
-const emptyJson = JSON.stringify(emptyChart); 
+const emptyChart = {nodes: [], edges: []};
 
 // TODO: Allow marking project's as public via url, that way you can share files with other people without them being able to edit and without needing their username
-// TODO: Add project importing / exporting
 
 export async function createProject(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -21,8 +20,14 @@ export async function createProject(req: Request, res: Response, next: NextFunct
             return next(error);
         }
 
-        if (name.length > 35) {
-            const error: AppError = new Error('Directory name exceeds max length (35).');
+        if (name.length > MAX_NAME_LENGTH) {
+            const error: AppError = new Error(`Directory name exceeds max length (${MAX_NAME_LENGTH}).`);
+            error.status = 400;
+            return next(error);
+        }
+        
+        if (description.length > MAX_DESCRIPTION_LENGTH) {
+            const error: AppError = new Error(`Directory description exceeds max length (${MAX_DESCRIPTION_LENGTH}).`);
             error.status = 400;
             return next(error);
         }
@@ -32,9 +37,26 @@ export async function createProject(req: Request, res: Response, next: NextFunct
             error.status = 400;
             return next(error);
         }
-        
+
+        const [projectCount, storageUsed] = await Promise.all([
+            repository.countProjectsInDirectory(directoryId),
+            repository.getUserStorageUsed(req.user.id),
+        ]);
+
+        if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {
+            const error: AppError = new Error(`Maximum of ${MAX_PROJECTS_PER_DIRECTORY} projects per directory reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (storageUsed >= MAX_STORAGE_PER_USER_BYTES) {
+            const error: AppError = new Error(`Storage limit of ${MAX_STORAGE_PER_USER_BYTES / (1024 * 1024)} MB per user reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
         const uuid = crypto.randomUUID();
-        await repository.createProject(uuid, directoryId, name, description, emptyJson);
+        await repository.createProject(uuid, directoryId, name, description, emptyChart);
         
         res.status(201).send({
             id: uuid,
@@ -76,18 +98,28 @@ export async function deleteProject(req: Request, res: Response, next: NextFunct
     }
 }
 
-export async function getChart(req: Request, res: Response, next: NextFunction) {
+export async function downloadProject(req: Request, res: Response, next: NextFunction) {
     try {
         const id = req.params.projectId as string; // won't even route if no id is included
+        const project = await repository.getProject(id);
         const chart = await repository.getProjectChart(id);
 
-        if (!chart) { // Should be impossible due to checkProjectAccess middleware
+        if (!project || !chart) { // This could happen due to a race condition
             const error: AppError = new Error('Unauthorized');
             error.status = 401;
             return next(error);
         }
 
-        res.status(200).send(chart);
+        const plainName = `${project.name}.json`;
+        const encodedName = encodeURIComponent(plainName);
+        res.setHeader('Content-Disposition', `attachment; filename="${plainName}"; filename*=UTF-8''${encodedName}`);
+        res.setHeader('Content-Type', 'application/json');
+
+        res.status(200).json({
+            name: project.name,
+            description: project.description,
+            chart: chart,
+        });
     } catch (error) {
         next(error);
     }

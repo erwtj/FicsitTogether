@@ -33,7 +33,7 @@ export async function initDatabase() {
                 REFERENCES directories ON DELETE CASCADE,
             name             TEXT NOT NULL,
             description      TEXT NOT NULL,
-            chart            TEXT NOT NULL
+            chart            jsonb NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS share_directories

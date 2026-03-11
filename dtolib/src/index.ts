@@ -1,3 +1,5 @@
+export * from './constraints.js';
+
 // Project information
 export type ProjectDTO = {
     id: string;
@@ -60,7 +62,7 @@ export type EdgeDTO = {
             id: string;
             x: number;
             y: number;
-        }
+        }[]
     }
 
     selected: boolean;
@@ -76,11 +78,6 @@ export type DirectoryTreeDTO = {
     name: string;
 }
 
-export type DirectoryTreeResultDTO = {
-    tree: DirectoryTreeDTO[];
-    depthLimitReached: boolean;
-}
-
 // Contains directory info, including contents of directory
 export type DirectoryContentDTO = {
     id: string,
@@ -89,7 +86,7 @@ export type DirectoryContentDTO = {
     parentDirectoryId: string, 
     subDirectories: DirectoryDTO[],
     projects: ProjectDTO[],
-    directoryTree: DirectoryTreeResultDTO,
+    directoryTree: DirectoryTreeDTO[],
 }
 
 // Singular directory info

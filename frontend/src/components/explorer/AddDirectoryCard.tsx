@@ -1,7 +1,8 @@
 import {FolderPlus} from "react-bootstrap-icons";
 import {Card} from "react-bootstrap";
 import {useState} from "react";
-import "./explorerComponents.css"
+import "./ExplorerComponents.css"
+import { MAX_NAME_LENGTH } from "dtolib";
 
 
 export const AddDirectoryCard = ({onSubmit}: {onSubmit: (value: string) => void}) => {
@@ -31,7 +32,7 @@ export const AddDirectoryCard = ({onSubmit}: {onSubmit: (value: string) => void}
                 <button className="d-inline bg-transparent border-0 p-0 m-0" type="submit" disabled={directoryName.length === 0}>
                     <FolderPlus
                         size={26}
-                        className={directoryName.length === 0 ? "text-muted" : ""}
+                        className={directoryName.length === 0 ? "text-body-tertiary" : ""}
                     />
                 </button>
 
@@ -41,7 +42,7 @@ export const AddDirectoryCard = ({onSubmit}: {onSubmit: (value: string) => void}
                     onChange={(e) => setDirectoryName(e.target.value.trimStart())}
                     placeholder="Directory name"
                     className={"border-0 border-bottom mb-0 fs-5"}
-                    maxLength={20}
+                    maxLength={MAX_NAME_LENGTH}
                     style={{
                         outline: "none",
                         width: "12rem",

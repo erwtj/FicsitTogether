@@ -13,8 +13,11 @@
 //
 // console.log(response.data);
 
+const rawUrl = import.meta.env.VITE_API_URL as string;
+const url = rawUrl.endsWith('/api/') ? rawUrl : rawUrl.endsWith('/api') ? rawUrl + '/' : rawUrl + '/api/';
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL + '/api/',
+    baseURL: url,
     headers: {
         'Content-Type': 'application/json'
     }

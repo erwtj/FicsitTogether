@@ -52,7 +52,9 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
         }).catch(err => {
             if (isAxiosError(err)) {
                 if (err.status === 404) {
-                    setErrorMessage("User not found");
+                    setErrorMessage("User not found.");
+                } else if (err.status === 400) {
+                    setErrorMessage(err.response?.data.message || "Could not share with user.");
                 } else {
                     console.error(err.message);
                 }

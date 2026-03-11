@@ -5,7 +5,6 @@ dotenv.config();
 
 interface Config {
     apiPort: number;
-    wsPort: number;
     corsOrigin: string;
     https: boolean;
     auth0Audience: string;
@@ -17,7 +16,6 @@ interface Config {
 
 const config: Config = {
     apiPort: Number(process.env.API_PORT) || 3000,
-    wsPort: Number(process.env.WS_PORT) || 3001,
     corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
     https: (process.env.HTTPS === 'true') || false,
     auth0Audience: process.env.AUTH0_AUDIENCE || "AUTH0-AUDIENCE",

@@ -7,10 +7,11 @@ import {buildUsageMaps} from "../utils/overviewUtil.ts";
 import "./overview.$dir.tsx.css"
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import {isItemSolid, roundTo3Decimals} from "../utils/throughputUtil.ts";
-import {ArrowLeft, FileEarmarkBarGraph, Folder } from "react-bootstrap-icons";
+import {ArrowBarUp, ArrowLeft, FileEarmarkBarGraph, Folder } from "react-bootstrap-icons";
 import {Button, ButtonGroup, Card, Dropdown } from "react-bootstrap";
+import {useClientSettings} from "../hooks/useClientSettings.ts";
 
-type itemUsageData = {
+type ItemUsageData = {
     input: number,
     output: number,
 }
@@ -19,40 +20,34 @@ export const Route = createFileRoute('/overview/$dir')({
     component: OverviewPage,
     staticData: {
         showNav: true,
-        title: "Ficsit Together | Overview"
+        title: "Ficsit Together | Overview",
+        requireAuth: true
     },
     loader: async ({context, params: {dir}}) => {
         const { auth } = context;
         if (!auth) throw redirect({ to: '/login', replace: true })
 
-        const [directory, charts] = await Promise.all([
-            fetchDirectoryContent(auth, dir).catch(err => {
+        const directory =
+            await fetchDirectoryContent(auth, dir).catch(err => {
                 if (err.response?.status === 403 || err.response?.status === 404) {
                     throw notFound()
                 }
                 throw err
-            }),
-            fetchAllProjectsInDirectory(auth, dir).catch(err => {
-                if (err.response?.status === 403 || err.response?.status === 404) {
-                    throw notFound()
-                }
-                throw err
-            }),
-        ])
+            });
 
         if (directory.id === directory.parentDirectoryId) {
             throw redirect({ to: '/home', replace: true })
         }
 
-        const parentDir = await fetchDirectoryContent(auth, directory.parentDirectoryId).catch(err => {
-            if (err.response?.status === 403 || err.response?.status === 404) {
-                throw notFound()
-            }
-            throw err
-        })
+        const charts =
+            await fetchAllProjectsInDirectory(auth, dir).catch(err => {
+                if (err.response?.status === 403 || err.response?.status === 404) {
+                    throw notFound()
+                }
+                throw err
+            });
 
-
-        return { directory, parentDir, charts }
+        return { directory, charts }
     }
 
 })
@@ -63,8 +58,6 @@ function OverviewPage() {
         <OverviewPageContent key={dirId}/> // Force remount when directory changes to reset state
     );
 }
-
-const allResources: Set<string> = new Set(getAllResources().map((resource: Resource) => resource.className));
 
 
 function countToDisplay(itemClassName: string, amount: number): string {
@@ -127,7 +120,7 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
                         alt="Image failed to load"
                         draggable={false}
                     />
-                    {<span className={warning ? "text-danger" : ""} style={{ fontSize: '0.875rem' }}>{!isInfinite ? displayPercentage + "%" : ""}</span>}
+                    {<span className={warning ? "no-drag text-danger" : "no-drag"} style={{ fontSize: '0.875rem' }}>{!isInfinite ? displayPercentage + "%" : ""}</span>}
                 </CircularProgressbarWithChildren>
 
                 <center>
@@ -144,7 +137,7 @@ function ResourceCircle({ amount, itemClassName }: { amount: number; itemClassNa
         </center>
     )
 }
-function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageData; itemClassName: string }) {
+function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: ItemUsageData; itemClassName: string }) {
     const item = getItem(itemClassName)!;
     const netAmount = itemUsageData.output - itemUsageData.input;
 
@@ -167,18 +160,31 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: itemUsageDa
     )
 }
 
-
+const allResources: Set<string> = new Set(getAllResources().map((resource: Resource) => resource.className));
 
 function OverviewPageContent() {
-    const { directory, parentDir, charts } = Route.useLoaderData();
+    const { directory, charts } = Route.useLoaderData();
+    const { clientSettings } = useClientSettings();
     const navigate = useNavigate();
 
     const { resourceMap, itemMap } = useMemo(() => {
-        if (!charts) return { resourceMap: new Map<string, itemUsageData>(), itemMap: new Map<string, itemUsageData>() };
+        if (!charts) return { resourceMap: new Map<string, ItemUsageData>(), itemMap: new Map<string, ItemUsageData>() };
         return buildUsageMaps(charts, allResources);
     }, [charts]);
 
-    const noDropDown = parentDir.id === parentDir.parentDirectoryId && directory.subDirectories.length === 0;
+    const resources = useMemo(() => {
+        return Array.from(resourceMap);
+    }, [resourceMap])
+
+    const items = useMemo(() => {
+        return Array.from(itemMap.entries());
+    }, [itemMap]);
+
+
+    const treeLength = directory.directoryTree.length;
+    const parentDir = treeLength > 1 ? directory.directoryTree[treeLength - 2] : null; // > 1 not >= 1 because we don't want to count the root directory
+    const noDropDown = !parentDir && directory.subDirectories.length === 0;
+    console.log(treeLength)
 
     return (
         <div>
@@ -198,10 +204,10 @@ function OverviewPageContent() {
                     <Dropdown.Toggle split className="btn-dir-toggle" id="dropdown-split-basic" disabled={noDropDown} />
 
                     <Dropdown.Menu>
-                        {parentDir.parentDirectoryId !== parentDir.id && (
+                        {parentDir && (
                             <>
                                 <Dropdown.Item href={`/overview/${directory.parentDirectoryId}`}>
-                                    <ArrowLeft size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }}/>
+                                    <ArrowBarUp size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }}/>
                                     <FileEarmarkBarGraph size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }} />
                                     {parentDir.name}
                                 </Dropdown.Item>
@@ -220,10 +226,11 @@ function OverviewPageContent() {
             <h1 className="d-flex flex-nowrap  justify-content-center mt-4 align-items-center no-drag m-0 p-0">Used Resources</h1>
             <hr className="mb-0 pb-0 mx-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
-                {Array.from(allResources).map((item, index) => (
+                {resources.map(([item, usage], index) => (
+                    (item !== "Desc_Water_C" || clientSettings.showWaterUsage) && (item !== "Desc_QuantumEnergy_C" || clientSettings.showPhotonUsage) &&
                     <div key={index} style={{margin: '1.25rem'}}>
                         <ResourceCircle
-                            amount={((resourceMap.get(item)?.input ?? 0) - (resourceMap.get(item)?.output ?? 0))}
+                            amount={usage.input - usage.output}
                             itemClassName={item}
                         />
                     </div>
@@ -232,7 +239,7 @@ function OverviewPageContent() {
             <h1 className="d-flex flex-nowrap  justify-content-center mt-4 align-items-center no-drag mt-5">Item Usage</h1>
             <hr className="mb-4 pb-0 mx-3 mt-2"/>
             <div className="d-flex flex-wrap justify-content-center mt-0 pt-0">
-                {Array.from(itemMap.entries()).map(([itemClassName, usageData], index) => (
+                {items.map(([itemClassName, usageData], index) => (
                     <div key={index} className="m-2">
                         <ItemCard itemUsageData={usageData} itemClassName={itemClassName}/>
                     </div>

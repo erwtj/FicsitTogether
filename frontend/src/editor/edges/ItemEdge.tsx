@@ -9,6 +9,7 @@ import {
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
 import { isItemSolid, roundTo3Decimals } from "../../utils/throughputUtil.ts";
+import { MAX_MOVABLE_POINTS } from "dtolib";
 import { useYjsMutation } from "../hooks/useYjsMutation";
 import {
     type ItemEdgeType,
@@ -138,7 +139,7 @@ export const ItemEdge = memo(function ItemEdge({
                 edgePath: customPath.path,
                 labelX: labelPoint.x,
                 labelY: labelPoint.y,
-                middlePoints: customPath.middlePoints,
+                middlePoints: movablePoints.length < MAX_MOVABLE_POINTS ? customPath.middlePoints : [],
             };
         }
         return {
@@ -150,8 +151,9 @@ export const ItemEdge = memo(function ItemEdge({
     }, [movablePoints, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
 
     const addMovablePoint = useCallback((idx: number) => {
-        const middlePoint = middlePoints[idx];
         const current = data?.movablePoints ?? [];
+        if (current.length >= MAX_MOVABLE_POINTS) return;
+        const middlePoint = middlePoints[idx];
         const newId = current.length === 0 ? "label" : `${current.length}`;
         const newPoint: MovablePoint = { id: newId, x: middlePoint.x, y: middlePoint.y };
         const next = [...current];
@@ -183,8 +185,7 @@ export const ItemEdge = memo(function ItemEdge({
             scratch[idx] = { ...origin, x: origin.x + dx, y: origin.y + dy };
             setDragBuffer([...scratch]);
         }
-
-
+        
         function onMouseUp(upEvent: MouseEvent) {
             upEvent.stopPropagation();
             window.removeEventListener("mousemove", onMouseMove);

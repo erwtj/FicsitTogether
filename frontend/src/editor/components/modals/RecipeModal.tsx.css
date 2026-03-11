@@ -79,17 +79,6 @@
     background: none;
 }
 
-.clickable-link{
-    cursor: pointer;
-    text-decoration: none;
-    color: rgba(222, 226, 230, 0.75) !important;
-}
-
-.clickable-link:hover {
-    color: #ea80fc !important;
-    text-decoration: underline;
-}
-
 .recipe-dialog .modal-dialog {
     max-height: 90vh; /* keep modal within viewport */
 }

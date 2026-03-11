@@ -11,3 +11,19 @@ img, .no-drag {
 .top-screen-navbar {
     overflow-x: hidden;
 }
+
+.clickable-link{
+    cursor: pointer;
+    text-decoration: none;
+    color: rgba(222, 226, 230, 0.75) !important;
+}
+
+.clickable-link.default-purple {
+    color: #c189cd !important;
+}
+
+.clickable-link:hover {
+    color: #ea80fc !important;
+    text-decoration: underline;
+}
+

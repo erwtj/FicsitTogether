@@ -5,7 +5,7 @@ import { User } from '@auth0/auth0-react'
 export interface Auth0ContextType  {
     isAuthenticated: boolean
     user: User | undefined
-    login: () => void
+    login: (prompt?: 'login' | 'none' | 'consent' | 'select_account') => void
     logout: () => void
     isLoading: boolean
     getAccessTokenSilently: () => Promise<string>
@@ -18,7 +18,7 @@ function Auth0ContextProvider({ children }: { children: React.ReactNode }) {
     const contextValue = {
         isAuthenticated,
         user,
-        login: () => loginWithRedirect(),
+        login: (prompt?: 'login' | 'none' | 'consent' | 'select_account') => loginWithRedirect(prompt ? { authorizationParams: { prompt } } : undefined),
         logout: () => logout({ logoutParams: { returnTo: window.location.origin } }),
         isLoading,
         getAccessTokenSilently
@@ -43,9 +43,8 @@ export function Auth0Wrapper({ children }: { children: React.ReactNode }) {
                 scope: 'openid profile email offline_access'
             }}
 
-            // TODO: Unsafe, only use in dev
-            useRefreshTokens={import.meta.env.DEV}
-            cacheLocation={import.meta.env.DEV ? "localstorage" : "memory"}
+            useRefreshTokens={true}
+            cacheLocation={"localstorage"}
         >
             <Auth0ContextProvider>{children}</Auth0ContextProvider>
         </Auth0Provider>

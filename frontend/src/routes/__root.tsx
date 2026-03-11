@@ -2,31 +2,56 @@ import { createRootRouteWithContext, redirect, Outlet, useRouterState} from '@ta
 import {type RouterContext} from '../router';
 import {useEffect} from "react";
 import NavHeader from "../components/NavHeader.tsx";
+import {z} from 'zod';
+
+const rootSearchSchema = z.object({
+    error: z.string().optional(),
+    error_description: z.string().optional(),
+}).passthrough();
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-    beforeLoad: ({context, location}) => {
-        if (location.pathname === '/login') {
+    validateSearch: rootSearchSchema,
+    beforeLoad: ({context, location, search, matches}) => {
+        // Auth0 error callback, redirect to login so the error is shown there
+        if (search.error) {
+            if (location.pathname !== '/login') {
+                throw redirect({
+                    to: '/login',
+                    search: { error: search.error, error_description: search.error_description },
+                    replace: true,
+                });
+            }
             return;
         }
 
-        if (!context.auth || !context.auth.isAuthenticated) {
+        if (location.pathname === '/') {
+            if (context.auth && context.auth.isAuthenticated) {
+                throw redirect({
+                    to: '/home',
+                    replace: true,
+                });
+            } else {
+                throw redirect({
+                    to: '/login',
+                    replace: true,
+                });
+            }
+        }
+
+        // If any matched route requires auth and the user isn't logged in, redirect to login
+        const requiresAuth = matches.some((match) => match.staticData?.requireAuth);
+        if (requiresAuth && !context.auth?.isAuthenticated) {
             throw redirect({
                 to: '/login',
                 replace: true,
             });
-        }
-
-        if (context.auth && context.auth.isAuthenticated && location.pathname === '/') {
-            throw redirect({
-                to: '/home',
-                replace: true,
-            })
         }
     },
     component: RootComponent,
     staticData: {
         showNav: false,
         title: 'Ficsit Together',
+        requireAuth: false,
     }
 });
 
@@ -37,7 +62,7 @@ function RootComponent() {
     });
 
     useEffect(() => {
-        document.title = state.matches[1]?.staticData?.title || 'Satisfactory Charter';
+        document.title = state.matches[1]?.staticData?.title || 'Ficsit Together';
     }, [state]);
 
     return (

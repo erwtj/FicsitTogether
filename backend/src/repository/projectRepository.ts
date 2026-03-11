@@ -9,18 +9,17 @@ export type Project = {
 }
 
 export type Chart = {
-    chart: string;
+    chart: ChartDataDTO;
 }
 
 // project will refer to the project metadata (id, parent_directory, name, description), although chart is a part of the project table it has its own functions
 // this is just to speed up queries, why query the big chart json when we don't use it
 
 // Exception for create, which inits with an empty chart
-export async function createProject(id: string, directoryId: string, name: string, description: string, chart: string) {
-    const json = JSON.stringify(chart);
+export async function createProject(id: string, directoryId: string, name: string, description: string, chart: ChartDataDTO) {
     await pool.query(
         'INSERT INTO projects (id, parent_directory, name, description, chart) VALUES ($1, $2, $3, $4, $5)',
-        [id, directoryId, name, description, json]
+        [id, directoryId, name, description, chart]
     );
 }
 
@@ -44,15 +43,13 @@ export async function getProjectChart(id: string) {
         'SELECT chart FROM projects WHERE id = $1',
         [id]
     );
-    const row = res.rows[0];
-    return row ? JSON.parse(row.chart) as ChartDataDTO : undefined;
+    return res.rows[0]?.chart ?? undefined;
 }
 
-export async function updateProjectChart(id: string, chart: any) {
-    const json = JSON.stringify(chart);
+export async function updateProjectChart(id: string, chart: ChartDataDTO) {
     await pool.query(
         'UPDATE projects SET chart = $1 WHERE id = $2',
-        [json, id]
+        [chart, id]
     );
 }
 
@@ -86,7 +83,7 @@ export async function getProjectsRecursive(directoryId: string) {
 }
 
 export async function getChartsRecursive(directoryId: string): Promise<ChartDataDTO[]> {
-    const res = await pool.query<{ chart: string }>(`
+    const res = await pool.query<Chart>(`
         WITH RECURSIVE subdirs(id) AS (
             SELECT id FROM directories WHERE id = $1
             UNION ALL
@@ -96,9 +93,34 @@ export async function getChartsRecursive(directoryId: string): Promise<ChartData
         FROM projects p
         WHERE p.parent_directory IN (SELECT id FROM subdirs)
     `, [directoryId]);
-    return res.rows.map(row => JSON.parse(row.chart) as ChartDataDTO);
+    return res.rows.map(row => row.chart);
 }
 
 export async function deleteProject(id: string) {
     await pool.query('DELETE FROM projects WHERE id = $1', [id]);
+}
+
+/**
+ * Returns the number of projects in a given directory.
+ */
+export async function countProjectsInDirectory(directoryId: string): Promise<number> {
+    const res = await pool.query<{ count: string }>(
+        'SELECT COUNT(*) AS count FROM projects WHERE parent_directory = $1',
+        [directoryId]
+    );
+    return parseInt(res.rows[0]?.count ?? '0', 10);
+}
+
+/**
+ * Returns the total storage used (in bytes) by all projects owned by a user,
+ * calculated as the byte length of the stored JSONB chart data.
+ */
+export async function getUserStorageUsed(userId: string): Promise<number> {
+    const res = await pool.query<{ total: string }>(`
+        SELECT COALESCE(SUM(octet_length(p.chart::text)), 0) AS total
+        FROM projects p
+        JOIN directories d ON p.parent_directory = d.id
+        WHERE d.owner = $1
+    `, [userId]);
+    return parseInt(res.rows[0]?.total ?? '0', 10);
 }

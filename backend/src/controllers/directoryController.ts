@@ -4,6 +4,15 @@ import * as projectRepository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import {getUserByUsername} from "../repository/userRepository.js";
 import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO} from "dtolib";
+import {
+    MAX_DESCRIPTION_LENGTH,
+    MAX_DIRECTORIES_PER_DIRECTORY,
+    MAX_DIRECTORY_DEPTH,
+    MAX_NAME_LENGTH,
+    MAX_PROJECTS_PER_DIRECTORY,
+    MAX_STORAGE_PER_USER_BYTES,
+} from "dtolib";
+import {sanitizeChart} from "../utils/chartValidator.js";
 
 export async function getDirectory(req: Request, res: Response, next: NextFunction) {
     try {
@@ -20,15 +29,15 @@ export async function getDirectory(req: Request, res: Response, next: NextFuncti
             subDirectories,
             projects,
             directoryTree,
-        } as unknown as DirectoryContentDTO);
+        } as DirectoryContentDTO);
     } catch (error) {
         next(error);
     }
 }
 
-export function getRootDirectory(req: Request, res: Response, next: NextFunction) {
+export async function getRootDirectory(req: Request, res: Response, next: NextFunction) {
     req.params.directoryId = req.user.root_directory;
-    getDirectory(req, res, next);
+    await getDirectory(req, res, next);
 }
 
 export async function createDirectory(req: Request, res: Response, next: NextFunction) {
@@ -42,8 +51,25 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
             return next(error);
         }
 
-        if (name.length > 20) {
-            const error: AppError = new Error('Directory name exceeds max length (20).');
+        if (name.length > MAX_NAME_LENGTH) {
+            const error: AppError = new Error(`Directory name exceeds max length (${MAX_NAME_LENGTH}).`);
+            error.status = 400;
+            return next(error);
+        }
+
+        const [parentDepth, siblingCount] = await Promise.all([
+            directoryRepository.getDirectoryDepth(parentDirectoryId),
+            directoryRepository.countDirectories(parentDirectoryId),
+        ]);
+
+        if (parentDepth >= MAX_DIRECTORY_DEPTH) {
+            const error: AppError = new Error(`Maximum directory depth of ${MAX_DIRECTORY_DEPTH} reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (siblingCount >= MAX_DIRECTORIES_PER_DIRECTORY) {
+            const error: AppError = new Error(`Maximum of ${MAX_DIRECTORIES_PER_DIRECTORY} directories per directory reached.`);
             error.status = 400;
             return next(error);
         }
@@ -98,13 +124,13 @@ export async function shareDirectory(req: Request, res: Response, next: NextFunc
         }
 
         if (directoryId === req.user.root_directory) {
-            const error: AppError = new Error('Not allowed to share root directory!');
+            const error: AppError = new Error('Not allowed to share root directory.');
             error.status = 400;
             return next(error);
         }
 
         if (username === req.user.username) {
-            const error: AppError = new Error('Not allowed to share with yourself!');
+            const error: AppError = new Error('Not allowed to share with yourself.');
             error.status = 400;
             return next(error);
         }
@@ -123,6 +149,13 @@ export async function shareDirectory(req: Request, res: Response, next: NextFunc
         if (!user) {
             const error: AppError = new Error('User does not exist.');
             error.status = 404;
+            return next(error);
+        }
+
+        const alreadyShared = await directoryRepository.existsShare(directoryId, user.id);
+        if (alreadyShared) {
+            const error: AppError = new Error('Directory is already shared with this user.');
+            error.status = 400;
             return next(error);
         }
 
@@ -212,6 +245,75 @@ export async function getSharedDirectories(req: Request, res: Response, next: Ne
         const sharedDirectories = await directoryRepository.getSharedDirectories(userId);
 
         res.status(200).send(sharedDirectories as SharedDirectoryDTO[]);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function uploadProject(req: Request, res: Response, next: NextFunction) {
+    try {
+        const directoryId = req.params.directoryId as string;
+        const file = (req as Request & { file?: Express.Multer.File }).file;
+
+        if (directoryId === req.user.root_directory) {
+            const error: AppError = new Error('Not allowed to upload projects to root directory.');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (!file) {
+            const error: AppError = new Error('No file uploaded.');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (file.mimetype !== 'application/json') {
+            const error: AppError = new Error('Invalid file type. Only JSON files are allowed.');
+            error.status = 400;
+            return next(error);
+        }
+        
+        const [projectCount, storageUsed] = await Promise.all([
+            projectRepository.countProjectsInDirectory(directoryId),
+            projectRepository.getUserStorageUsed(req.user.id),
+        ]);
+
+        if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {
+            const error: AppError = new Error(`Maximum of ${MAX_PROJECTS_PER_DIRECTORY} projects per directory reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (storageUsed + file.size > MAX_STORAGE_PER_USER_BYTES) {
+            const error: AppError = new Error(`Storage limit of ${MAX_STORAGE_PER_USER_BYTES / (1024 * 1024)} MB per user reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        let projectData: { name?: unknown; description?: unknown; chart?: unknown };
+        try {
+            projectData = JSON.parse(file.buffer.toString('utf-8'));
+        } catch {
+            const error: AppError = new Error('Invalid JSON file.');
+            error.status = 400;
+            return next(error);
+        }
+
+        if (typeof projectData.name !== 'string' || !projectData.name ||
+            typeof projectData.description !== 'string' || !projectData.chart) {
+            const error: AppError = new Error('Invalid project data. Missing required fields.');
+            error.status = 400;
+            return next(error);
+        }
+
+        const name = projectData.name.slice(0, MAX_NAME_LENGTH);
+        const description = projectData.description.slice(0, MAX_DESCRIPTION_LENGTH);
+        const chart = sanitizeChart(projectData.chart);
+
+        const projectId = crypto.randomUUID();
+        await projectRepository.createProject(projectId, directoryId, name, description, chart);
+
+        res.status(201).send({ id: projectId, name, description, directoryId });
     } catch (error) {
         next(error);
     }

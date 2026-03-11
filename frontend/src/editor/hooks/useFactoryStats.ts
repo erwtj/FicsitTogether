@@ -8,6 +8,7 @@ import {
     type PowerNodeData,
 } from "../types";
 import { roundTo3Decimals } from "../../utils/throughputUtil";
+import {useClientSettings} from "../../hooks/useClientSettings.ts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,9 @@ function mapToItemThroughputs(map: Map<string, number>): ItemThroughput[] {
  * recalculations, no edge subscriptions.
  */
 export function useFactoryStats(nodes: Node[]): FactoryStats {
+
+    const {clientSettings} = useClientSettings()
+
     return useMemo(() => {
         const inputMap = new Map<string, number>();
         const outputMap = new Map<string, number>();
@@ -143,6 +147,24 @@ export function useFactoryStats(nodes: Node[]): FactoryStats {
             },
         );
 
+        if (clientSettings.enableIONetto) {
+            // If IO Netto is enabled, we treat inputs as negative and outputs as positive for a net total
+            for (const [className, amount] of inputMap.entries()) {
+                const newAmount = (outputMap.get(className) ?? 0) - amount;
+                if (newAmount > 0) {
+                    inputMap.delete(className);
+                    outputMap.set(className, newAmount);
+                } else if (newAmount < 0) {
+                    inputMap.set(className, -newAmount);
+                    outputMap.delete(className);
+                } else {
+                    inputMap.delete(className);
+                    outputMap.delete(className);
+                }
+            }
+        }
+
+
         return {
             inputs: mapToItemThroughputs(inputMap),
             outputs: mapToItemThroughputs(outputMap),
@@ -150,6 +172,6 @@ export function useFactoryStats(nodes: Node[]): FactoryStats {
             powerProductionMW: roundTo3Decimals(powerProductionMW),
             buildings,
         };
-    }, [nodes]);
+    }, [nodes, clientSettings]);
 }
 

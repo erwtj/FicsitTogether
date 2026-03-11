@@ -21,6 +21,7 @@ import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
 import { Toast } from "react-bootstrap";
 import {useSloopModal} from "./hooks/modals/useSloopModal.ts";
 import {SloopModal} from "./components/modals/SloopModal.tsx";
+import {useClientSettings} from "../hooks/useClientSettings.ts";
 
 interface ChartEditorProps {
     projectId: string;
@@ -34,6 +35,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     useEffect(() => {
         auth?.getAccessTokenSilently()?.then(setToken).catch(console.error);
     }, [auth]);
+
+    const {clientSettings} = useClientSettings();
 
     // Add node modal stuff (spawn, auto-connect logic, etc.)
     const { show, requiredInput, requiredOutput, onDropOnCanvas, onCanvasDoubleClick, onModalSubmit } =
@@ -102,14 +105,20 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     multiSelectionKeyCode={'Shift'}
                     onKeyDownCapture={handleKeyDownCapture}
                     fitView
+                    snapToGrid={clientSettings.snappingEnabled}
+                    snapGrid={[clientSettings.snapSize, clientSettings.snapSize]}
                 >
                     <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
-                    <MiniMap className="bg-body" position="top-right" nodeColor={nodeColor} />
+                    {clientSettings.minimapEnabled && <MiniMap className="bg-body" position="top-right" nodeColor={clientSettings.minimapColors ? nodeColor : undefined} />}
                     <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
                         <OverviewSidePanel/>
                     </Panel>
                 </ReactFlow>
-    
+
+                <div className="experimental-ribbon no-drag">
+                    Experimental
+                </div>
+                
                 <div className="position-fixed top-0 end-0 p-3 z-1">
                     <Toast show={!connected} className="delayed-appear">
                         <Toast.Header closeButton={false}>
@@ -120,7 +129,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                         </Toast.Body>
                     </Toast>
                 </div>
-    
+                
                 <RecipeModal
                     key={`${show}-${requiredOutput}`}
                     show={show}

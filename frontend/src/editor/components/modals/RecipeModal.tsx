@@ -23,7 +23,6 @@ function getRelevantItemsForInput(requiredInput: string): string[] {
 function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: RecipeModalProps) {
     const [selectedItem, setSelectedItem] = useState<string | null>(RequiredOutput ?? null);
     const [searchTerm, setSearchTerm] = useState("");
-
     const handleClose = () => {
         setSelectedItem(null);
         setSearchTerm("");
@@ -93,7 +92,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
     }, [selectedItem, RequiredInput]);
 
     const powerRecipes = useMemo(() =>
-            selectedItem ? getRecipesByInputItem(selectedItem).filter(r => r.output.length === 0) : []
+            selectedItem ? getRecipesByInputItem(selectedItem).filter(r => r.output.length === 0 && r.input[0]?.name === selectedItem) : []
         , [selectedItem]);
 
     const selectedItemObj = useMemo(() =>
