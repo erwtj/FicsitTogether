@@ -71,6 +71,16 @@ function HomePage() {
         setTotalDirectoryCount(user.total_directory_count);
     }, [user]);
 
+    const refetchUser = () => {
+        fetchUser(auth)
+            .then(updatedUser => {
+                setTotalDirectoryCount(updatedUser.total_directory_count);
+            })
+            .catch(err => {
+                console.error('Error fetching user data:', err);
+            });
+    }
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -110,7 +120,7 @@ function HomePage() {
             deleteDirectory(auth, selectedDirectory.id)
             .then(success => {
                 if (success) {
-                    setTotalDirectoryCount(d => d - 1);
+                    refetchUser();
                     setOwnedDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
                 } else {
                     console.error('Failed to delete directory');

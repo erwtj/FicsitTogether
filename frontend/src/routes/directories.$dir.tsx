@@ -88,10 +88,11 @@ function DirectoryPageContent() {
 
     const [apiError, setApiError] = useState<string | null>(null);
 
-    const refetchProjectCount = () => {
+    const refetchUser = () => {
         fetchUser(auth)
             .then(updatedUser => {
                 setTotalProjectCount(updatedUser.total_project_count);
+                setTotalDirectoryCount(updatedUser.total_directory_count);
             })
             .catch(err => {
                 console.error('Error fetching user data:', err);
@@ -171,8 +172,7 @@ function DirectoryPageContent() {
             deleteDirectory(auth, selectedDirectory.id)
                 .then(success => {
                     if (success) {
-                        setTotalDirectoryCount(d => d - 1);
-                        refetchProjectCount();
+                        refetchUser();
                         setSubDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
                     } else {
                         console.error('Failed to delete directory');
