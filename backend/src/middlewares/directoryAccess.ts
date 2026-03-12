@@ -9,7 +9,6 @@ export async function hasDirectoryAccess(user: User, directoryId: string): Promi
         return true;
     }
 
-    // TODO: Check if this recursive call works properly
     // Recursively check parent directories
     const res = await pool.query<{ result: number }>(`
         WITH RECURSIVE parent_dirs(id, parent_directory, owner, name) AS (
