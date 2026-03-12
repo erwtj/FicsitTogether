@@ -213,3 +213,11 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
 
     return res.rows.map(({ id, name }) => ({ id, name }));
 }
+
+export async function updateDirectoryPublic(directoryId: string, isPublic: boolean) {
+    await pool.query(
+        'UPDATE directories SET public = $1 WHERE id = $2',
+        [isPublic, directoryId]
+    );
+}
+

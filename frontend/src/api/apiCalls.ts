@@ -1,6 +1,6 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO, type ChartDataDTO} from "dtolib"
+import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO, type ChartDataDTO, type PublicProjectDTO} from "dtolib"
 
 
 // API calls
@@ -199,4 +199,38 @@ export async function uploadProject(auth: Auth0ContextType, directoryId: string,
     });
 
     return response.data as ProjectDTO;
+}
+
+export async function updateProjectPublic(auth: Auth0ContextType, projID: string, isPublic: boolean): Promise<boolean> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.put(`projects/${projID}/public`, {
+        isPublic: isPublic
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response?.status === 200;
+}
+
+export async function updateDirectoryPublic(auth: Auth0ContextType, dirID: string, isPublic: boolean): Promise<boolean> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.put(`directories/${dirID}/public`, {
+        isPublic: isPublic
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    
+    return response?.status === 200;
+}
+
+export async function getPublicProject(projID: string): Promise<PublicProjectDTO> {
+    const response = await api.get(`public/projects/${projID}`);
+
+    return response?.data as PublicProjectDTO;
 }

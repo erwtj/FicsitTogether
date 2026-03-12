@@ -1,5 +1,5 @@
 ﻿import { Router } from 'express';
-import {checkDirectoryAccess} from "../middlewares/directoryAccess.js";
+import {requireCanEditDirectory} from "../middlewares/directoryAccess.js";
 import {
     getDirectory,
     createDirectory,
@@ -9,7 +9,8 @@ import {
     getRootDirectory,
     getSharedDirectories,
     getDirectorySharedWith, leaveDirectory,
-    getChartsInDirectory, uploadProject
+    getChartsInDirectory, uploadProject,
+    updateDirectoryPublic
 } from "../controllers/directoryController.js";
 import {uploadSingleJson} from "../middlewares/upload.js";
 
@@ -19,16 +20,17 @@ const router = Router();
 router.get('/root', getRootDirectory);
 router.get('/shared', getSharedDirectories);
 
-router.get('/:directoryId', checkDirectoryAccess, getDirectory);
-router.post('/', checkDirectoryAccess, createDirectory);
-router.delete('/:directoryId', checkDirectoryAccess, deleteDirectory);
+router.get('/:directoryId', requireCanEditDirectory, getDirectory);
+router.post('/', requireCanEditDirectory, createDirectory);
+router.delete('/:directoryId', requireCanEditDirectory, deleteDirectory);
+router.put('/:directoryId', requireCanEditDirectory, updateDirectoryPublic);
 
-router.post('/:directoryId/share', checkDirectoryAccess, shareDirectory);
-router.delete('/:directoryId/share', checkDirectoryAccess, unshareDirectory);
-router.get('/:directoryId/share', checkDirectoryAccess, getDirectorySharedWith);
-router.get('/:directoryId/charts', checkDirectoryAccess, getChartsInDirectory);
-router.get('/:directoryId/leave', checkDirectoryAccess, leaveDirectory);
+router.post('/:directoryId/share', requireCanEditDirectory, shareDirectory);
+router.delete('/:directoryId/share', requireCanEditDirectory, unshareDirectory);
+router.get('/:directoryId/share', requireCanEditDirectory, getDirectorySharedWith);
+router.get('/:directoryId/charts', requireCanEditDirectory, getChartsInDirectory);
+router.get('/:directoryId/leave', requireCanEditDirectory, leaveDirectory);
 
-router.post('/:directoryId/upload', checkDirectoryAccess, uploadSingleJson, uploadProject);
+router.post('/:directoryId/upload', requireCanEditDirectory, uploadSingleJson, uploadProject);
 
 export default router;

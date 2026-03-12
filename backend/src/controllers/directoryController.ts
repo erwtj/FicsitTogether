@@ -326,3 +326,16 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
         next(error);
     }
 }
+
+export async function updateDirectoryPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+        const id = req.params.directoryId as string; // won't even route if no id is included
+        const isPublic = req.body.isPublic as boolean;
+
+        await directoryRepository.updateDirectoryPublic(id, isPublic);
+
+        res.sendStatus(200);
+    } catch (error) {
+        next(error);
+    }
+}

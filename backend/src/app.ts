@@ -2,6 +2,7 @@
 import cors from 'cors';
 import projectRoutes from './routes/projectRoutes.js';
 import directoryRoutes from './routes/directoryRoutes.js';
+import publicRoutes from './routes/publicRoutes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import config from './config/config.js';
 import userRoutes from "./routes/userRoutes.js";
@@ -21,7 +22,12 @@ app.use(cors({
     credentials: true
 }));
 
-// Every route requires login
+// TODO: Type check incoming data (e.g. project creation, user registration) to prevent malformed data from reaching the database. This can be done with a library like Joi or Zod, or manually in the controller functions.
+
+// Public routes (no auth required)
+app.use('/api/public', publicRoutes);
+
+// Every route after requires login
 app.use(checkJwt);
 app.use(attachUser);
 

@@ -8,6 +8,15 @@ export type ProjectDTO = {
     description: string;
 }
 
+// Full project info returned from a public/shared view (includes the chart)
+export type PublicProjectDTO = {
+    id: string;
+    directoryId: string;
+    name: string;
+    description: string;
+    chart: ChartDataDTO;
+}
+
 // Chart
 export type ChartDTO = {
     chart: string;

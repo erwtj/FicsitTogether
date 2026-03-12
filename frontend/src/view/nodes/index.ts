@@ -1,6 +1,6 @@
 ﻿import { type NodeTypes } from "@xyflow/react";
 import { RecipeNode }      from "./RecipeNode";
-import { ItemSpawnerNode } from "./ItemSpawnerNode";
+import { ItemSpawnerNode } from "./ItemSpawnerNode.tsx";
 import { EndNode }         from "./EndNode";
 import { PowerNode }       from "./PowerNode";
 

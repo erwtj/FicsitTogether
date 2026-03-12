@@ -96,3 +96,10 @@ export async function countTotalProjectsForUser(userId: string): Promise<number>
     `, [userId]);
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
+
+export async function updateProjectPublic(projectId: string, isPublic: boolean) {
+    await pool.query(
+        'UPDATE projects SET public = $1 WHERE id = $2',
+        [isPublic, projectId]
+    );
+}
