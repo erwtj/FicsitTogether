@@ -9,7 +9,7 @@ import {
     fetchSharedDirectories,
     createDirectory,
     deleteDirectory,
-    leaveDirectory
+    leaveDirectory, fetchUser
 } from "../api/apiCalls.ts";
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
@@ -31,8 +31,9 @@ export const Route = createFileRoute('/home')({
             throw redirect({to: '/login', replace: true});
         }
 
-        const [root, sharedRaw] = await Promise.all([
+        const [root, user, sharedRaw] = await Promise.all([
             fetchRoot(auth),
+            fetchUser(auth),
             fetchSharedDirectories(auth),
         ])
         
@@ -49,23 +50,26 @@ export const Route = createFileRoute('/home')({
             sharedBy: dir.ownerUsername
         } as DirectoryInfo));
 
-        return { root, owned, shared };
+        return { root, user, owned, shared };
     }, staleTime: 0
 })
 
 function HomePage() {
     const auth = useAuth0Context()
 
-    const { root, owned, shared } = Route.useLoaderData();
+    const { root, user, owned, shared } = Route.useLoaderData();
     const [ownedDirectories, setOwnedDirectories] = useState<DirectoryInfo[]>(owned);
     const [sharedDirectories, setSharedDirectories] = useState<DirectoryInfo[]>(shared);
 
     useEffect(() => {
-        /* eslint-disable react-hooks/set-state-in-effect */
         setOwnedDirectories(owned);
         setSharedDirectories(shared);
-        /* eslint-enable react-hooks/set-state-in-effect */
     }, [owned, shared]);
+
+    const [totalDirectoryCount, setTotalDirectoryCount] = useState(user.total_directory_count);
+    useEffect(() => {
+        setTotalDirectoryCount(user.total_directory_count);
+    }, [user]);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -78,6 +82,7 @@ function HomePage() {
     const handleCreateDirectory = (name: string) => {
         createDirectory(auth, root.id, name)
         .then(newDir => {
+            setTotalDirectoryCount(d => d + 1);
             setOwnedDirectories(prev => [...prev, {
                 id: newDir.id,
                 name: newDir.name,
@@ -105,6 +110,7 @@ function HomePage() {
             deleteDirectory(auth, selectedDirectory.id)
             .then(success => {
                 if (success) {
+                    setTotalDirectoryCount(d => d - 1);
                     setOwnedDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
                 } else {
                     console.error('Failed to delete directory');
@@ -175,7 +181,7 @@ function HomePage() {
                             />
                         ))}
                         {ownedDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
-                            <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                            <AddDirectoryCard directoryCount={totalDirectoryCount} onSubmit={(s) => handleCreateDirectory(s)}/>
                         }
                     </div>
                 </div>

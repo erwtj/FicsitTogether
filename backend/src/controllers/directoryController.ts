@@ -7,10 +7,11 @@ import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserI
 import {
     MAX_DESCRIPTION_LENGTH,
     MAX_DIRECTORIES_PER_DIRECTORY,
+    MAX_DIRECTORIES_PER_USER,
     MAX_DIRECTORY_DEPTH,
     MAX_NAME_LENGTH,
     MAX_PROJECTS_PER_DIRECTORY,
-    MAX_STORAGE_PER_USER_BYTES,
+    MAX_PROJECTS_PER_USER,
 } from "dtolib";
 import {sanitizeChart} from "../utils/chartValidator.js";
 
@@ -57,9 +58,10 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
             return next(error);
         }
 
-        const [parentDepth, siblingCount] = await Promise.all([
+        const [parentDepth, siblingCount, totalDirectoriesForUser] = await Promise.all([
             directoryRepository.getDirectoryDepth(parentDirectoryId),
             directoryRepository.countDirectories(parentDirectoryId),
+            directoryRepository.countTotalDirectoriesForUser(req.user.id),
         ]);
 
         if (parentDepth >= MAX_DIRECTORY_DEPTH) {
@@ -70,6 +72,12 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
 
         if (siblingCount >= MAX_DIRECTORIES_PER_DIRECTORY) {
             const error: AppError = new Error(`Maximum of ${MAX_DIRECTORIES_PER_DIRECTORY} directories per directory reached.`);
+            error.status = 400;
+            return next(error);
+        }
+
+        if (totalDirectoriesForUser >= MAX_DIRECTORIES_PER_USER) {
+            const error: AppError = new Error(`Maximum of ${MAX_DIRECTORIES_PER_USER} total directories per user reached.`);
             error.status = 400;
             return next(error);
         }
@@ -273,9 +281,9 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
             return next(error);
         }
         
-        const [projectCount, storageUsed] = await Promise.all([
+        const [projectCount, totalProjectsForUser] = await Promise.all([
             projectRepository.countProjectsInDirectory(directoryId),
-            projectRepository.getUserStorageUsed(req.user.id),
+            projectRepository.countTotalProjectsForUser(req.user.id),
         ]);
 
         if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {
@@ -284,8 +292,8 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
             return next(error);
         }
 
-        if (storageUsed + file.size > MAX_STORAGE_PER_USER_BYTES) {
-            const error: AppError = new Error(`Storage limit of ${MAX_STORAGE_PER_USER_BYTES / (1024 * 1024)} MB per user reached.`);
+        if (totalProjectsForUser >= MAX_PROJECTS_PER_USER) {
+            const error: AppError = new Error(`Maximum of ${MAX_PROJECTS_PER_USER} total projects per user reached.`);
             error.status = 400;
             return next(error);
         }

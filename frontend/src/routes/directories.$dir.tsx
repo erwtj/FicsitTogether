@@ -64,6 +64,8 @@ function DirectoryPageContent() {
     const { dir: dirId } = Route.useParams();
     
     const { user, directory } = Route.useLoaderData();
+    const [totalProjectCount, setTotalProjectCount] = useState(user.total_project_count);
+    const [totalDirectoryCount, setTotalDirectoryCount] = useState(user.total_directory_count);
 
     const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>(directory.subDirectories);
     const [projects, setProjects] = useState<ProjectDTO[]>(directory.projects);
@@ -73,6 +75,11 @@ function DirectoryPageContent() {
         setProjects(directory.projects);
     }, [directory]);
 
+    useEffect(() => {
+        setTotalProjectCount(user.total_project_count);
+        setTotalDirectoryCount(user.total_directory_count);
+    }, [user]);
+
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
 
@@ -81,13 +88,23 @@ function DirectoryPageContent() {
 
     const [apiError, setApiError] = useState<string | null>(null);
 
+    const refetchProjectCount = () => {
+        fetchUser(auth)
+            .then(updatedUser => {
+                setTotalProjectCount(updatedUser.total_project_count);
+            })
+            .catch(err => {
+                console.error('Error fetching user data:', err);
+            });
+    }
+
     // Create Directory and Project flow
     const handleCreateDirectory = (name: string) => {
         createDirectory(auth, dirId, name)
             .then(newDir => {
-                    setSubDirectories(prev => [...prev, newDir]);
-                }
-            )
+                setTotalDirectoryCount(d => d + 1);
+                setSubDirectories(prev => [...prev, newDir]);
+            })
             .catch(err => {
                 if (err.response?.status === 400) {
                     setApiError(err.response.data?.message || 'Invalid input. Please check your directory name and try again.');
@@ -100,9 +117,9 @@ function DirectoryPageContent() {
     const handleCreateProject = (name: string) => {
         createProject(auth, dirId, name)
             .then(newProject => {
-                    setProjects(prev => [...prev, newProject]);
-                }
-            )
+                setTotalProjectCount(d => d + 1);
+                setProjects(prev => [...prev, newProject]);
+            })
             .catch(err => {
                 if (err.response?.status === 400) {
                     setApiError(err.response.data?.message || 'Invalid input. Please check your project name and try again.');
@@ -115,6 +132,7 @@ function DirectoryPageContent() {
     const handleUploadProject = (file: File) => {
         uploadProject(auth, dirId, file)
             .then(newProject => {
+                setTotalProjectCount(d => d + 1);
                 setProjects(prev => [...prev, newProject]);
             })
             .catch((err) => {
@@ -153,6 +171,8 @@ function DirectoryPageContent() {
             deleteDirectory(auth, selectedDirectory.id)
                 .then(success => {
                     if (success) {
+                        setTotalDirectoryCount(d => d - 1);
+                        refetchProjectCount();
                         setSubDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
                     } else {
                         console.error('Failed to delete directory');
@@ -171,6 +191,7 @@ function DirectoryPageContent() {
             deleteProject(auth, selectedProject.id)
                 .then(success => {
                     if (success) {
+                        setTotalProjectCount(d => d - 1);
                         setProjects(prev => prev.filter(proj => proj.id !== selectedProject.id));
                     } else {
                         console.error('Failed to delete project');
@@ -233,7 +254,7 @@ function DirectoryPageContent() {
                     })}
                     {directory.directoryTree.length <= MAX_DIRECTORY_DEPTH && 
                         subDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
-                        <AddDirectoryCard onSubmit={handleCreateDirectory}/>}
+                        <AddDirectoryCard directoryCount={totalDirectoryCount} onSubmit={handleCreateDirectory}/>}
                 </div>
                 <div key={"project-list"} className={"d-flex flex-wrap gap-3 mt-3 justify-content-center"}
                      style={{width: "100%"}}>
@@ -244,7 +265,7 @@ function DirectoryPageContent() {
                         )
                     })}
                     {projects.length < MAX_PROJECTS_PER_DIRECTORY &&
-                        <AddProjectCard onSubmit={handleCreateProject} onUpload={handleUploadProject}/>}
+                        <AddProjectCard projectCount={totalProjectCount} onSubmit={handleCreateProject} onUpload={handleUploadProject}/>}
                 </div>
             </div>
 

@@ -122,4 +122,6 @@ export type FullUserInfoDTO = {
     username: string;
     root_directory: string;
     created_at: string;
+    total_project_count: number;
+    total_directory_count: number;
 }

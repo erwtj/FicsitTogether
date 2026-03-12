@@ -53,14 +53,21 @@ export async function getDirectoryDepth(directoryId: string): Promise<number> {
     return res.rows[0]?.depth ?? 0;
 }
 
-/**
- * Returns the number of immediate subdirectories inside a directory (excluding itself).
- */
 export async function countDirectories(parentDirectoryId: string): Promise<number> {
     const res = await pool.query<{ count: string }>(
         'SELECT COUNT(*) AS count FROM directories WHERE parent_directory = $1 AND id != $1',
         [parentDirectoryId]
     );
+    return parseInt(res.rows[0]?.count ?? '0', 10);
+}
+
+export async function countTotalDirectoriesForUser(userId: string): Promise<number> {
+    const res = await pool.query<{ count: string }>(`
+        SELECT COUNT(*) AS count
+        FROM directories
+        WHERE owner = $1
+          AND id != parent_directory
+    `, [userId]);
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 

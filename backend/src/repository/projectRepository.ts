@@ -53,32 +53,11 @@ export async function updateProjectChart(id: string, chart: ChartDataDTO) {
     );
 }
 
-export async function getAllProjects() {
-    const res = await pool.query<Project>(
-        'SELECT id, parent_directory as "directoryId", name, description FROM projects'
-    );
-    return res.rows;
-}
-
 export async function getProjectsInDirectory(directoryId: string) {
     const res = await pool.query<Project>(
         'SELECT id, parent_directory as "directoryId", name, description FROM projects WHERE parent_directory = $1',
         [directoryId]
     );
-    return res.rows;
-}
-
-export async function getProjectsRecursive(directoryId: string) {
-    const res = await pool.query<Project>(`
-        WITH RECURSIVE subdirs(id) AS (
-            SELECT id FROM directories WHERE id = $1
-            UNION ALL
-            SELECT d.id FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
-        )
-        SELECT p.id, p.parent_directory as "directoryId", p.name, p.description
-        FROM projects p
-        WHERE p.parent_directory IN (SELECT id FROM subdirs)
-    `, [directoryId]);
     return res.rows;
 }
 
@@ -100,9 +79,6 @@ export async function deleteProject(id: string) {
     await pool.query('DELETE FROM projects WHERE id = $1', [id]);
 }
 
-/**
- * Returns the number of projects in a given directory.
- */
 export async function countProjectsInDirectory(directoryId: string): Promise<number> {
     const res = await pool.query<{ count: string }>(
         'SELECT COUNT(*) AS count FROM projects WHERE parent_directory = $1',
@@ -111,16 +87,12 @@ export async function countProjectsInDirectory(directoryId: string): Promise<num
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 
-/**
- * Returns the total storage used (in bytes) by all projects owned by a user,
- * calculated as the byte length of the stored JSONB chart data.
- */
-export async function getUserStorageUsed(userId: string): Promise<number> {
-    const res = await pool.query<{ total: string }>(`
-        SELECT COALESCE(SUM(octet_length(p.chart::text)), 0) AS total
+export async function countTotalProjectsForUser(userId: string): Promise<number> {
+    const res = await pool.query<{ count: string }>(`
+        SELECT COUNT(*) AS count
         FROM projects p
         JOIN directories d ON p.parent_directory = d.id
         WHERE d.owner = $1
     `, [userId]);
-    return parseInt(res.rows[0]?.total ?? '0', 10);
+    return parseInt(res.rows[0]?.count ?? '0', 10);
 }
