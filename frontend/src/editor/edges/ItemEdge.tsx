@@ -50,7 +50,6 @@ export const ItemEdge = memo(function ItemEdge({
         [dragBuffer, data?.movablePoints],
     );
 
-
     sourceY = sourceY - 10; // Nudge source handle up by 10px to align with item icon center
     targetY = targetY + 10; // Nudge target handle up by 10px to align with item icon center
 
@@ -104,11 +103,10 @@ export const ItemEdge = memo(function ItemEdge({
     const handleThroughputChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = parseFloat(e.target.value);
-            if (isNaN(val) || val < 0) {
+            if (isNaN(val) || val < 0)
                 updateEdgeData(id, { throughput: 0 });
-                return;
-            }
-            updateEdgeData(id, { throughput: isFluid ? val * 1000 : val });
+            else
+                updateEdgeData(id, { throughput: isFluid ? val * 1000 : val });
         },
         [id, isFluid, updateEdgeData],
     );
@@ -204,7 +202,7 @@ export const ItemEdge = memo(function ItemEdge({
         window.addEventListener("mouseup", onMouseUp, { capture: true });
     }, [data?.movablePoints, reactFlow, id, updateEdgeData]);
 
-    const renderDraggablePoints = useCallback(() => {
+    const DraggablePoints = useCallback(() => {
         return (
             <>
                 {middlePoints.map((p, idx) => (
@@ -284,7 +282,7 @@ export const ItemEdge = memo(function ItemEdge({
                 </div>
             </EdgeLabelRenderer>
             <EdgeLabelRenderer>
-                {selected && renderDraggablePoints()}
+                {selected && <DraggablePoints/>}
             </EdgeLabelRenderer>
         </>
     );
