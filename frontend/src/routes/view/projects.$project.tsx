@@ -3,7 +3,7 @@ import {getPublicProject} from "../../api/apiCalls.ts";
 import "../../view/ChartViewer.css"
 import {ChartViewer} from "../../view/ChartViewer.tsx";
 
-export const Route = createFileRoute('/view/project/$project')({
+export const Route = createFileRoute('/view/projects/$project')({
     component: RouteComponent,
     staticData: {
         showNav: false,

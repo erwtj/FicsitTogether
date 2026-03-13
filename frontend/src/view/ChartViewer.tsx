@@ -1,5 +1,6 @@
 ﻿import {Background, BackgroundVariant, MiniMap, ReactFlow,
-    ReactFlowProvider, useNodesState, useEdgesState, type Edge, type Node, useUpdateNodeInternals } from "@xyflow/react";
+    ReactFlowProvider, useNodesState, useEdgesState, type Edge, type Node, useUpdateNodeInternals,
+    Panel} from "@xyflow/react";
 import type { PublicProjectDTO } from "dtolib";
 import {type ItemEdgeData, nodeColor} from "../editor/types";
 import { useFactorySync } from "../editor/hooks/useFactorySync";
@@ -9,6 +10,7 @@ import { useEffect } from "react";
 
 import "./ChartViewer.css";
 import {useClientSettings} from "../hooks/useClientSettings.ts";
+import {OverviewSidePanel} from "./components/OverviewSidePanel.tsx";
 
 // Drop persisted measurement fields so React Flow measures node width/height from the current DOM/CSS.
 function resetNodeMeasurements(node: Node): Node {
@@ -64,9 +66,9 @@ function ViewProject({ project }: { project: PublicProjectDTO }) {
         >
             <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
             {clientSettings.minimapEnabled && <MiniMap className="bg-body" position="top-right" nodeColor={clientSettings.minimapColors ? nodeColor : undefined}/>}
-            {/*<Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
-                <OverviewSidePanel/>
-            </Panel>*/}
+            <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
+                <OverviewSidePanel projectName={project.name} parentDirectory={project.directoryId}/>
+            </Panel>
         </ReactFlow>
 
         <div className="experimental-ribbon no-drag">
