@@ -1,4 +1,4 @@
-﻿import { memo, useState } from "react";
+﻿import { memo } from "react";
 import { type NodeProps, Position } from "@xyflow/react";
 import { Card } from "react-bootstrap";
 import { getItem } from "ficlib";
@@ -20,10 +20,7 @@ export const ItemSpawnerNode = memo(function ItemSpawnerNode({
     const handleId = `${id}-output-handle-0`;
     const displayAmount = roundTo3Decimals(outputAmount / (solid ? 1 : 1000));
 
-    const [inputValue, setInputValue] = useState<string>(String(displayAmount));
-    const [isFocused, setIsFocused] = useState(false);
-
-    const visibleValue = isFocused ? inputValue : String(displayAmount);
+    const visibleValue = String(displayAmount);
 
     return (
         <div className="react-flow__node-default p-0">
@@ -39,13 +36,10 @@ export const ItemSpawnerNode = memo(function ItemSpawnerNode({
                                 <input
                                     type={"number"}
                                     inputMode={"decimal"}
-                                    className={"form-control fs-8 num-input nodrag"}
+                                    className={"form-control fs-8 num-input nodrag bg-body"}
                                     placeholder={"0"}
                                     value={visibleValue}
-                                    onFocus={() => { setInputValue(displayAmount === 0 ? "" : String(displayAmount)); setIsFocused(true); }}
-                                    onBlur={() => setIsFocused(false)}
-                                    onClickCapture={e => e.stopPropagation()}
-                                    onDoubleClickCapture={e => e.stopPropagation()}
+                                    disabled={true}
                                 />
                             </div>
 

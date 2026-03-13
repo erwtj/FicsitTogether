@@ -1,4 +1,4 @@
-﻿import { memo, useCallback, useMemo } from "react";
+﻿import { memo, useMemo } from "react";
 import {
     BaseEdge,
     EdgeLabelRenderer,
@@ -121,29 +121,8 @@ export const ItemEdge = memo(function ItemEdge({
             edgePath: basePath,
             labelX: baseLabelX,
             labelY: baseLabelY,
-            middlePoints: [{ x: baseLabelX, y: baseLabelY }],
         };
     }, [movablePoints, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
-
-    const DraggablePoints = useCallback(() => {
-        return (
-            movablePoints.length > 0 &&
-                movablePoints.map((p, idx) => (
-                    <div
-                        key={idx}
-                        style={{
-                            transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
-                            pointerEvents: "all",
-                            cursor: "move",
-                            zIndex: 10000,
-                        }}
-                        className="position-handle"
-                        onClick={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                    />
-                ))
-        );
-    }, [movablePoints]);
 
     // ── Render ─────────────────────────────────────────────────────────────
     return (
@@ -171,7 +150,7 @@ export const ItemEdge = memo(function ItemEdge({
                     className="nodrag nopan"
                     style={{
                         position: "absolute",
-                        transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY - (selected ? 20 : 0)}px)`,
+                        transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
                         fontSize: 12,
                         pointerEvents: "all",
                     }}
@@ -179,17 +158,13 @@ export const ItemEdge = memo(function ItemEdge({
                     <input
                         type="number"
                         inputMode="decimal"
-                        className="form-control fs-8 num-input text-center"
+                        className="form-control fs-8 num-input text-center bg-body"
                         placeholder="0"
                         value={displayAmount}
                         style={labelStyle}
-                        onClickCapture={e => e.stopPropagation()}
-                        onDoubleClickCapture={e => e.stopPropagation()}
+                        disabled={true}
                     />
                 </div>
-            </EdgeLabelRenderer>
-            <EdgeLabelRenderer>
-                {selected && <DraggablePoints/>}
             </EdgeLabelRenderer>
         </>
     );

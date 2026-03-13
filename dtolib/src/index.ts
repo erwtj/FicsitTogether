@@ -29,7 +29,7 @@ export type SloopData = {
 
 export type RecipeNodeData = {
     recipeClassName: string;
-    sloopData?: SloopData[]
+    sloopData?: SloopData[];
 };
 
 export type ItemSpawnerNodeData = {

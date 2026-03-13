@@ -30,10 +30,13 @@ export const RecipeNode = memo(function RecipeNode({
 
     // Reset the slooping if factor drops below sloop required threshold 
     useEffect(() => {
+        if (!data)
+            return;
+        
         const sloopData = data?.sloopData ?? [];
-        if (sloopData.length === 0) return;
+        if (sloopData.length === 0 || !data?._rawFactor) return;
 
-        const rawFactor = data?._rawFactor ?? { inputFactor: 1, outputFactor: 1 };
+        const rawFactor = data!._rawFactor;
         const somersloopsNeeded = producedIn.somersloopsNeeded ?? 1;
 
         let isInvalid = false;
@@ -49,7 +52,7 @@ export const RecipeNode = memo(function RecipeNode({
         if (isInvalid) {
             updateNodeData(id, { sloopData: [] });
         }
-    }, [data?._rawFactor, data?._rawFactor?.inputFactor, data?._rawFactor?.outputFactor, data?.sloopData, id, producedIn.somersloopsNeeded, updateNodeData]);
+    }, [data, data?._rawFactor, data?._rawFactor?.inputFactor, data?._rawFactor?.outputFactor, data?.sloopData, id, producedIn.somersloopsNeeded, updateNodeData]);
 
 
     const inputHandles = useMemo(() => recipe.input.map((input, i) => {

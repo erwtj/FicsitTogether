@@ -102,7 +102,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     zoomOnDoubleClick={false}
                     nodeOrigin={[0.5, 0.0]}
                     deleteKeyCode={['Backspace', 'Delete']}
-                    multiSelectionKeyCode={'Shift'}
+                    multiSelectionKeyCode={['Shift', 'Control']}
                     onKeyDownCapture={handleKeyDownCapture}
                     fitView
                     snapToGrid={clientSettings.snappingEnabled}

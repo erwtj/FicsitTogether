@@ -5,9 +5,8 @@ import { MAX_CHART_NODES, MAX_CHART_EDGES, MAX_MOVABLE_POINTS } from "dtolib";
 // Maximum sensible values
 const MAX_COORD = 1_000_000;
 const MAX_NODE_SIZE = 10_000;
-const MAX_THROUGHPUT = 1_000_000;
-const MAX_OUTPUT_AMOUNT = 1_000_000_000; // mL/min for fluids
-const MAX_SOMERSLOOPS = 4;
+const MAX_THROUGHPUT = 10_000_000;
+const MAX_OUTPUT_AMOUNT = 10_000_000_000; // mL/min for fluids
 const MAX_PERCENTAGE = 250;
 const MAX_MOVABLE_POINT_COORD = 1_000_000;
 
