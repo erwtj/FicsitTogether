@@ -14,7 +14,7 @@ export const ItemSpawnerNode = memo(function ItemSpawnerNode({
     data,
 }: NodeProps<ItemSpawnerNodeType>) {
     const { itemClassName, outputAmount } = data;
-    const { updateNodeData } = useYjsMutation();
+    const { updateNodeAndSingleEdgeData } = useYjsMutation();
 
     const item = getItem(itemClassName)!;
 
@@ -33,9 +33,9 @@ export const ItemSpawnerNode = memo(function ItemSpawnerNode({
 
         const val = parseFloat(raw);
         if (!isNaN(val) && val >= 0)
-            updateNodeData(id, { outputAmount: solid ? val : val * 1000 });
+            updateNodeAndSingleEdgeData(id, { outputAmount: solid ? val : val * 1000 });
         else if (raw === "")
-            updateNodeData(id, { outputAmount: 0 });
+            updateNodeAndSingleEdgeData(id, { outputAmount: 0 });
     };
 
     return (
