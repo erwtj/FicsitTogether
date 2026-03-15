@@ -214,10 +214,40 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
     return res.rows.map(({ id, name }) => ({ id, name }));
 }
 
+export async function getPublicDirectoryTree(directoryId: string): Promise<DirectoryMinimalInfo[]> {
+    const res = await pool.query<DirectoryTreeRow>(`
+        WITH RECURSIVE parent_dirs(id, parent_directory, name, depth, public) AS (
+            SELECT id, parent_directory, name, 0, public
+            FROM directories
+            WHERE id = $1
+
+            UNION ALL
+
+            SELECT d.id, d.parent_directory, d.name, pd.depth + 1, d.public
+            FROM directories d
+                INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
+            WHERE d.id != d.parent_directory
+        ),
+        max_public_depth AS (
+            SELECT MAX(depth) AS depth
+            FROM parent_dirs
+            WHERE public = true
+        )
+        SELECT pd.id, pd.name, pd.depth
+        FROM parent_dirs pd
+            CROSS JOIN max_public_depth mpd
+        WHERE pd.id != pd.parent_directory
+          AND mpd.depth IS NOT NULL
+          AND pd.depth <= mpd.depth
+        ORDER BY pd.depth DESC
+    `, [directoryId]);
+
+    return res.rows.map(({ id, name }) => ({ id, name }));
+}
+
 export async function updateDirectoryPublic(directoryId: string, isPublic: boolean) {
     await pool.query(
         'UPDATE directories SET public = $1 WHERE id = $2',
         [isPublic, directoryId]
     );
 }
-

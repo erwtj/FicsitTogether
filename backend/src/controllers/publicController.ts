@@ -1,14 +1,15 @@
 ﻿import type {Request, Response, NextFunction} from "express";
-import * as repository from "../repository/projectRepository.js";
+import * as projectRepository from "../repository/projectRepository.js";
+import * as directoryRepository from "../repository/directoryRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
-import type { PublicProjectDTO } from "dtolib";
+import type {DirectoryContentDTO, PublicProjectDTO } from "dtolib";
 
 export async function getPublicProject(req: Request, res: Response, next: NextFunction) {
     try {
         const id = req.params.projectId as string;
         const [project, chart] = await Promise.all([
-            repository.getProject(id),
-            repository.getProjectChart(id),
+            projectRepository.getProject(id),
+            projectRepository.getProjectChart(id),
         ]);
 
         if (!project || !chart) {
@@ -32,7 +33,21 @@ export async function getPublicProject(req: Request, res: Response, next: NextFu
 export async function getPublicDirectory(req: Request, res: Response, next: NextFunction) {
     try {
         const directoryId = req.params.directoryId as string;
-        
+
+        const [directory, subDirectories, projects, directoryTree] = await Promise.all([
+            directoryRepository.getDirectory(directoryId),
+            directoryRepository.getDirectories(directoryId),
+            projectRepository.getProjectsInDirectory(directoryId),
+            directoryRepository.getPublicDirectoryTree(directoryId),
+        ]);
+
+        res.status(200).send({
+            ...directory,
+            owner: "",
+            subDirectories: subDirectories.map(dir => ({ ...dir, owner: "" })),
+            projects,
+            directoryTree,
+        } as DirectoryContentDTO);
     } catch (error) {
         next(error);
     }

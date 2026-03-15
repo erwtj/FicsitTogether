@@ -11,12 +11,13 @@ export type ProjectInfo = {
 }
 
 export type ProjectProps = {
+    to: "edit" | "view/projects";
     project: ProjectInfo;
-    deleteProject: (project: ProjectInfo) => void;
-    downloadProject: (project: ProjectInfo) => void;
+    deleteProject?: (project: ProjectInfo) => void;
+    downloadProject?: (project: ProjectInfo) => void;
 }
 
-export const ProjectCard = ({project, deleteProject, downloadProject}: ProjectProps) => {
+export const ProjectCard = ({to, project, deleteProject, downloadProject}: ProjectProps) => {
     const [showDropdown, setShowDropdown] = useState(false);
 
     return (
@@ -26,13 +27,13 @@ export const ProjectCard = ({project, deleteProject, downloadProject}: ProjectPr
             style={{width: "18rem", minHeight: "4rem", position: "relative"}}
             key={project.id}
         >
-            <Link to={"/edit/$project"} params={{ project: project.id }} className={"stretched-link"}></Link>
+            <Link to={`/${to}/$project`} params={{ project: project.id }} className={"stretched-link"}></Link>
             <Card.Title className={"d-flex align-items-center justify-content-between user-select-none"}>
                 {project.name.length === 0 ?
                     <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem", height: "1.7rem"}} key="name">No name</h5> :
                     <h5 className={"text-truncate mb-0"} style={{width: "14rem", height: "1.7rem"}} key="name">{project.name}</h5>
                 }
-                <Dropdown className={"ms-auto"} style={{zIndex: showDropdown ? 3 : 2}} show={showDropdown}>
+                {(deleteProject || downloadProject) && <Dropdown className={"ms-auto"} style={{zIndex: showDropdown ? 3 : 2}} show={showDropdown}>
                     <Dropdown.Toggle variant={"primary"}
                                      className="dropdown-toggle p-0 no-arrow align-top"
                                      id={"dropdown-basic"} onClick={() => setShowDropdown(!showDropdown)}
@@ -40,16 +41,16 @@ export const ProjectCard = ({project, deleteProject, downloadProject}: ProjectPr
                         <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
                     <Dropdown.Menu className={"p-0 z-2"} popperConfig={{ strategy: 'fixed' }} renderOnMount>
-                        <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
+                        {deleteProject && <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
                                        onClick={() => deleteProject(project)}>
                             Delete
-                        </Dropdown.Item>
-                        <Dropdown.Item href={"#"} className={"dropdown-option download-option user-select-none"}
+                        </Dropdown.Item>}
+                        {downloadProject && <Dropdown.Item href={"#"} className={"dropdown-option download-option user-select-none"}
                                        onClick={() => downloadProject(project)}>
                             Download
-                        </Dropdown.Item>
+                        </Dropdown.Item>}
                     </Dropdown.Menu>
-                </Dropdown>
+                </Dropdown>}
             </Card.Title>
             <Card.Text className={"project-description text-muted user-select-none mw-100 text-wrap"}>
                 {project.description.length === 0 ?

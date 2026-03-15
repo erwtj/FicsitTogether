@@ -125,6 +125,31 @@ export async function requireCanEditDirectory(req: Request, res: Response, next:
     next();
 }
 
+export async function requireDirectoryOwner(req: Request, res: Response, next: NextFunction) {
+    const directoryId = req.params.directoryId || req.body.directoryId || req.query.directoryId;
+
+    if (!directoryId) {
+        return res.status(400).json({ error: 'Bad Request: No directory ID provided' });
+    }
+
+    const resDb = await pool.query<{ owner: string }>(
+        'SELECT owner FROM directories WHERE id = $1',
+        [directoryId]
+    );
+
+    if (resDb.rowCount === 0) {
+        return res.status(404).json({ error: 'Not Found: Directory does not exist' });
+    }
+
+    const ownerId = resDb.rows[0]!.owner;
+
+    if (ownerId !== req.user.id) {
+        return res.status(403).json({ error: 'Forbidden: You do not own this directory' });
+    }
+
+    next();
+}
+
 export async function requireCanEditProject(req: Request, res: Response, next: NextFunction) {
     const projectId = req.params.projectId || req.body.projectId || req.query.projectId;
 
@@ -153,3 +178,16 @@ export async function requireCanViewProject(req: Request, res: Response, next: N
     return res.status(403).json({ error: 'Forbidden: This project is not publicly accessible' });
 }
 
+export async function requireCanViewDirectory(req: Request, res: Response, next: NextFunction) {
+    const directoryId = req.params.directoryId || req.body.directoryId || req.query.directoryId;
+
+    if (!directoryId) {
+        return res.status(400).json({ error: 'Bad Request: No directory ID provided' });
+    }
+    
+    if (await isPublicDirectory(directoryId as string)) {
+        return next();
+    }
+    
+    return res.status(403).json({ error: 'Forbidden: This directory is not publicly accessible' });
+}

@@ -1,5 +1,5 @@
 ﻿import { Router } from 'express';
-import {requireCanEditDirectory} from "../middlewares/directoryAccess.js";
+import {requireCanEditDirectory, requireCanEditProject, requireDirectoryOwner} from "../middlewares/directoryAccess.js";
 import {
     getDirectory,
     createDirectory,
@@ -23,10 +23,10 @@ router.get('/shared', getSharedDirectories);
 router.get('/:directoryId', requireCanEditDirectory, getDirectory);
 router.post('/', requireCanEditDirectory, createDirectory);
 router.delete('/:directoryId', requireCanEditDirectory, deleteDirectory);
-router.put('/:directoryId', requireCanEditDirectory, updateDirectoryPublic);
+router.put('/:directoryId/public', requireCanEditProject, updateDirectoryPublic);
 
-router.post('/:directoryId/share', requireCanEditDirectory, shareDirectory);
-router.delete('/:directoryId/share', requireCanEditDirectory, unshareDirectory);
+router.post('/:directoryId/share', requireDirectoryOwner, shareDirectory);
+router.delete('/:directoryId/share', requireCanEditDirectory, unshareDirectory); // Both the owner and shared users can unshare (the owner can unshare others, and shared users can unshare themselves to remove their access)
 router.get('/:directoryId/share', requireCanEditDirectory, getDirectorySharedWith);
 router.get('/:directoryId/charts', requireCanEditDirectory, getChartsInDirectory);
 router.get('/:directoryId/leave', requireCanEditDirectory, leaveDirectory);

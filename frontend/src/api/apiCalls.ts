@@ -229,8 +229,14 @@ export async function updateDirectoryPublic(auth: Auth0ContextType, dirID: strin
     return response?.status === 200;
 }
 
-export async function getPublicProject(projID: string): Promise<PublicProjectDTO> {
+export async function fetchPublicProject(projID: string): Promise<PublicProjectDTO> {
     const response = await api.get(`public/projects/${projID}`);
 
     return response?.data as PublicProjectDTO;
+}
+
+export async function fetchPublicDirectory(dirID: string): Promise<DirectoryContentDTO> {
+    const response = await api.get(`public/directories/${dirID}`);
+
+    return response?.data as DirectoryContentDTO;
 }

@@ -14,7 +14,7 @@ export type DirectoryInfo = {
 
 
 export type DirectoryCardProps = {
-    to: 'directories' | 'overview'; // Determines the route to link to when the card is clicked
+    to: 'directories' | 'view/directories'; // Determines the route to link to when the card is clicked
     directoryInfo: DirectoryInfo;
     deleteDirectory?: (directory: DirectoryInfo) => void; // Callback for deleting the directory
     shareDirectory?: (directory: DirectoryInfo) => void; // Callback for sharing the directory
