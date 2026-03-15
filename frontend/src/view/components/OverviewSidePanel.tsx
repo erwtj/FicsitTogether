@@ -6,6 +6,7 @@ import {
     BoxArrowInDown,
     Buildings,
     ChevronRight,
+    Download,
     Gear,
     LightningFill,
 } from "react-bootstrap-icons";
@@ -15,6 +16,7 @@ import {roundTo3Decimals, throughputToDisplay} from "../../utils/throughputUtil.
 import "./OverviewSidePanel.css";
 import { Link } from "@tanstack/react-router";
 import {ClientSettingsModal} from "../../components/modals/ClientSettingsModal.tsx";
+import type { PublicProjectDTO } from "dtolib";
 
 // ─── Item / Building list renderers ──────────────────────────────────────────
 
@@ -63,7 +65,7 @@ function BuildingList({ buildings }: { buildings: BuildingCount[] }) {
 
 // ─── Panel ────────────────────────────────────────────────────────────────────
 
-export function OverviewSidePanel({projectName, parentDirectory}: {projectName: string, parentDirectory: string}) {
+export function OverviewSidePanel({project}: {project: PublicProjectDTO}) {
     const [showPanel, setShowPanel] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const handleShow = useCallback(() => setShowPanel(v => !v), []);
@@ -73,6 +75,22 @@ export function OverviewSidePanel({projectName, parentDirectory}: {projectName: 
         useFactoryStats(nodes);
 
     const netPower = powerProductionMW - powerConsumptionMW;
+
+    const handleDownloadProject = async () => {
+        const chart = JSON.stringify({
+            name: project.name,
+            description: project.description,
+            chart: {nodes: project.chart.nodes, edges: project.chart.edges}
+        });
+        
+        const blob = new Blob([chart], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${project.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
 
     return (
         <>
@@ -88,16 +106,17 @@ export function OverviewSidePanel({projectName, parentDirectory}: {projectName: 
             <Offcanvas show={showPanel} onHide={handleShow} placement="start" scroll backdrop={false}>
                 <Offcanvas.Header>
                     <Offcanvas.Title>
-                        <Link to={"/view/directories/$dir"} params={{ dir: parentDirectory }} className={"text-body-secondary clickable-link"}>
+                        <Link to={"/view/directories/$dir"} params={{ dir: project.directoryId }} className={"text-body-secondary clickable-link"}>
                             <ArrowLeft size={20} className="mb-1 me-3"/>
                         </Link>
-                        {projectName !== ""
-                            ? <span className="text-white clickable-link" role={"button"}>{projectName}</span>
+                        {project.name !== ""
+                            ? <span className="text-white clickable-link" role={"button"}>{project.name}</span>
                             : <span className="text-muted fst-italic clickable-link" role={"button"}>No name</span>
                         }
                     </Offcanvas.Title>
                     <div className="d-flex flex-row align-items-center gap-2 ms-auto">
-                        <Gear size={20} className="text-body-secondary clickable-link ms-auto" role="button"
+                        <Download size={20} className="text-body-secondary clickable-link ms-auto me-2" role="button" onClick={handleDownloadProject}/>
+                        <Gear size={20} className="text-body-secondary clickable-link" role="button"
                               onClick={() => setShowSettings(true)}/>
                         <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowPanel(false)}></button>
                     </div>

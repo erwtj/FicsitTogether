@@ -67,7 +67,7 @@ function ViewProject({ project }: { project: PublicProjectDTO }) {
             <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
             {clientSettings.minimapEnabled && <MiniMap className="bg-body" position="top-right" nodeColor={clientSettings.minimapColors ? nodeColor : undefined}/>}
             <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
-                <OverviewSidePanel projectName={project.name} parentDirectory={project.directoryId}/>
+                <OverviewSidePanel project={project}/>
             </Panel>
         </ReactFlow>
 
