@@ -18,6 +18,7 @@
     "dtolib": "*",
     "express": "^5.2.1",
     "express-oauth2-jwt-bearer": "^1.7.4",
+    "express-rate-limit": "^7.5.0",
     "ficlib": "*",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2",

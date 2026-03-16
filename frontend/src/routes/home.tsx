@@ -41,6 +41,7 @@ export const Route = createFileRoute('/home')({
         const owned = root.subDirectories.map(dir => ({
             id: dir.id,
             name: dir.name,
+            public: dir.public,
             isShared: false,
         } as DirectoryInfo));
 
@@ -48,6 +49,7 @@ export const Route = createFileRoute('/home')({
             id: dir.id,
             name: dir.name,
             isShared: true,
+            public: false,
             sharedBy: dir.ownerUsername
         } as DirectoryInfo));
 

@@ -8,8 +8,11 @@ import config from './config/config.js';
 import userRoutes from "./routes/userRoutes.js";
 import {checkJwt} from "./middlewares/auth.js";
 import {attachUser} from "./middlewares/attachUser.js";
+import { publicRateLimit } from './middlewares/publicRateLimit.js';
 
 const app = express();
+
+app.set('trust proxy', config.trustProxy);
 
 // Parse json bodies
 app.use(express.json());
@@ -25,7 +28,7 @@ app.use(cors({
 // TODO: Type check incoming data (e.g. project creation, user registration) to prevent malformed data from reaching the database. This can be done with a library like Joi or Zod, or manually in the controller functions.
 
 // Public routes (no auth required)
-app.use('/api/public', publicRoutes);
+app.use('/api/public', publicRateLimit, publicRoutes);
 
 // Every route after requires login
 app.use(checkJwt);

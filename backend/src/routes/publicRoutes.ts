@@ -4,7 +4,6 @@ import {requireCanViewDirectory, requireCanViewProject} from '../middlewares/dir
 
 const router = Router();
 
-// TODO: Rate limit public endpoints
 router.get('/projects/:projectId', requireCanViewProject, getPublicProject);
 router.get('/directories/:directoryId', requireCanViewDirectory, getPublicDirectory);
 

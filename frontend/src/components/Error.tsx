@@ -1,6 +1,20 @@
 ﻿import type { ErrorComponentProps } from "@tanstack/react-router";
 
 export function ErrorComponent({error}: ErrorComponentProps) {
+    if(error.message.includes("429")) {
+        return (
+            <div className="d-flex align-items-center justify-content-center px-2" style={{marginTop: "10vh"}}>
+                <div className="text-center">
+                    <h1 className="display-1 fw-bold">Too Many Requests</h1>
+                    <p className="fs-2 fw-medium mt-4 mb-0">You are being rate limited, sorry.</p>
+                    <p className="fs-5">Please wait a moment and try again.</p>
+                    <p className="fs-5 mt-4 mb-4">Error message: <span className="text-warning">{error.message}</span></p>
+                    <button className="btn btn-primary" onClick={() => window.location.reload()}>Reload page</button>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div className="d-flex align-items-center justify-content-center px-2" style={{marginTop: "10vh"}}>
             <div className="text-center">

@@ -27,6 +27,9 @@ Login and session management is handled via [OAuth 2.0](https://oauth.net/2/) us
 - WS_PORT: Port to run the WebSocket server on
 - CORS_ORIGIN: CORS origin to allow
 - HTTPS: Whether to run the server with HTTPS (true/false)
+- TRUST_PROXY: Express trust proxy setting (for example: false, true, 1)
+- PUBLIC_RATE_LIMIT_WINDOW_MS: Time window for unauthenticated public endpoint limits (default 60000)
+- PUBLIC_RATE_LIMIT_MAX_REQUESTS: Max requests per IP in that window for `/api/public/*` (default 60)
 
 #### AUTH0
 - AUTH0_AUDIENCE: AUTH0 API Audience
