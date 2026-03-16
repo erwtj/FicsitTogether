@@ -18,12 +18,16 @@ img, .no-drag {
     color: rgba(222, 226, 230, 0.75) !important;
 }
 
-.clickable-link.default-purple {
-    color: #c189cd !important;
-}
 
 .clickable-link:hover {
     color: #ea80fc !important;
     text-decoration: underline;
 }
 
+.default-purple {
+    color: #c189cd !important;
+}
+
+.default-orange {
+    color: #e26d13 !important;
+}

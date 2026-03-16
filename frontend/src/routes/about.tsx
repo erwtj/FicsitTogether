@@ -52,32 +52,32 @@ function RouteComponent() {
                         <h5 className="mb-3 text-muted text-uppercase" style={{ letterSpacing: "0.05em", fontSize: "0.8rem" }}>What does it do?</h5>
                         <div className="d-flex flex-wrap justify-content-center gap-2">
                             <Feature
-                                icon={<PeopleFill size={28} style={{color: "#c189cd"}}/>}
+                                icon={<PeopleFill size={28} className={"default-orange"}/>}
                                 title="Live collaboration"
                                 description="Open the same project with multiple people and see each other's changes in real time."
                             />
                             <Feature
-                                icon={<Diagram3Fill size={28} style={{color: "#c189cd"}}/>}
+                                icon={<Diagram3Fill size={28} className={"default-orange"}/>}
                                 title="Node-based editor"
                                 description="Plan your factory by connecting recipe nodes, resource spawners and sinks together visually."
                             />
                             <Feature
-                                icon={<FolderFill size={28} style={{color: "#c189cd"}}/>}
+                                icon={<FolderFill size={28} className={"default-orange"}/>}
                                 title="Directories"
                                 description="Organise your projects in folders however you like. Nest them as deep as you want."
                             />
                             <Feature
-                                icon={<ShareFill size={28} style={{color: "#c189cd"}}/>}
+                                icon={<ShareFill size={28} className={"default-orange"}/>}
                                 title="Sharing"
                                 description="Share a directory with other users and collaborate on an entire folder of projects."
                             />
                             <Feature
-                                icon={<EyeFill size={28} style={{color: "#c189cd"}}/>}
+                                icon={<EyeFill size={28} className={"default-orange"}/>}
                                 title="Public links"
                                 description="Share a directory for public viewing by anyone with the url, without showing your username."
                             />
                             <Feature
-                                icon={<Upload size={28} style={{color: "#c189cd"}}/>}
+                                icon={<Upload size={28} className={"default-orange"}/>}
                                 title="Export/Import"
                                 description="Download or upload a .json file of any of your projects to share with others."
                             />

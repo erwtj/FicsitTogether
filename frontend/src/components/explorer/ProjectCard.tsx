@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, Dropdown } from 'react-bootstrap';
-import { ThreeDotsVertical } from 'react-bootstrap-icons';
+import { FileEarmark, Globe, ThreeDotsVertical } from 'react-bootstrap-icons';
 import {Link} from "@tanstack/react-router";
 import "./ExplorerComponents.css";
 
@@ -8,27 +8,39 @@ export type ProjectInfo = {
     id: string;
     name: string;
     description: string;
+    public: boolean;
 }
 
 export type ProjectProps = {
     to: "edit" | "view/projects";
     project: ProjectInfo;
+    changePublic?: (project: ProjectInfo) => void;
     deleteProject?: (project: ProjectInfo) => void;
     downloadProject?: (project: ProjectInfo) => void;
 }
 
-export const ProjectCard = ({to, project, deleteProject, downloadProject}: ProjectProps) => {
+export const ProjectCard = ({to, project, changePublic, deleteProject, downloadProject}: ProjectProps) => {
     const [showDropdown, setShowDropdown] = useState(false);
 
     return (
         <Card
             onMouseLeave={() => setShowDropdown(false)}
             className={"clickable-card p-3 d-flex d-flex flex-column"}
-            style={{width: "18rem", minHeight: "4rem", position: "relative"}}
+            style={{width: "18rem", minHeight: "5rem", position: "relative"}}
             key={project.id}
         >
             <Link to={`/${to}/$project`} params={{ project: project.id }} className={"stretched-link"}></Link>
             <Card.Title className={"d-flex align-items-center justify-content-between user-select-none"}>
+                {project.public && <>
+                    <FileEarmark size={28} className={"me-2"}/>
+                    <Globe size={18} className={`public-globe position-absolute bottom-0 end-0 default-purple`} style={{
+                        borderRadius: "50%",
+                        left: "1.75rem",
+                        top: "2rem",
+                        padding: "2px",
+                        zIndex: 1,
+                    }}/>
+                </>}
                 {project.name.length === 0 ?
                     <h5 className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem", height: "1.7rem"}} key="name">No name</h5> :
                     <h5 className={"text-truncate mb-0"} style={{width: "14rem", height: "1.7rem"}} key="name">{project.name}</h5>
@@ -48,6 +60,10 @@ export const ProjectCard = ({to, project, deleteProject, downloadProject}: Proje
                         {downloadProject && <Dropdown.Item href={"#"} className={"dropdown-option download-option user-select-none"}
                                        onClick={() => downloadProject(project)}>
                             Download
+                        </Dropdown.Item>}
+                        {changePublic && <Dropdown.Item href={"#"} className={"dropdown-option public-option user-select-none"}
+                                       onClick={() => changePublic(project)}>
+                            {project.public ? "Make Private" : "Make Public"}
                         </Dropdown.Item>}
                     </Dropdown.Menu>
                 </Dropdown>}

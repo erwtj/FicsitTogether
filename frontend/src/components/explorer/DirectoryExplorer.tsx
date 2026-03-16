@@ -3,7 +3,7 @@ import {
     createDirectory,
     createProject,
     deleteDirectory, deleteProject,
-    downloadProject, fetchUser,
+    downloadProject, fetchUser, updateDirectoryPublic, updateProjectPublic,
     uploadProject
 } from "../../api/apiCalls.ts";
 import type {Auth0ContextType} from "../../auth/auth0.tsx";
@@ -31,6 +31,7 @@ type DirectoryExplorerProps = {
     directory: DirectoryContentDTO;
 }
 
+// TODO: Add a way to copy the public link of a directory to the clipboard
 export const DirectoryExplorer = ({ isPublic, user, auth, directory }: DirectoryExplorerProps) => {
     const [totalProjectCount, setTotalProjectCount] = useState(user?.total_project_count);
     const [totalDirectoryCount, setTotalDirectoryCount] = useState(user?.total_directory_count);
@@ -132,13 +133,21 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
     }
     const handleDownloadProject = async (projectInfo: ProjectInfo) => {
         if (!auth) return;
-        const response = await downloadProject(auth, projectInfo.id)
-        const url = URL.createObjectURL(response);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${projectInfo.name}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        downloadProject(auth, projectInfo.id).catch((err) => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Cannot download this project. Please try again.');
+            } else {
+                setApiError('An error occurred while downloading the project. Please try again.');
+            }
+            console.error('Error downloading project:', err)
+        }).then(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectInfo.name}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
     }
     const handleDeleteConfirm = (shouldDelete: boolean) => {
         setShowDeleteModal(false);
@@ -189,6 +198,32 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
         setShowShareModal(true);
     }
 
+    const handleChangeDirectoryPublic = (directory: DirectoryInfo) => {
+        if (!auth) return;
+        const newPublicStatus = !directory.public;
+        updateDirectoryPublic(auth, directory.id, newPublicStatus)
+            .then(() => {
+                setSubDirectories(prev => prev.map(dir => dir.id === directory.id ? { ...dir, public: newPublicStatus } : dir));
+            })
+            .catch(err => {
+                setApiError('An error occurred while updating the directory. Please try again.');
+                console.error('Error updating directory:', err)
+            });
+    }
+
+    const handleChangeProjectPublic = (project: ProjectInfo) => {
+        if (!auth) return;
+        const newPublicStatus = !project.public;
+        updateProjectPublic(auth, project.id, newPublicStatus)
+            .then(() => {
+                setProjects(prev => prev.map(proj => proj.id === project.id ? { ...proj, public: newPublicStatus } : proj));
+            })
+            .catch(err => {
+                setApiError('An error occurred while updating the project. Please try again.');
+                console.error('Error updating project:', err)
+            });
+    }
+
     return (
         <>
             <BuyMeCoffeeWidget />
@@ -213,16 +248,11 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
                         return (
                             <DirectoryCard
                                 to={isPublic ? "view/directories" : "directories"}
-                                directoryInfo={
-                                    {
-                                        id: directory.id,
-                                        name: directory.name,
-                                        isShared: false,
-                                    }
-                                }
+                                directoryInfo={{...directory, isShared: false}}
                                 key={directory.id}
+                                changePublic={!isPublic ? handleChangeDirectoryPublic : undefined}
                                 deleteDirectory={!isPublic ? handleDeleteDirectory : undefined}
-                                shareDirectory={isPublic && user && directory.owner === user.id ? handleShareDirectory : undefined}
+                                shareDirectory={(!isPublic && user && directory.owner === user.id) ? handleShareDirectory : undefined}
                             />
                         )
                     })}
@@ -235,7 +265,8 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
 
                     {projects.map((project) => {
                         return (
-                            <ProjectCard to={isPublic ? "view/projects" : "edit"} project={project} 
+                            <ProjectCard to={isPublic ? "view/projects" : "edit"} project={project}
+                                         changePublic={!isPublic ? handleChangeProjectPublic : undefined}
                                          deleteProject={!isPublic ? handleDeleteProject : undefined} 
                                          downloadProject={!isPublic ? handleDownloadProject: undefined} key={project.id}/>
                         )

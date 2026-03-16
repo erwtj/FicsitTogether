@@ -5,6 +5,7 @@ export type Directory = {
     parentDirectoryId: string;
     owner: string;
     name: string;
+    public: boolean;
 }
 
 export type DirectoryMinimalInfo = {
@@ -80,7 +81,7 @@ export async function createDirectory(id: string, parentDirectoryId: string, own
 
 export async function getDirectory(id: string) {
     const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories WHERE id = $1',
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories WHERE id = $1',
         [id]
     );
     return res.rows[0] ?? undefined;
@@ -88,14 +89,14 @@ export async function getDirectory(id: string) {
 
 export async function getAllDirectories() {
     const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories'
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories'
     );
     return res.rows;
 }
 
 export async function getDirectories(parentDirectoryId: string) {
     const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories WHERE parent_directory = $1 AND id != $1',
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories WHERE parent_directory = $1 AND id != $1',
         [parentDirectoryId]
     );
     return res.rows;
@@ -107,13 +108,13 @@ export async function deleteDirectory(id: string) {
 
 export async function getDirectoriesRecursive(directoryId: string) {
     const res = await pool.query<Directory>(`
-        WITH RECURSIVE subdirs(id, parent_directory, owner, name) AS (
-            SELECT id, parent_directory, owner, name FROM directories WHERE id = $1
+        WITH RECURSIVE subdirs(id, parent_directory, owner, name, public) AS (
+            SELECT id, parent_directory, owner, name, public FROM directories WHERE id = $1
             UNION ALL
-            SELECT d.id, d.parent_directory, d.owner, d.name
+            SELECT d.id, d.parent_directory, d.owner, d.name, d.public
             FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
         )
-        SELECT id, parent_directory as "parentDirectoryId", owner, name FROM subdirs
+        SELECT id, parent_directory as "parentDirectoryId", owner, name, public FROM subdirs
     `, [directoryId]);
     return res.rows;
 }

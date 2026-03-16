@@ -5,6 +5,7 @@ const { Pool } = pg;
 
 export const pool = new Pool({ connectionString: config.databaseUrl });
 
+// TODO: add created at to projects and directories, and order by it when listing contents
 export async function initDatabase() {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS users
