@@ -1,4 +1,4 @@
-import { createFileRoute, redirect} from '@tanstack/react-router';
+import { createFileRoute, Link, redirect} from '@tanstack/react-router';
 import LoginButton from '../components/buttons/LoginButton';
 import Card from 'react-bootstrap/Card';
 import Alert from 'react-bootstrap/Alert';
@@ -39,6 +39,7 @@ function LoginComponent() {
                 <Card.Body className="text-center">
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>
                     <Card.Title className="fs-2">Welcome to Ficsit Together</Card.Title>
+                    <p>Don't know what it is? Check out the <Link to={"/about"} className="clickable-link default-purple">about</Link> page!</p>
                     {error ? (
                         <Alert variant="warning" className="text-start mt-2 mb-3 py-2">
                             {error_description && <p className="mb-0 small">{decodeURIComponent(error_description)}</p>}

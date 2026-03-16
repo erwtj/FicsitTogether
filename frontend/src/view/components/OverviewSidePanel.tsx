@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Offcanvas, Toast } from "react-bootstrap";
+import { Offcanvas } from "react-bootstrap";
 import {
     ArrowLeft,
     BoxArrowDown,
@@ -11,15 +11,12 @@ import {
     LightningFill,
 } from "react-bootstrap-icons";
 import { useNodes } from "@xyflow/react";
-import { useFactoryStats, type ItemThroughput, type BuildingCount } from "../../hooks/useFactoryStats";
-import { useYjsMetadata } from "../../hooks/useYjsMetadata";
-import {roundTo3Decimals, throughputToDisplay} from "../../../utils/throughputUtil";
+import { useFactoryStats, type ItemThroughput, type BuildingCount } from "../../editor/hooks/useFactoryStats";
+import {roundTo3Decimals, throughputToDisplay} from "../../utils/throughputUtil.ts";
 import "./OverviewSidePanel.css";
 import { Link } from "@tanstack/react-router";
-import {ClientSettingsModal} from "../../../components/modals/ClientSettingsModal.tsx";
-import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "dtolib";
-import {downloadProject} from "../../../api/apiCalls.ts";
-import {useAuth0Context} from "../../../auth/useAuth0Context.ts";
+import {ClientSettingsModal} from "../../components/modals/ClientSettingsModal.tsx";
+import type { PublicProjectDTO } from "dtolib";
 
 // ─── Item / Building list renderers ──────────────────────────────────────────
 
@@ -66,88 +63,33 @@ function BuildingList({ buildings }: { buildings: BuildingCount[] }) {
     );
 }
 
-// ─── Document info panel ──────────────────────────────────────────────────────
-
-function DocumentInfoPanel({
-    show,
-    onHide,
-}: {
-    show: boolean;
-    onHide: () => void;
-}) {
-    const { metadata, setName, setDescription } = useYjsMetadata();
-
-    return (
-        <Offcanvas show={show} onHide={onHide} placement="start" scroll backdrop={false}>
-            <Offcanvas.Header closeButton>
-                <Offcanvas.Title>Document Info</Offcanvas.Title>
-            </Offcanvas.Header>
-            <Offcanvas.Body>
-                <div className="d-flex flex-column gap-3">
-                    <div>
-                        <label htmlFor="doc-name" className="form-label">Document name</label>
-                        <input
-                            id="doc-name"
-                            type="text"
-                            className="form-control"
-                            value={metadata.name}
-                            maxLength={MAX_NAME_LENGTH}
-                            onChange={e => setName(e.target.value)}
-                            placeholder="No name"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="doc-description" className="form-label">Document description</label>
-                        <textarea
-                            id="doc-description"
-                            className="form-control"
-                            rows={4}
-                            value={metadata.description}
-                            maxLength={MAX_DESCRIPTION_LENGTH}
-                            onChange={e => setDescription(e.target.value)}
-                            placeholder="No description"
-                        />
-                    </div>
-                </div>
-            </Offcanvas.Body>
-        </Offcanvas>
-    );
-}
-
 // ─── Panel ────────────────────────────────────────────────────────────────────
 
-export function OverviewSidePanel({projectId}: {projectId: string}) {
+export function OverviewSidePanel({project}: {project: PublicProjectDTO}) {
     const [showPanel, setShowPanel] = useState(false);
-    const [showDocInfo, setShowDocInfo] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const handleShow = useCallback(() => setShowPanel(v => !v), []);
 
-    const { metadata } = useYjsMetadata();
     const nodes = useNodes();
     const { inputs, outputs, powerConsumptionMW, powerProductionMW, buildings } =
         useFactoryStats(nodes);
 
     const netPower = powerProductionMW - powerConsumptionMW;
 
-    const auth = useAuth0Context();
-    const [apiError, setApiError] = useState<string | null>(null);
-
     const handleDownloadProject = async () => {
-        downloadProject(auth, projectId).catch((err) => {
-            if (err.response?.status === 400) {
-                setApiError(err.response.data?.message || 'Cannot download this project. Please try again.');
-            } else {
-                setApiError('An error occurred while downloading the project. Please try again.');
-            }
-            console.error('Error downloading project:', err)
-        }).then(blob => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${metadata.name}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+        const chart = JSON.stringify({
+            name: project.name,
+            description: project.description,
+            chart: {nodes: project.chart.nodes, edges: project.chart.edges}
         });
+        
+        const blob = new Blob([chart], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${project.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     return (
@@ -159,24 +101,17 @@ export function OverviewSidePanel({projectId}: {projectId: string}) {
                 onClick={handleShow}
             />
 
-            <DocumentInfoPanel show={showDocInfo} onHide={() => setShowDocInfo(false)} />
             <ClientSettingsModal show={showSettings} handleClose={() => setShowSettings(false)} />
 
             <Offcanvas show={showPanel} onHide={handleShow} placement="start" scroll backdrop={false}>
                 <Offcanvas.Header>
                     <Offcanvas.Title>
-                        {(metadata.parentDirectoryId && metadata.parentDirectoryId !== "") ?
-                            <Link to={"/directories/$dir"} params={{ dir: metadata.parentDirectoryId ?? "" }} className={"text-body-secondary clickable-link"}>
-                                <ArrowLeft size={20} className="mb-1 me-3"/>
-                            </Link>
-                            :
-                            <Link to={"/home"} className={"text-body-secondary clickable-link"}>
-                                <ArrowLeft size={20} className="mb-1 me-3"/>
-                            </Link>
-                        }
-                        {metadata.name
-                            ? <span className="text-white clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>{metadata.name}</span>
-                            : <span className="text-muted fst-italic clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>No name</span>
+                        <Link to={"/view/directories/$dir"} params={{ dir: project.directoryId }} className={"text-body-secondary clickable-link"}>
+                            <ArrowLeft size={20} className="mb-1 me-3"/>
+                        </Link>
+                        {project.name !== ""
+                            ? <span className="text-white clickable-link" role={"button"}>{project.name}</span>
+                            : <span className="text-muted fst-italic clickable-link" role={"button"}>No name</span>
                         }
                     </Offcanvas.Title>
                     <div className="d-flex flex-row align-items-center gap-2 ms-auto">
@@ -248,13 +183,6 @@ export function OverviewSidePanel({projectId}: {projectId: string}) {
                     </div>
                 </Offcanvas.Body>
             </Offcanvas>
-
-            <Toast show={apiError !== null} onClose={() => setApiError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
-                <Toast.Header>
-                    <strong className="me-auto text-danger">An error occurred</strong>
-                </Toast.Header>
-                <Toast.Body>{apiError}</Toast.Body>
-            </Toast>
         </>
     );
 }

@@ -70,7 +70,7 @@ server {\n\
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript;\n\
     location ~* \\.(?:ico|css|js|gif|webp|png|jpg|jpeg|svg|woff2?|ttf|eot)$ {\n\
         expires 1y;\n\
-        add_header Cache-Control "public, immutable";\n\
+        add_header Cache-Control "view, immutable";\n\
         try_files $uri =404;\n\
     }\n\
     location / {\n\

@@ -9,7 +9,7 @@ import {
     fetchSharedDirectories,
     createDirectory,
     deleteDirectory,
-    leaveDirectory, fetchUser
+    leaveDirectory, fetchUser, updateDirectoryPublic
 } from "../api/apiCalls.ts";
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
@@ -17,6 +17,7 @@ import "./home.tsx.css";
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
 import { Toast } from "react-bootstrap";
 import { MAX_DIRECTORIES_PER_DIRECTORY } from "dtolib";
+import PublicModal from "../components/modals/PublicModal.tsx";
 
 export const Route = createFileRoute('/home')({
     component: HomePage,
@@ -40,6 +41,7 @@ export const Route = createFileRoute('/home')({
         const owned = root.subDirectories.map(dir => ({
             id: dir.id,
             name: dir.name,
+            public: dir.public,
             isShared: false,
         } as DirectoryInfo));
 
@@ -47,6 +49,7 @@ export const Route = createFileRoute('/home')({
             id: dir.id,
             name: dir.name,
             isShared: true,
+            public: false,
             sharedBy: dir.ownerUsername
         } as DirectoryInfo));
 
@@ -84,6 +87,7 @@ function HomePage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showPublicModal, setShowPublicModal] = useState(false);
     
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     
@@ -96,6 +100,7 @@ function HomePage() {
             setOwnedDirectories(prev => [...prev, {
                 id: newDir.id,
                 name: newDir.name,
+                public: newDir.public,
                 isShared: false,
             }]);
         }
@@ -171,6 +176,30 @@ function HomePage() {
         setSelectedDirectory(directory);
         setShowShareModal(true);
     }
+    
+    const handlePublicUpdate = (isPublic: boolean) => {
+        if (selectedDirectory) {
+            updateDirectoryPublic(auth, selectedDirectory.id, isPublic)
+            .then(() => {
+                selectedDirectory.public = isPublic;
+                setOwnedDirectories(prev => prev.map(dir => dir.id === selectedDirectory.id ? { ...dir, public: isPublic } : dir));
+            })
+            .catch(err => {
+                setApiError('An error occurred while updating the directory. Please try again.');
+                console.error('Error updating directory:', err)
+            });
+        }
+    }
+
+    const handlePublicClose = () => {
+        setShowPublicModal(false);
+        setSelectedDirectory(null);
+    }
+    
+    const handleChangePublic = (directory: DirectoryInfo) => {
+        setSelectedDirectory(directory);
+        setShowPublicModal(true);
+    }
 
     return (
         <div className="container flex-grow-1 mw-100">
@@ -186,8 +215,9 @@ function HomePage() {
                             <DirectoryCard to="directories"
                                 key={dirInfo.id}
                                 directoryInfo={dirInfo}
-                                deleteDirectory={(dir) => handleDeleteDirectory(dir)}
-                                shareDirectory={(dir) => handleShareDirectory(dir)}
+                                deleteDirectory={handleDeleteDirectory}
+                                shareDirectory={handleShareDirectory}
+                                changePublic={handleChangePublic}
                             />
                         ))}
                         {ownedDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
@@ -240,6 +270,15 @@ function HomePage() {
                 directoryId={selectedDirectory?.id || ""}
                 directoryName={selectedDirectory?.name || ""}
                 onClose={() => setShowShareModal(false)}
+            />
+            <PublicModal
+                show={showPublicModal}
+                itemName={selectedDirectory?.name || ""}
+                itemId={selectedDirectory?.id || ""}
+                type={"directory"}
+                isPublic={selectedDirectory?.public ?? false}
+                onClose={handlePublicClose}
+                updateStatus={handlePublicUpdate}
             />
         </div>
     );

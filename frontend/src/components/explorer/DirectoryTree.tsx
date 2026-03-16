@@ -3,7 +3,7 @@ import {Navbar, Nav} from "react-bootstrap";
 import {ChevronRight, House} from 'react-bootstrap-icons';
 import type {DirectoryTreeDTO} from "dtolib";
 
-function DirectoryTree({dirTree, to}: {dirTree: DirectoryTreeDTO[], to: 'directories' | 'overview'}) {
+function DirectoryTree({dirTree, to}: {dirTree: DirectoryTreeDTO[], to: 'directories' | 'view/directories'}) {
     return (
         <Navbar bg="dark" className="border-bottom overflow-hidden top-screen-navbar d-none d-sm-flex" variant="dark" style={{ height: "40px", width: "100vw" }} >
             <Nav className="d-flex align-items-center ms-3">

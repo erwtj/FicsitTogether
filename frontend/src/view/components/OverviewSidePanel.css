@@ -1,0 +1,7 @@
+﻿.sidepanel-section {
+    padding: .5rem .5rem .25rem 1rem;
+    overflow: hidden;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: #272b2f;
+}

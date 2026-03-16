@@ -6,8 +6,6 @@ import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH, MAX_PROJECTS_PER_DIRECTORY, MAX
 
 const emptyChart = {nodes: [], edges: []};
 
-// TODO: Allow marking project's as public via url, that way you can share files with other people without them being able to edit and without needing their username
-
 export async function createProject(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const directoryId = req.body.directoryId as string;
@@ -120,6 +118,19 @@ export async function downloadProject(req: Request, res: Response, next: NextFun
             description: project.description,
             chart: chart,
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function updateProjectPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+        const id = req.params.projectId as string; // won't even route if no id is included
+        const isPublic = req.body.isPublic as boolean;
+        
+        await repository.updateProjectPublic(id, isPublic);
+
+        res.sendStatus(200);
     } catch (error) {
         next(error);
     }

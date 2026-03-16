@@ -6,6 +6,16 @@ export type ProjectDTO = {
     directoryId: string;
     name: string;
     description: string;
+    public: boolean;
+}
+
+// Full project info returned from a public/shared view (includes the chart)
+export type PublicProjectDTO = {
+    id: string;
+    directoryId: string;
+    name: string;
+    description: string;
+    chart: ChartDataDTO;
 }
 
 // Chart
@@ -20,7 +30,7 @@ export type SloopData = {
 
 export type RecipeNodeData = {
     recipeClassName: string;
-    sloopData?: SloopData[]
+    sloopData?: SloopData[];
 };
 
 export type ItemSpawnerNodeData = {
@@ -86,7 +96,8 @@ export type DirectoryTreeDTO = {
 export type DirectoryContentDTO = {
     id: string,
     name: string,
-    owner: string, 
+    owner: string,
+    public: boolean,
     parentDirectoryId: string, 
     subDirectories: DirectoryDTO[],
     projects: ProjectDTO[],
@@ -98,7 +109,8 @@ export type DirectoryDTO = {
     id: string,
     name: string,
     owner: string,
-    parentDirectoryId: string
+    parentDirectoryId: string,
+    public: boolean,
 }
 
 // Info for a directory that was shared with you (includes info about the owner)

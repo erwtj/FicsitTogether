@@ -6,6 +6,7 @@ export type Project = {
     directoryId: string;
     name: string;
     description: string;
+    public: boolean;
 }
 
 export type Chart = {
@@ -32,7 +33,7 @@ export async function updateProject(id: string, name: string, description: strin
 
 export async function getProject(id: string) {
     const res = await pool.query<Project>(
-        'SELECT id, parent_directory as "directoryId", name, description FROM projects WHERE id = $1',
+        'SELECT id, parent_directory as "directoryId", name, description, public FROM projects WHERE id = $1',
         [id]
     );
     return res.rows[0] ?? undefined;
@@ -55,7 +56,7 @@ export async function updateProjectChart(id: string, chart: ChartDataDTO) {
 
 export async function getProjectsInDirectory(directoryId: string) {
     const res = await pool.query<Project>(
-        'SELECT id, parent_directory as "directoryId", name, description FROM projects WHERE parent_directory = $1',
+        'SELECT id, parent_directory as "directoryId", name, description, public FROM projects WHERE parent_directory = $1',
         [directoryId]
     );
     return res.rows;
@@ -95,4 +96,11 @@ export async function countTotalProjectsForUser(userId: string): Promise<number>
         WHERE d.owner = $1
     `, [userId]);
     return parseInt(res.rows[0]?.count ?? '0', 10);
+}
+
+export async function updateProjectPublic(projectId: string, isPublic: boolean) {
+    await pool.query(
+        'UPDATE projects SET public = $1 WHERE id = $2',
+        [isPublic, projectId]
+    );
 }

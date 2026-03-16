@@ -1,8 +1,9 @@
 import { createRootRouteWithContext, redirect, Outlet, useRouterState} from '@tanstack/react-router';
 import {type RouterContext} from '../router';
 import {useEffect} from "react";
-import NavHeader from "../components/NavHeader.tsx";
+import NavHeader from "../components/nav/NavHeader.tsx";
 import {z} from 'zod';
+import PublicNavHeader from "../components/nav/PublicNavHeader.tsx";
 import {useHelpModal} from "../hooks/useHelpModal.ts";
 import {HelpModal} from "../components/modals/HelpModal/HelpModal.tsx";
 
@@ -62,6 +63,8 @@ function RootComponent() {
     const showNav = state.matches.some((match) => {
         return match.staticData?.showNav === true;
     });
+  
+    const auth = Route.useRouteContext().auth;
 
     const {show, details, onModalClose} = useHelpModal()
 
@@ -98,7 +101,7 @@ function RootComponent() {
 
     return (
         <div className="d-flex flex-column min-vh-100 m-0 flex-grow-1">
-            {showNav && <NavHeader/>}
+            {showNav && ((auth && auth.isAuthenticated) ? <NavHeader/> : <PublicNavHeader/>)}
             <HelpModal
                 show={show}
                 openPage={details?.openPage}

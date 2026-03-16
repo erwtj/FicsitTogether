@@ -143,16 +143,7 @@ export async function shareDirectory(req: Request, res: Response, next: NextFunc
             return next(error);
         }
 
-        const [directory, user] = await Promise.all([
-            directoryRepository.getDirectory(directoryId),
-            getUserByUsername(username),
-        ]);
-
-        if (directory!.owner !== req.user.id) {
-            const error: AppError = new Error('Unauthorized');
-            error.status = 401;
-            return next(error);
-        }
+        const user = await getUserByUsername(username);
 
         if (!user) {
             const error: AppError = new Error('User does not exist.');
@@ -187,6 +178,7 @@ export async function unshareDirectory(req: Request, res: Response, next: NextFu
 
         const directory = await directoryRepository.getDirectory(directoryId);
 
+        // Only the owner of the directory can unshare it with other users, but users can unshare themselves
         if (!(directory!.owner === req.user.id || userId === req.user.id)) {
             const error: AppError = new Error('Unauthorized');
             error.status = 401;
@@ -322,6 +314,29 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
         await projectRepository.createProject(projectId, directoryId, name, description, chart);
 
         res.status(201).send({ id: projectId, name, description, directoryId });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function updateDirectoryPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+        const id = req.params.directoryId as string; // won't even route if no id is included
+        const isPublic = req.body.isPublic as boolean;
+        
+        // Stops root directory from being shared
+        // But what if I am not the owner of the directory, and it is a root?? 
+        // Well that wouldn't work because it couldn't have been shared with you in the first place, so it is fine
+        // So we can assume that if we pass the can edit check, and it is the root directory, then we are the owner of the directory
+        if (id === req.user.root_directory) {
+            const error: AppError = new Error('Not allowed to change visibility of root directory.');
+            error.status = 400;
+            return next(error);
+        }
+
+        await directoryRepository.updateDirectoryPublic(id, isPublic);
+
+        res.sendStatus(200);
     } catch (error) {
         next(error);
     }

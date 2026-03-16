@@ -11,7 +11,7 @@ import {
     applyAwarenessUpdate,
     removeAwarenessStates
 } from 'y-protocols/awareness';
-import {hasProjectAccess} from "../middlewares/directoryAccess.js";
+import {canEditProject} from "../middlewares/directoryAccess.js";
 import {type NodeDTO, type EdgeDTO, MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH} from "dtolib";
 import {sanitizeChart} from "../utils/chartValidator.js";
 
@@ -163,7 +163,7 @@ export function setupWebSocketServer(server: Server) {
                 return;
             }
 
-            if (!await hasProjectAccess(user, projectId)) {
+            if (!await canEditProject(user, projectId)) {
                 socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                 socket.destroy();
                 return;

@@ -60,6 +60,15 @@
     color: #dee2e6;
 }
 
+.public-option:hover {
+    background-color: rgba(198, 99, 218, 0.49);
+}
+
+.public-option:active {
+    background: #c663da;
+    color: #dee2e6;
+}
+
 .favorite-option:hover {
     color: #ffc107;
 }
@@ -112,4 +121,13 @@
 
 .upload-button:active {
     color: #a2a4a6 !important;
+}
+
+.public-globe {
+    background: var(--bs-body-bg);
+    transition: background .1s ease-in-out;
+}
+
+.clickable-card:hover .public-globe {
+    background: #333;
 }
