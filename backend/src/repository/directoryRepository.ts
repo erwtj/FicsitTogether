@@ -95,10 +95,11 @@ export async function getAllDirectories() {
 }
 
 export async function getDirectories(parentDirectoryId: string) {
-    const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories WHERE parent_directory = $1 AND id != $1',
-        [parentDirectoryId]
-    );
+    const res = await pool.query<Directory>(`
+        SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories 
+        WHERE parent_directory = $1 AND id != $1
+        ORDER BY created_at ASC, id ASC
+    `,[parentDirectoryId]);
     return res.rows;
 }
 
@@ -145,7 +146,7 @@ export async function getSharedDirectories(userId: string) {
                  JOIN directories d ON sd.directory = d.id
                  JOIN users u ON d.owner = u.id
         WHERE sd.user = $1
-        ORDER BY d.name
+        ORDER BY d.created_at ASC, d.id ASC
     `, [userId]);
     return res.rows;
 }

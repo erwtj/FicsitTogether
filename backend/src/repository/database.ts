@@ -5,7 +5,6 @@ const { Pool } = pg;
 
 export const pool = new Pool({ connectionString: config.databaseUrl });
 
-// TODO: add created at to projects and directories, and order by it when listing contents
 export async function initDatabase() {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS users
@@ -79,5 +78,14 @@ export async function initDatabase() {
         -- but NOT lookups by directory alone (existsShare, getSharedWith, getDirectoryTree access checks).
         CREATE INDEX IF NOT EXISTS idx_share_directories_directory
             ON share_directories (directory);
+    `);
+    
+    // Add creation timestamp to projects and directories for sorting by creation date
+    await pool.query(`
+        ALTER TABLE directories
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+        
+        ALTER TABLE projects
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
     `);
 }

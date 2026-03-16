@@ -35,7 +35,7 @@ function RouteComponent() {
         <>
             <BuyMeCoffeeWidget/>
 
-            <div className="d-flex justify-content-center px-3" style={{ marginTop: "8vh" }}>
+            <div className="d-flex justify-content-center px-3" style={{ marginTop: "2vh" }}>
                 <div style={{ maxWidth: "720px", width: "100%" }}>
 
                     <div className="text-center mb-4">

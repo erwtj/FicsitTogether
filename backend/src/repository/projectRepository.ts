@@ -56,7 +56,7 @@ export async function updateProjectChart(id: string, chart: ChartDataDTO) {
 
 export async function getProjectsInDirectory(directoryId: string) {
     const res = await pool.query<Project>(
-        'SELECT id, parent_directory as "directoryId", name, description, public FROM projects WHERE parent_directory = $1',
+        'SELECT id, parent_directory as "directoryId", name, description, public FROM projects WHERE parent_directory = $1 ORDER BY created_at ASC, id ASC',
         [directoryId]
     );
     return res.rows;
