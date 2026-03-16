@@ -63,7 +63,7 @@ export const ProjectCard = ({to, project, changePublic, deleteProject, downloadP
                         </Dropdown.Item>}
                         {changePublic && <Dropdown.Item href={"#"} className={"dropdown-option public-option user-select-none"}
                                        onClick={() => changePublic(project)}>
-                            {project.public ? "Make Private" : "Make Public"}
+                            Publicize
                         </Dropdown.Item>}
                     </Dropdown.Menu>
                 </Dropdown>}

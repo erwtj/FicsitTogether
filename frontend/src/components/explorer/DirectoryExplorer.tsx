@@ -21,6 +21,7 @@ import {AddProjectCard} from "./AddProjectCard.tsx";
 import { Toast } from "react-bootstrap";
 import ConfirmationModal from "../modals/ConfirmationModal.tsx";
 import ShareModal from "../modals/ShareModal.tsx";
+import PublicModal from "../modals/PublicModal.tsx";
 
 type DirectoryExplorerProps = {
     isPublic: boolean;
@@ -31,7 +32,6 @@ type DirectoryExplorerProps = {
     directory: DirectoryContentDTO;
 }
 
-// TODO: Add a way to copy the public link of a directory to the clipboard
 export const DirectoryExplorer = ({ isPublic, user, auth, directory }: DirectoryExplorerProps) => {
     const [totalProjectCount, setTotalProjectCount] = useState(user?.total_project_count);
     const [totalDirectoryCount, setTotalDirectoryCount] = useState(user?.total_directory_count);
@@ -44,6 +44,7 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showPublicModal, setShowPublicModal] = useState(false);
 
     const [apiError, setApiError] = useState<string | null>(null);
     
@@ -58,66 +59,66 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
     }, [user]);
     
     const refetchCounts = () => {
-        if (auth) {
-            fetchUser(auth)
-                .then(updatedUser => {
-                    setTotalProjectCount(updatedUser.total_project_count);
-                    setTotalDirectoryCount(updatedUser.total_directory_count);
-                })
-                .catch(err => {
-                    console.error('Error fetching user data:', err);
-                });
-        }
+        if (!auth) return;
+        
+        fetchUser(auth)
+        .then(updatedUser => {
+            setTotalProjectCount(updatedUser.total_project_count);
+            setTotalDirectoryCount(updatedUser.total_directory_count);
+        })
+        .catch(err => {
+            console.error('Error fetching user data:', err);
+        });
     }
     
     // Create Directory and Project flow
     const handleCreateDirectory = (name: string) => {
         if (!auth) return; 
         createDirectory(auth, directory.id, name)
-            .then(newDir => {
-                if (!isPublic) setTotalDirectoryCount(d => d! + 1);
-                setSubDirectories(prev => [...prev, newDir]);
-            })
-            .catch(err => {
-                if (err.response?.status === 400) {
-                    setApiError(err.response.data?.message || 'Invalid input. Please check your directory name and try again.');
-                } else {
-                    setApiError('An error occurred while creating the directory. Please try again.');
-                }
-                console.error('Error creating directory:', err)
-            });
+        .then(newDir => {
+            if (!isPublic) setTotalDirectoryCount(d => d! + 1);
+            setSubDirectories(prev => [...prev, newDir]);
+        })
+        .catch(err => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Invalid input. Please check your directory name and try again.');
+            } else {
+                setApiError('An error occurred while creating the directory. Please try again.');
+            }
+            console.error('Error creating directory:', err)
+        });
     };
     const handleCreateProject = (name: string) => {
         if (!auth) return; 
         createProject(auth, directory.id, name)
-            .then(newProject => {
-                if (!isPublic) setTotalProjectCount(d => d! + 1);
-                setProjects(prev => [...prev, newProject]);
-            })
-            .catch(err => {
-                if (err.response?.status === 400) {
-                    setApiError(err.response.data?.message || 'Invalid input. Please check your project name and try again.');
-                } else {
-                    setApiError('An error occurred while creating the project. Please try again.');
-                }
-                console.error('Error creating project:', err)
-            });
+        .then(newProject => {
+            if (!isPublic) setTotalProjectCount(d => d! + 1);
+            setProjects(prev => [...prev, newProject]);
+        })
+        .catch(err => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Invalid input. Please check your project name and try again.');
+            } else {
+                setApiError('An error occurred while creating the project. Please try again.');
+            }
+            console.error('Error creating project:', err)
+        });
     }
     const handleUploadProject = (file: File) => {
         if (!auth) return;
         uploadProject(auth, directory.id, file)
-            .then(newProject => {
-                if (!isPublic) setTotalProjectCount(d => d! + 1);
-                setProjects(prev => [...prev, newProject]);
-            })
-            .catch((err) => {
-                if (err.response?.status === 400) {
-                    setApiError(err.response.data?.message || 'Invalid file format. Please upload a valid project JSON file.');
-                } else {
-                    setApiError('An error occurred while uploading the project. Please try again.');
-                }
-                console.error('Error uploading project:', err)
-            });
+        .then(newProject => {
+            if (!isPublic) setTotalProjectCount(d => d! + 1);
+            setProjects(prev => [...prev, newProject]);
+        })
+        .catch((err) => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Invalid file format. Please upload a valid project JSON file.');
+            } else {
+                setApiError('An error occurred while uploading the project. Please try again.');
+            }
+            console.error('Error uploading project:', err)
+        });
     }
 
     // Delete Directory and Project flow
@@ -153,41 +154,41 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
         setShowDeleteModal(false);
         if (shouldDelete && selectedDirectory && auth) {
             deleteDirectory(auth, selectedDirectory.id)
-                .then(success => {
-                    if (success) {
-                        if (!isPublic) refetchCounts();
-                        setSubDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
-                    } else {
-                        console.error('Failed to delete directory');
-                    }
-                })
-                .catch(err => {
-                    if (err.response?.status === 400) {
-                        setApiError(err.response.data?.message || 'Cannot delete this directory. Please try again.');
-                    } else {
-                        setApiError('An error occurred while deleting the directory. Please try again.');
-                    }
-                    console.error('Error deleting directory:', err)
-                });
+            .then(success => {
+                if (success) {
+                    if (!isPublic) refetchCounts();
+                    setSubDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
+                } else {
+                    console.error('Failed to delete directory');
+                }
+            })
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Cannot delete this directory. Please try again.');
+                } else {
+                    setApiError('An error occurred while deleting the directory. Please try again.');
+                }
+                console.error('Error deleting directory:', err)
+            });
         }
         else if (shouldDelete && selectedProject && auth) {
             deleteProject(auth, selectedProject.id)
-                .then(success => {
-                    if (success) {
-                        if(!isPublic) setTotalProjectCount(d => d! - 1);
-                        setProjects(prev => prev.filter(proj => proj.id !== selectedProject.id));
-                    } else {
-                        console.error('Failed to delete project');
-                    }
-                })
-                .catch(err => {
-                    if (err.response?.status === 400) {
-                        setApiError(err.response.data?.message || 'Cannot delete this project. Please try again.');
-                    } else {
-                        setApiError('An error occurred while deleting the project. Please try again.');
-                    }
-                    console.error('Error deleting project:', err)
-                });
+            .then(success => {
+                if (success) {
+                    if(!isPublic) setTotalProjectCount(d => d! - 1);
+                    setProjects(prev => prev.filter(proj => proj.id !== selectedProject.id));
+                } else {
+                    console.error('Failed to delete project');
+                }
+            })
+            .catch(err => {
+                if (err.response?.status === 400) {
+                    setApiError(err.response.data?.message || 'Cannot delete this project. Please try again.');
+                } else {
+                    setApiError('An error occurred while deleting the project. Please try again.');
+                }
+                console.error('Error deleting project:', err)
+            });
         }
         setSelectedDirectory(null);
         setSelectedProject(null);
@@ -198,30 +199,46 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
         setShowShareModal(true);
     }
 
-    const handleChangeDirectoryPublic = (directory: DirectoryInfo) => {
-        if (!auth) return;
-        const newPublicStatus = !directory.public;
-        updateDirectoryPublic(auth, directory.id, newPublicStatus)
+    const handlePublicClose = () => {
+        setShowPublicModal(false);
+        setSelectedDirectory(null);
+        setSelectedProject(null);
+    }
+    
+    const handlePublicUpdate = (isPublic: boolean) => {
+        if (!auth) return; 
+        if (selectedDirectory) {
+            updateDirectoryPublic(auth, selectedDirectory.id, isPublic)
             .then(() => {
-                setSubDirectories(prev => prev.map(dir => dir.id === directory.id ? { ...dir, public: newPublicStatus } : dir));
+                selectedDirectory.public = isPublic;
+                setSubDirectories(prev => prev.map(dir => dir.id === selectedDirectory.id ? { ...dir, public: isPublic } : dir));
             })
             .catch(err => {
                 setApiError('An error occurred while updating the directory. Please try again.');
                 console.error('Error updating directory:', err)
             });
-    }
-
-    const handleChangeProjectPublic = (project: ProjectInfo) => {
-        if (!auth) return;
-        const newPublicStatus = !project.public;
-        updateProjectPublic(auth, project.id, newPublicStatus)
+        } else if (selectedProject) {
+            updateProjectPublic(auth, selectedProject.id, isPublic)
             .then(() => {
-                setProjects(prev => prev.map(proj => proj.id === project.id ? { ...proj, public: newPublicStatus } : proj));
+                selectedProject.public = isPublic;
+                setProjects(prev => prev.map(proj => proj.id === selectedProject.id ? { ...proj, public: isPublic } : proj));
             })
             .catch(err => {
                 setApiError('An error occurred while updating the project. Please try again.');
                 console.error('Error updating project:', err)
             });
+        }
+    }
+    const handleChangeDirectoryPublic = (directory: DirectoryInfo) => {
+        setSelectedDirectory(directory);
+        setSelectedProject(null);
+        setShowPublicModal(true);
+    }
+
+    const handleChangeProjectPublic = (project: ProjectInfo) => {
+        setSelectedProject(project);
+        setSelectedDirectory(null);
+        setShowPublicModal(true);
     }
 
     return (
@@ -295,6 +312,15 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
                 directoryId={selectedDirectory?.id || ""}
                 directoryName={selectedDirectory?.name || ""}
                 onClose={() => setShowShareModal(false)}
+            />
+            <PublicModal 
+                show={showPublicModal} 
+                itemName={selectedDirectory?.name ?? selectedProject?.name ?? ""}
+                itemId={selectedDirectory?.id ?? selectedProject?.id ?? ""}
+                type={selectedDirectory ? "directory" : "project"}
+                isPublic={selectedDirectory?.public ?? selectedProject?.public ?? false}
+                onClose={handlePublicClose} 
+                updateStatus={handlePublicUpdate}
             />
         </>
     );

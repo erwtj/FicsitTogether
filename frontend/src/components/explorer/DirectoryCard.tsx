@@ -76,7 +76,7 @@ export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory,
                             {(changePublic && !directoryInfo.isShared) && (
                                 <Dropdown.Item href={"#"} className={"dropdown-option public-option user-select-none"}
                                                onClick={() => changePublic(directoryInfo)}>
-                                    {directoryInfo.public ? "Make Private" : "Make Public"}
+                                    Publicize
                                 </Dropdown.Item>
                             )}
                             {(leaveDirectory && directoryInfo.isShared) && (

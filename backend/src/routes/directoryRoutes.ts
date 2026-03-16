@@ -23,7 +23,7 @@ router.get('/shared', getSharedDirectories);
 router.get('/:directoryId', requireCanEditDirectory, getDirectory);
 router.post('/', requireCanEditDirectory, createDirectory);
 router.delete('/:directoryId', requireCanEditDirectory, deleteDirectory);
-router.put('/:directoryId/public', requireCanEditProject, updateDirectoryPublic);
+router.put('/:directoryId/public', requireCanEditDirectory, updateDirectoryPublic);
 
 router.post('/:directoryId/share', requireDirectoryOwner, shareDirectory);
 router.delete('/:directoryId/share', requireCanEditDirectory, unshareDirectory); // Both the owner and shared users can unshare (the owner can unshare others, and shared users can unshare themselves to remove their access)
