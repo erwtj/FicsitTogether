@@ -31,7 +31,7 @@ export const ProjectCard = ({to, project, changePublic, deleteProject, downloadP
         >
             <Link to={`/${to}/$project`} params={{ project: project.id }} className={"stretched-link"}></Link>
             <Card.Title className={"d-flex align-items-center justify-content-between user-select-none"}>
-                {project.public && <>
+                {(project.public && changePublic) && <>
                     <FileEarmark size={28} className={"me-2"}/>
                     <Globe size={18} className={`public-globe position-absolute bottom-0 end-0 default-purple`} style={{
                         borderRadius: "50%",
