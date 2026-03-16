@@ -1,14 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { FolderFill, ShareFill, Upload, EyeFill, PeopleFill, Diagram3Fill } from 'react-bootstrap-icons'
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
-import NavHeader from "../components/NavHeader.tsx";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 
 export const Route = createFileRoute('/about')({
-    // TODO: Make accessible to non-authenticated users without showing the navbar, or maybe show a different navbar?
     component: RouteComponent,
     staticData: {
-        showNav: false,
+        showNav: true,
         title: "Ficsit Together | About",
         requireAuth: false
     }
@@ -35,7 +33,6 @@ function RouteComponent() {
 
     return (
         <>
-            {auth && auth.isAuthenticated && <NavHeader/>}
             <BuyMeCoffeeWidget/>
 
             <div className="d-flex justify-content-center px-3" style={{ marginTop: "8vh" }}>

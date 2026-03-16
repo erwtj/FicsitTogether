@@ -1,8 +1,9 @@
 import { createRootRouteWithContext, redirect, Outlet, useRouterState} from '@tanstack/react-router';
 import {type RouterContext} from '../router';
 import {useEffect} from "react";
-import NavHeader from "../components/NavHeader.tsx";
+import NavHeader from "../components/nav/NavHeader.tsx";
 import {z} from 'zod';
+import PublicNavHeader from "../components/nav/PublicNavHeader.tsx";
 
 const rootSearchSchema = z.object({
     error: z.string().optional(),
@@ -65,9 +66,11 @@ function RootComponent() {
         document.title = state.matches[1]?.staticData?.title || 'Ficsit Together';
     }, [state]);
 
+    const auth = Route.useRouteContext().auth;
+
     return (
         <div className="d-flex flex-column min-vh-100 m-0 flex-grow-1">
-            {showNav && <NavHeader/>}
+            {showNav && ((auth && auth.isAuthenticated) ? <NavHeader/> : <PublicNavHeader/>)}
             <Outlet/>
         </div>
     );

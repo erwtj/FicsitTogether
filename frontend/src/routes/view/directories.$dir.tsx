@@ -3,9 +3,9 @@ import {fetchPublicDirectory} from "../../api/apiCalls.ts";
 import {DirectoryExplorer} from "../../components/explorer/DirectoryExplorer.tsx";
 
 export const Route = createFileRoute('/view/directories/$dir')({
-    component: RouteComponent,
+    component: DirectoryPage,
     staticData: {
-        showNav: false,
+        showNav: true,
         title: "Ficsit Together | View Directory",
         requireAuth: false
     },
@@ -27,8 +27,15 @@ export const Route = createFileRoute('/view/directories/$dir')({
     staleTime: 0
 })
 
-function RouteComponent() {
+function DirectoryPage() {
+    const { dir: dirId } = Route.useParams();
+    return (
+        <DirectoryPageContent key={dirId}/> // Force remount when directory changes to reset state
+    );
+}
+
+function DirectoryPageContent() {
     const { directory } = Route.useLoaderData();
-    
+
     return <DirectoryExplorer isPublic={true} directory={directory}/>
 }

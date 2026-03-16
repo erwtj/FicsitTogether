@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Nav, Navbar } from "react-bootstrap";
 import { Link } from "@tanstack/react-router";
-import { useAuth0Context } from "../auth/useAuth0Context.ts";
-import UserPopover from "./popovers/UserPopover.tsx";
+import { useAuth0Context } from "../../auth/useAuth0Context.ts";
+import UserPopover from "../popovers/UserPopover.tsx";
 import { Calculator, Table, House, InfoCircle } from "react-bootstrap-icons";
 
 function NavHeader() {

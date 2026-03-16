@@ -46,10 +46,9 @@ function DirectoryPage() {
 
 function DirectoryPageContent() {
     const auth = useAuth0Context()
-    const { dir: dirId } = Route.useParams();
-    
+
     const { user, directory } = Route.useLoaderData();
     
-    return <DirectoryExplorer isPublic={false} directory={directory} user={user} dirId={dirId} auth={auth}/>
+    return <DirectoryExplorer isPublic={false} directory={directory} user={user} auth={auth}/>
 }
 
