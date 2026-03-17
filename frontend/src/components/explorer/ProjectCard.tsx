@@ -71,7 +71,7 @@ export const ProjectCard = ({to, project, changePublic, deleteProject, downloadP
             <Card.Text className={"project-description text-muted user-select-none mw-100 text-wrap"}>
                 {project.description.length === 0 ?
                     <span className={"text-truncate mb-0 text-muted fst-italic"} style={{width: "10rem"}} key="description">No description</span> :
-                    <span className={"d-inline mb-0"} style={{width: "16rem"}} key="description">{project.description}</span>
+                    <span className={"d-inline-block mb-0"} style={{width: "16rem", whiteSpace: "pre-wrap"}} key="description">{project.description}</span>
                 }
             </Card.Text>
         </Card>
