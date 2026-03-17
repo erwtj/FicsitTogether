@@ -9,12 +9,21 @@ declare module "express-serve-static-core" {
     }
 }
 
+const userCache = new Map<string, { user: User; expiresAt: number }>();
+const CACHE_TTL_MS = 60_000; // 1 minute
+
 export async function attachUser(req: Request, res: Response, next: NextFunction) {
     try {
         const auth0_id = req.auth?.payload.sub;
 
         if (!auth0_id) {
             return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const cached = userCache.get(auth0_id);
+        if (cached && cached.expiresAt > Date.now()) {
+            req.user = cached.user;
+            return next();
         }
 
         let user = await getUserByAuth0Id(auth0_id);
@@ -36,6 +45,7 @@ export async function attachUser(req: Request, res: Response, next: NextFunction
             user = await getUserByAuth0Id(auth0_id);
         }
 
+        userCache.set(auth0_id, { user: user!, expiresAt: Date.now() + CACHE_TTL_MS });
         req.user = user!;
         next();
     } catch (error) {

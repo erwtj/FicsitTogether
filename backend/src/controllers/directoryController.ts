@@ -58,10 +58,11 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
             return next(error);
         }
 
-        const [parentDepth, siblingCount, totalDirectoriesForUser] = await Promise.all([
+        const [parentDepth, siblingCount, totalDirectoriesForUser, parentDirectory] = await Promise.all([
             directoryRepository.getDirectoryDepth(parentDirectoryId),
             directoryRepository.countDirectories(parentDirectoryId),
             directoryRepository.countTotalDirectoriesForUser(req.user.id),
+            directoryRepository.getDirectory(parentDirectoryId)
         ]);
 
         if (parentDepth >= MAX_DIRECTORY_DEPTH) {
@@ -82,8 +83,6 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
             return next(error);
         }
 
-        // The owner of the parent directory is also the owner of this directory
-        const parentDirectory = await directoryRepository.getDirectory(parentDirectoryId);
         const owner = parentDirectory!.owner;
 
         const uuid = crypto.randomUUID();
