@@ -87,8 +87,7 @@ function RouteComponent() {
                     <hr/>
 
                     <div className="text-center my-4 text-muted">
-                        <p>Check out these example projects!</p>
-                        TODO: Url's to example projects once we have some, also add descriptions for each project
+                        <p>Check out <a href="https://ficsit-together.com/view/directories/5ea1a0e0-5239-42bc-b1ca-7d1f169a9f47" className="clickable-link default-purple">these</a> example projects!</p>
                     </div>
 
                     <hr/>
