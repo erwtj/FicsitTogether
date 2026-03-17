@@ -176,7 +176,11 @@ export function setupWebSocketServer(server: Server) {
                 wss.emit('connection', authWs, request);
             });
         } catch (error) {
-            console.error('WebSocket authentication error:', error);
+            if (error instanceof Error && error.name === 'TokenExpiredError') {
+                // console.warn('WebSocket authentication error: token expired');
+            } else {
+                console.error('WebSocket authentication error:', error);
+            }
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
             socket.destroy();
         }
