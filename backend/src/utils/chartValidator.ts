@@ -216,7 +216,6 @@ function sanitizeEdge(raw: unknown, validNodeIds: Set<string>, handleMap: Map<st
 
     if (!isString(e.source) || !validNodeIds.has(e.source)) return null;
     if (!isString(e.target) || !validNodeIds.has(e.target)) return null;
-    if (e.source === e.target) return null; // No self-loops
 
     if (!isString(e.sourceHandle) || !isString(e.targetHandle)) return null;
 

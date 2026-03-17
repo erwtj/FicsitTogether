@@ -8,6 +8,10 @@
     animation: fluid-flow 0.5s linear infinite;
 }
 
+svg:has(g > path.elevated-edge) {
+    z-index: 2 !important;
+}
+
 .num-input {
     width: 80px;
     border: none;

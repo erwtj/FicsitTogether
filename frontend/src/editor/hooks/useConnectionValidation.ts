@@ -14,7 +14,7 @@ export function useConnectionValidation() {
             const sourceNode = reactFlow.getNode(source ?? "");
             const targetNode = reactFlow.getNode(target ?? "");
 
-            if (!sourceNode || !targetNode || source === target) return false;
+            if (!sourceNode || !targetNode) return false;
 
             const sourceItem = getHandleItemClassName(sourceNode, sourceHandle, "source");
             const targetItem = getHandleItemClassName(targetNode, targetHandle, "target");
