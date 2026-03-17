@@ -210,6 +210,7 @@ export const ItemEdge = memo(function ItemEdge({
                           style={{
                               transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
                               pointerEvents: "all",
+                              zIndex: 3,
                           }}
                           className="add-handle"
                           onClick={(e) => {
@@ -225,7 +226,7 @@ export const ItemEdge = memo(function ItemEdge({
                                 transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)`,
                                 pointerEvents: "all",
                                 cursor: "move",
-                                zIndex: 10000,
+                                zIndex: 3,
                             }}
                             className="position-handle"
                             onClick={(e) => e.stopPropagation()}
@@ -240,7 +241,7 @@ export const ItemEdge = memo(function ItemEdge({
     // ── Render ─────────────────────────────────────────────────────────────
     return (
         <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} className={isFluid ? "fluid-edge" : undefined} />
+            <BaseEdge path={edgePath} markerEnd={markerEnd} style={pathStyle} className={`${isFluid ? "fluid-edge" : ""}`}/>
 
             {(sourceNode?.selected || targetNode?.selected || selected) && sourceItem && (
                 <>
@@ -266,6 +267,7 @@ export const ItemEdge = memo(function ItemEdge({
                         transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY - (selected ? 20 : 0)}px)`,
                         fontSize: 12,
                         pointerEvents: "all",
+                        zIndex: selected ? 2 : undefined,
                     }}
                 >
                     <input

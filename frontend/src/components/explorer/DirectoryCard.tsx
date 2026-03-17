@@ -38,9 +38,9 @@ export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory,
             <div className={"d-flex flex-row align-items-center justify-content-center w-100"}>
                 {/* We can not replace me-2 with gap-2, since this will cause the directory icon to shrink */}
                 <Folder size={26} className={"me-2"}/>
-                {changePublic && directoryInfo.public && <Globe size={18} className={`public-globe position-absolute ${directoryInfo.public ? "default-purple" : "text-muted"}`} style={{
+                {changePublic && directoryInfo.public && <Globe size={18} className={`public-globe position-absolute default-purple`} style={{
                     borderRadius: "50%",
-                    left: "2rem",
+                    left: "1.8rem",
                     top: "2rem",
                     padding: "2px",
                     zIndex: 1,
