@@ -8,7 +8,6 @@ import type {
 } from "dtolib";
 
 // Classnames are looked up via getWhatever() from ficlib
-// TODO: Turn data into complement types from dtolib
 export type SloopData = {} & SloopDataDTO;
 
 export type RecipeNodeData = {
