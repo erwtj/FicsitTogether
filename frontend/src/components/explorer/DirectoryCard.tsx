@@ -65,15 +65,11 @@ export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory,
                             <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                         </Dropdown.Toggle>
                         <Dropdown.Menu className={"p-0 z-2"} popperConfig={{ strategy: 'fixed' }} renderOnMount>
-                            {(deleteDirectory && !directoryInfo.isShared) && (
-                                <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
-                                               onClick={() => deleteDirectory(directoryInfo)}>Delete</Dropdown.Item>
-                            )}
                             {(shareDirectory && !directoryInfo.isShared) && (
                                 <Dropdown.Item href={"#"} className={"dropdown-option share-option user-select-none"}
                                                onClick={() => shareDirectory(directoryInfo)}>Share</Dropdown.Item>
                             )}
-                            {(changePublic && !directoryInfo.isShared) && (
+                            {changePublic && (
                                 <Dropdown.Item href={"#"} className={"dropdown-option public-option user-select-none"}
                                                onClick={() => changePublic(directoryInfo)}>
                                     Publicize
@@ -82,6 +78,10 @@ export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory,
                             {(leaveDirectory && directoryInfo.isShared) && (
                                 <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
                                                onClick={() => leaveDirectory(directoryInfo)}>Leave</Dropdown.Item>
+                            )}
+                            {(deleteDirectory && !directoryInfo.isShared) && (
+                                <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
+                                               onClick={() => deleteDirectory(directoryInfo)}>Delete</Dropdown.Item>
                             )}
                         </Dropdown.Menu>
                     </Dropdown> : <span className={"ms-auto"}/>}

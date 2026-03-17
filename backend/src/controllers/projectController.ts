@@ -38,7 +38,7 @@ export async function createProject(req: Request, res: Response, next: NextFunct
 
         const [projectCount, totalProjectCount] = await Promise.all([
             repository.countProjectsInDirectory(directoryId),
-            repository.countTotalProjectsForUser(req.user.id)
+            repository.countTotalProjectsForDirectoryOwner(directoryId)
         ]);
 
         if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {

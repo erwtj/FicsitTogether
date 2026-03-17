@@ -88,13 +88,17 @@ export async function countProjectsInDirectory(directoryId: string): Promise<num
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 
-export async function countTotalProjectsForUser(userId: string): Promise<number> {
+export async function countTotalProjectsForDirectoryOwner(directoryId: string): Promise<number> {
     const res = await pool.query<{ count: string }>(`
-        SELECT COUNT(*) AS count
-        FROM projects p
-        JOIN directories d ON p.parent_directory = d.id
-        WHERE d.owner = $1
-    `, [userId]);
+        SELECT COUNT(*)
+        FROM projects
+        JOIN directories d ON projects.parent_directory = d.id
+        WHERE d.owner = (
+            SELECT owner
+            FROM directories
+            WHERE id = $1
+        )
+    `, [directoryId]);
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 

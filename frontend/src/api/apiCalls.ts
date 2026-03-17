@@ -1,6 +1,6 @@
 import type {Auth0ContextType} from "../auth/auth0.tsx";
 import api from "../api/axiosInstance.ts";
-import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO, type ChartDataDTO, type PublicProjectDTO} from "dtolib"
+import {type DirectoryDTO, type FullUserInfoDTO, type SharedDirectoryDTO, type DirectoryContentDTO, type MinimalUserInfoDTO, type ProjectDTO, type ChartDataDTO, type PublicProjectDTO, type TotalCountsDTO} from "dtolib"
 
 
 // API calls
@@ -158,7 +158,29 @@ export async function leaveDirectory(auth: Auth0ContextType, dirID: string): Pro
     return response?.status === 200;
 }
 
+export async function fetchTotalCounts(auth: Auth0ContextType, dirID: string): Promise<TotalCountsDTO> {
+    const token = await auth.getAccessTokenSilently();
+    
+    const response = await api.get(`directories/${dirID}/owner/count`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    
+    return response?.data as TotalCountsDTO;
+}
 
+export async function fetchTotalCountsRoot(auth: Auth0ContextType): Promise<TotalCountsDTO> {
+    const token = await auth.getAccessTokenSilently();
+    
+    const response = await api.get(`directories/root/owner/count`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    
+    return response?.data as TotalCountsDTO;
+}
 
 export async function fetchUser(auth: Auth0ContextType): Promise<FullUserInfoDTO> {
     const token = await auth.getAccessTokenSilently();

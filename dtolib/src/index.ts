@@ -118,6 +118,7 @@ export type SharedDirectoryDTO = {
     id: string;
     name: string;
     parentDirectoryId: string;
+    public: boolean;
     ownerUsername: string;
     ownerId: string;
 }
@@ -134,6 +135,9 @@ export type FullUserInfoDTO = {
     username: string;
     root_directory: string;
     created_at: string;
-    total_project_count: number;
-    total_directory_count: number;
+}
+
+export type TotalCountsDTO = {
+    totalProjects: number;
+    totalDirectories: number;
 }

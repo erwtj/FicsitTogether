@@ -3,7 +3,7 @@ import * as directoryRepository from "../repository/directoryRepository.js";
 import * as projectRepository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import {getUserByUsername} from "../repository/userRepository.js";
-import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO} from "dtolib";
+import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO, TotalCountsDTO} from "dtolib";
 import {
     MAX_DESCRIPTION_LENGTH,
     MAX_DIRECTORIES_PER_DIRECTORY,
@@ -61,8 +61,8 @@ export async function createDirectory(req: Request, res: Response, next: NextFun
         const [parentDepth, siblingCount, totalDirectoriesForUser, parentDirectory] = await Promise.all([
             directoryRepository.getDirectoryDepth(parentDirectoryId),
             directoryRepository.countDirectories(parentDirectoryId),
-            directoryRepository.countTotalDirectoriesForUser(req.user.id),
-            directoryRepository.getDirectory(parentDirectoryId)
+            directoryRepository.countTotalDirectoriesForDirectoryOwner(parentDirectoryId),
+            directoryRepository.getDirectory(parentDirectoryId),
         ]);
 
         if (parentDepth >= MAX_DIRECTORY_DEPTH) {
@@ -274,7 +274,7 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
         
         const [projectCount, totalProjectsForUser] = await Promise.all([
             projectRepository.countProjectsInDirectory(directoryId),
-            projectRepository.countTotalProjectsForUser(req.user.id),
+            projectRepository.countTotalProjectsForDirectoryOwner(directoryId),
         ]);
 
         if (projectCount >= MAX_PROJECTS_PER_DIRECTORY) {
@@ -336,6 +336,32 @@ export async function updateDirectoryPublic(req: Request, res: Response, next: N
         await directoryRepository.updateDirectoryPublic(id, isPublic);
 
         res.sendStatus(200);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function countTotalsForDirectoryOwner (req: Request, res: Response, next: NextFunction) {
+    try {
+        const directoryId = req.params.directoryId as string;
+
+        const totalDirectories = await directoryRepository.countTotalDirectoriesForDirectoryOwner(directoryId)
+        const totalProjects = await projectRepository.countTotalProjectsForDirectoryOwner(directoryId)
+
+        res.status(200).send({ totalDirectories, totalProjects } as TotalCountsDTO);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function countTotalsForRootOwner (req: Request, res: Response, next: NextFunction) {
+    try {
+        const rootDirectoryId = req.user.root_directory;
+        
+        const totalDirectories = await directoryRepository.countTotalDirectoriesForDirectoryOwner(rootDirectoryId);
+        const totalProjects = await projectRepository.countTotalProjectsForDirectoryOwner(rootDirectoryId);
+        
+        res.status(200).send({ totalDirectories, totalProjects } as TotalCountsDTO);
     } catch (error) {
         next(error);
     }
