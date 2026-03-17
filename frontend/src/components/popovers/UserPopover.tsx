@@ -23,7 +23,9 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
             auth0Context.getAccessTokenSilently()
             .then(token => {
                 const decoded = token.split('.').length === 3 && JSON.parse(atob(token.split('.')[1]));
-                const username = decoded[import.meta.env.VITE_AUTH0_AUDIENCE + '/username'] as string || user!.name!;
+                const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+                const namespace = audience + (audience.endsWith('/') ? 'username' : '/username');
+                const username = decoded[namespace] as string || user!.name!;
                 setUsername(username);
             })
             .catch(err => console.error('Error getting access token:', err));

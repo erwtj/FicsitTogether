@@ -1,0 +1,84 @@
+.modal-content-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.tabs-section {
+    width: 10%;
+    margin-right: 20px;
+}
+
+.content-section {
+    width: 75%;
+}
+
+.HelpModal {
+    overflow: hidden;
+    scroll-behavior: smooth;
+}
+
+
+.modal-w75 {
+    width: 75%;
+    max-width: none !important;
+}
+
+.help-sidebar {
+    padding: 12px 4px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-side-bar-top-level {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 16px;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 4px;
+    margin-bottom: 0px;
+    border-radius: 4px;
+
+
+    color: #eee;
+}
+
+.help-side-bar-top-level:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.help-side-bar-sub-level {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin-top: 4px;
+    color: #eee;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 4px;
+
+    margin-left: 20px;
+}
+
+.help-side-bar-sub-level .nav-link {
+    padding: 0px 0px;
+    width: 100%;
+
+
+    color: #eee;
+}
+
+.help-side-bar-sub-level:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.selected {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sloopcard-images {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.5rem;
+}

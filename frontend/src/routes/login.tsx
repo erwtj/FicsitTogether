@@ -1,4 +1,4 @@
-import { createFileRoute, redirect} from '@tanstack/react-router';
+import { createFileRoute, Link, redirect} from '@tanstack/react-router';
 import LoginButton from '../components/buttons/LoginButton';
 import Card from 'react-bootstrap/Card';
 import Alert from 'react-bootstrap/Alert';
@@ -22,6 +22,7 @@ export const Route = createFileRoute('/login')({
     staticData : {
         title: "Ficsit Together | Login",
         showNav: false,
+        requireAuth: false,
     }
 });
 
@@ -38,11 +39,9 @@ function LoginComponent() {
                 <Card.Body className="text-center">
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp'/>
                     <Card.Title className="fs-2">Welcome to Ficsit Together</Card.Title>
+                    <p>Don't know what it is? Check out the <Link to={"/about"} className="clickable-link default-purple">about</Link> page!</p>
                     {error ? (
-                        <Alert variant="danger" className="text-start mt-2 mb-3">
-                            <Alert.Heading className="fs-6 fw-bold">
-                                {error === 'access_denied' ? 'Access denied' : error}
-                            </Alert.Heading>
+                        <Alert variant="warning" className="text-start mt-2 mb-3 py-2">
                             {error_description && <p className="mb-0 small">{decodeURIComponent(error_description)}</p>}
                         </Alert>
                     ) : (
@@ -50,7 +49,7 @@ function LoginComponent() {
                             Get started by signing in to your account
                         </Card.Text>
                     )}
-                    <LoginButton className="w-75" prompt={error ? 'login' : undefined}/>
+                    <LoginButton className="w-75 slooping" prompt={error ? 'login' : undefined}/>
                 </Card.Body>
             </Card>
         </div>

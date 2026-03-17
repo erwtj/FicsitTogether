@@ -1,0 +1,24 @@
+﻿.num-input {
+    width: 80px;
+    border: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: 1rem;
+}
+
+.num-input:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}

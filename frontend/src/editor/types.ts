@@ -1,33 +1,33 @@
 import { type Node, type Edge } from "@xyflow/react";
+import type {
+    SloopData as SloopDataDTO,
+    RecipeNodeData as RecipeNodeDataDTO,
+    ItemSpawnerNodeData as ItemSpawnerNodeDataDTO,
+    EndNodeData as EndNodeDataDTO,
+    PowerNodeData as PowerNodeDataDTO,
+} from "dtolib";
 
 // Classnames are looked up via getWhatever() from ficlib
+export type SloopData = {} & SloopDataDTO;
 
 export type RecipeNodeData = {
-    recipeClassName: string;
-    somersloops: number;
-    percentage: number[];
-
     _factor?: NodeFactor; // Computed input/output factor based on building count and Somer Sloop bonus. Never written to Yjs
+    _rawFactor?: NodeFactor; // Factor without Somer Sloop bonus. Never written to Yjs
     _outputOverUsed?: Record<string, boolean>; // Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs
-};
+} & RecipeNodeDataDTO;
 
 export type ItemSpawnerNodeData = {
-    itemClassName: string;
-    outputAmount: number; // Items (or mL for fluids) per minute this node provides
     _outputOverUsed?: Record<string, boolean>; // Per-output-handle over-capacity flags. Key = handleId. Never written to Yjs
-};
+} & ItemSpawnerNodeDataDTO;
 
 export type EndNodeData = {
-    itemClassName: string;
-    sinkOutput: boolean;
     _totalThroughput?: number; // Total throughput flowing in. Never written to Yjs
     _totalSinkPoints?: number; // Total sink points flowing in (throughput * item sink points). Never written to Yjs
-};
+} & EndNodeDataDTO;
 
 export type PowerNodeData = {
-    recipeClassName: string;
     _factor?: number; // Computed clock factor. Never written to Yjs
-};
+} & PowerNodeDataDTO;
 
 export type RecipeNodeType     = Node<RecipeNodeData,      "recipe-node">;
 export type ItemSpawnerNodeType = Node<ItemSpawnerNodeData, "item-spawner-node">;

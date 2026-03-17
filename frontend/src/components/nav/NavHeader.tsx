@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Nav, Navbar } from "react-bootstrap";
 import { Link } from "@tanstack/react-router";
-import { useAuth0Context } from "../auth/useAuth0Context.ts";
-import UserPopover from "./popovers/UserPopover.tsx";
-import { Calculator, Table, House } from "react-bootstrap-icons";
+import { useAuth0Context } from "../../auth/useAuth0Context.ts";
+import UserPopover from "../popovers/UserPopover.tsx";
+import { Calculator, Table, House, InfoCircle } from "react-bootstrap-icons";
 
 function NavHeader() {
     const auth0Context = useAuth0Context();
@@ -56,7 +56,16 @@ function NavHeader() {
                             <Calculator className="me-2" size={16} />Recipe Calculator
                         </Nav.Item>
                         <Nav.Item className="nav-link d-flex align-items-center disabled" >
-                            <Table className="me-2 " size={16} />RSP Factor Table
+                            <Table className="me-2" size={16} />RSP Factor Table
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Link
+                                to="/about"
+                                className="nav-link d-flex align-items-center"
+                                onClick={() => setExpanded(false)}
+                            >
+                                <InfoCircle className="me-2" size={16} />About
+                            </Link>
                         </Nav.Item>
                     </Nav>
 

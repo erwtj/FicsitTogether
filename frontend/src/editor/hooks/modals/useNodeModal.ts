@@ -2,10 +2,10 @@
 import * as Y from "yjs";
 import { useReactFlow } from "@xyflow/react";
 import { getRecipe } from "ficlib";
-import { type AppNode } from "../types";
-import { getItemIndexFromHandleId } from "../utils/idUtils";
-import { type PendingConnection, useNodeSpawner } from "./useNodeSpawner";
-import type { RecipeModalProps } from "../components/modals/RecipeModal";
+import { type AppNode } from "../../types.ts";
+import { getItemIndexFromHandleId } from "../../utils/idUtils.ts";
+import { type PendingConnection, useNodeSpawner } from "../useNodeSpawner.ts";
+import type { RecipeModalProps } from "../../components/modals/RecipeModal.tsx";
 
 /**
  * Manages the recipe-picker modal: when to show it, what item constraints to

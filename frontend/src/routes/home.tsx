@@ -9,7 +9,7 @@ import {
     fetchSharedDirectories,
     createDirectory,
     deleteDirectory,
-    leaveDirectory
+    leaveDirectory, fetchUser, updateDirectoryPublic
 } from "../api/apiCalls.ts";
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
@@ -17,17 +17,14 @@ import "./home.tsx.css";
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
 import { Toast } from "react-bootstrap";
 import { MAX_DIRECTORIES_PER_DIRECTORY } from "dtolib";
+import PublicModal from "../components/modals/PublicModal.tsx";
 
 export const Route = createFileRoute('/home')({
-    beforeLoad: ({context}) => {
-        if (!context.auth?.isAuthenticated) {
-            throw redirect({to: '/login', replace: true});
-        }
-    },
     component: HomePage,
     staticData: {
         title: "Ficsit Together | Home",
         showNav: true,
+        requireAuth: true
     },
     loader: async ({context}) => {
         const {auth} = context;
@@ -35,14 +32,16 @@ export const Route = createFileRoute('/home')({
             throw redirect({to: '/login', replace: true});
         }
 
-        const [root, sharedRaw] = await Promise.all([
+        const [root, user, sharedRaw] = await Promise.all([
             fetchRoot(auth),
+            fetchUser(auth),
             fetchSharedDirectories(auth),
         ])
         
         const owned = root.subDirectories.map(dir => ({
             id: dir.id,
             name: dir.name,
+            public: dir.public,
             isShared: false,
         } as DirectoryInfo));
 
@@ -50,30 +49,45 @@ export const Route = createFileRoute('/home')({
             id: dir.id,
             name: dir.name,
             isShared: true,
+            public: false,
             sharedBy: dir.ownerUsername
         } as DirectoryInfo));
 
-        return { root, owned, shared };
+        return { root, user, owned, shared };
     }, staleTime: 0
 })
 
 function HomePage() {
     const auth = useAuth0Context()
 
-    const { root, owned, shared } = Route.useLoaderData();
+    const { root, user, owned, shared } = Route.useLoaderData();
     const [ownedDirectories, setOwnedDirectories] = useState<DirectoryInfo[]>(owned);
     const [sharedDirectories, setSharedDirectories] = useState<DirectoryInfo[]>(shared);
 
     useEffect(() => {
-        /* eslint-disable react-hooks/set-state-in-effect */
         setOwnedDirectories(owned);
         setSharedDirectories(shared);
-        /* eslint-enable react-hooks/set-state-in-effect */
     }, [owned, shared]);
+
+    const [totalDirectoryCount, setTotalDirectoryCount] = useState(user.total_directory_count);
+    useEffect(() => {
+        setTotalDirectoryCount(user.total_directory_count);
+    }, [user]);
+
+    const refetchUser = () => {
+        fetchUser(auth)
+            .then(updatedUser => {
+                setTotalDirectoryCount(updatedUser.total_directory_count);
+            })
+            .catch(err => {
+                console.error('Error fetching user data:', err);
+            });
+    }
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showPublicModal, setShowPublicModal] = useState(false);
     
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     
@@ -82,9 +96,11 @@ function HomePage() {
     const handleCreateDirectory = (name: string) => {
         createDirectory(auth, root.id, name)
         .then(newDir => {
+            setTotalDirectoryCount(d => d + 1);
             setOwnedDirectories(prev => [...prev, {
                 id: newDir.id,
                 name: newDir.name,
+                public: newDir.public,
                 isShared: false,
             }]);
         }
@@ -109,6 +125,7 @@ function HomePage() {
             deleteDirectory(auth, selectedDirectory.id)
             .then(success => {
                 if (success) {
+                    refetchUser();
                     setOwnedDirectories(prev => prev.filter(dir => dir.id !== selectedDirectory.id));
                 } else {
                     console.error('Failed to delete directory');
@@ -159,6 +176,30 @@ function HomePage() {
         setSelectedDirectory(directory);
         setShowShareModal(true);
     }
+    
+    const handlePublicUpdate = (isPublic: boolean) => {
+        if (selectedDirectory) {
+            updateDirectoryPublic(auth, selectedDirectory.id, isPublic)
+            .then(() => {
+                selectedDirectory.public = isPublic;
+                setOwnedDirectories(prev => prev.map(dir => dir.id === selectedDirectory.id ? { ...dir, public: isPublic } : dir));
+            })
+            .catch(err => {
+                setApiError('An error occurred while updating the directory. Please try again.');
+                console.error('Error updating directory:', err)
+            });
+        }
+    }
+
+    const handlePublicClose = () => {
+        setShowPublicModal(false);
+        setSelectedDirectory(null);
+    }
+    
+    const handleChangePublic = (directory: DirectoryInfo) => {
+        setSelectedDirectory(directory);
+        setShowPublicModal(true);
+    }
 
     return (
         <div className="container flex-grow-1 mw-100">
@@ -171,15 +212,16 @@ function HomePage() {
                     </h4>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {ownedDirectories.map(dirInfo => (
-                            <DirectoryCard
+                            <DirectoryCard to="directories"
                                 key={dirInfo.id}
                                 directoryInfo={dirInfo}
-                                deleteDirectory={(dir) => handleDeleteDirectory(dir)}
-                                shareDirectory={(dir) => handleShareDirectory(dir)}
+                                deleteDirectory={handleDeleteDirectory}
+                                shareDirectory={handleShareDirectory}
+                                changePublic={handleChangePublic}
                             />
                         ))}
                         {ownedDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
-                            <AddDirectoryCard onSubmit={(s) => handleCreateDirectory(s)}/>
+                            <AddDirectoryCard directoryCount={totalDirectoryCount} onSubmit={(s) => handleCreateDirectory(s)}/>
                         }
                     </div>
                 </div>
@@ -192,7 +234,7 @@ function HomePage() {
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {sharedDirectories.length > 0 ?
                             sharedDirectories.map(dirInfo => (
-                                <DirectoryCard key={dirInfo.id} directoryInfo={dirInfo}
+                                <DirectoryCard to="directories" key={dirInfo.id} directoryInfo={dirInfo}
                                                leaveDirectory={(dir) => handleLeaveDirectory(dir)}/>
                             ))
                             :
@@ -228,6 +270,15 @@ function HomePage() {
                 directoryId={selectedDirectory?.id || ""}
                 directoryName={selectedDirectory?.name || ""}
                 onClose={() => setShowShareModal(false)}
+            />
+            <PublicModal
+                show={showPublicModal}
+                itemName={selectedDirectory?.name || ""}
+                itemId={selectedDirectory?.id || ""}
+                type={"directory"}
+                isPublic={selectedDirectory?.public ?? false}
+                onClose={handlePublicClose}
+                updateStatus={handlePublicUpdate}
             />
         </div>
     );

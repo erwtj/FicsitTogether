@@ -7,7 +7,7 @@ import {buildUsageMaps} from "../utils/overviewUtil.ts";
 import "./overview.$dir.tsx.css"
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import {isItemSolid, roundTo3Decimals} from "../utils/throughputUtil.ts";
-import {ArrowLeft, FileEarmarkBarGraph, Folder } from "react-bootstrap-icons";
+import {ArrowBarUp, ArrowLeft, FileEarmarkBarGraph, Folder } from "react-bootstrap-icons";
 import {Button, ButtonGroup, Card, Dropdown } from "react-bootstrap";
 import {useClientSettings} from "../hooks/useClientSettings.ts";
 
@@ -20,40 +20,34 @@ export const Route = createFileRoute('/overview/$dir')({
     component: OverviewPage,
     staticData: {
         showNav: true,
-        title: "Ficsit Together | Overview"
+        title: "Ficsit Together | Overview",
+        requireAuth: true
     },
     loader: async ({context, params: {dir}}) => {
         const { auth } = context;
         if (!auth) throw redirect({ to: '/login', replace: true })
 
-        const [directory, charts] = await Promise.all([
-            fetchDirectoryContent(auth, dir).catch(err => {
+        const directory =
+            await fetchDirectoryContent(auth, dir).catch(err => {
                 if (err.response?.status === 403 || err.response?.status === 404) {
                     throw notFound()
                 }
                 throw err
-            }),
-            fetchAllProjectsInDirectory(auth, dir).catch(err => {
-                if (err.response?.status === 403 || err.response?.status === 404) {
-                    throw notFound()
-                }
-                throw err
-            }),
-        ])
+            });
 
         if (directory.id === directory.parentDirectoryId) {
             throw redirect({ to: '/home', replace: true })
         }
 
-        const parentDir = await fetchDirectoryContent(auth, directory.parentDirectoryId).catch(err => {
-            if (err.response?.status === 403 || err.response?.status === 404) {
-                throw notFound()
-            }
-            throw err
-        })
+        const charts =
+            await fetchAllProjectsInDirectory(auth, dir).catch(err => {
+                if (err.response?.status === 403 || err.response?.status === 404) {
+                    throw notFound()
+                }
+                throw err
+            });
 
-
-        return { directory, parentDir, charts }
+        return { directory, charts }
     }
 
 })
@@ -169,8 +163,8 @@ function ItemCard({ itemUsageData, itemClassName }: { itemUsageData: ItemUsageDa
 const allResources: Set<string> = new Set(getAllResources().map((resource: Resource) => resource.className));
 
 function OverviewPageContent() {
-    const { directory, parentDir, charts } = Route.useLoaderData();
-    const {clientSettings} = useClientSettings();
+    const { directory, charts } = Route.useLoaderData();
+    const { clientSettings } = useClientSettings();
     const navigate = useNavigate();
 
     const { resourceMap, itemMap } = useMemo(() => {
@@ -186,7 +180,11 @@ function OverviewPageContent() {
         return Array.from(itemMap.entries());
     }, [itemMap]);
 
-    const noDropDown = parentDir.id === parentDir.parentDirectoryId && directory.subDirectories.length === 0;
+
+    const treeLength = directory.directoryTree.length;
+    const parentDir = treeLength > 1 ? directory.directoryTree[treeLength - 2] : null; // > 1 not >= 1 because we don't want to count the root directory
+    const noDropDown = !parentDir && directory.subDirectories.length === 0;
+    console.log(treeLength)
 
     return (
         <div>
@@ -206,10 +204,10 @@ function OverviewPageContent() {
                     <Dropdown.Toggle split className="btn-dir-toggle" id="dropdown-split-basic" disabled={noDropDown} />
 
                     <Dropdown.Menu>
-                        {parentDir.parentDirectoryId !== parentDir.id && (
+                        {parentDir && (
                             <>
                                 <Dropdown.Item href={`/overview/${directory.parentDirectoryId}`}>
-                                    <ArrowLeft size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }}/>
+                                    <ArrowBarUp size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }}/>
                                     <FileEarmarkBarGraph size={18} style={{ marginBottom: '0.125rem', marginRight: '0.5rem' }} />
                                     {parentDir.name}
                                 </Dropdown.Item>

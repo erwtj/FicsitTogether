@@ -2,6 +2,7 @@
 import { type Node, type Edge } from "@xyflow/react";
 import { useYjsDoc } from "../context/YjsContext";
 import { stripComputedFields } from "../utils/idUtils";
+import type {ItemEdgeData} from "../types.ts";
 
 /**
  * Returns helpers to update node / edge data in the shared Y.Doc.
@@ -23,6 +24,7 @@ export function useYjsMutation() {
             if (node) {
                 nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
             }
+
         },
         [ydocRef],
     );
@@ -43,5 +45,41 @@ export function useYjsMutation() {
         [ydocRef],
     );
 
-    return { updateNodeData, updateEdgeData };
+    const updateNodeAndSingleEdgeData = useCallback(
+        (nodeId: string, patch: Record<string, unknown>) => {
+            const doc = ydocRef.current;
+            if (!doc) return;
+
+            const nodeMap = doc.getMap<Node>("nodes");
+            const edgeMap = doc.getMap<Edge>("edges");
+
+            const node = nodeMap.get(nodeId);
+            if (!node) return;
+
+            const outgoingEdges = Array.from(edgeMap.values()).filter(
+                (edge) =>
+                    edge.source === nodeId
+            );
+
+
+
+            if (outgoingEdges.length === 1) {
+                const edge = outgoingEdges[0];
+                const edgeId = edge.id;
+
+                const edgePatch: Partial<ItemEdgeData> = {
+                    throughput: patch.outputAmount as number | undefined,
+                }
+
+                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+                edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...edgePatch } });
+            }
+            else {
+                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+            }
+        },
+        [ydocRef],
+    )
+
+    return { updateNodeData, updateEdgeData, updateNodeAndSingleEdgeData };
 }

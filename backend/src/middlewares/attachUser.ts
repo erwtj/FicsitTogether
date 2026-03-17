@@ -21,7 +21,8 @@ export async function attachUser(req: Request, res: Response, next: NextFunction
 
         if (!user) {
             const userId = crypto.randomUUID();
-            const username = req.auth?.payload[config.auth0Audience + '/username'] as string || `user_${userId.slice(0, 8)}`;
+            const namespace = config.auth0Audience + (config.auth0Audience.endsWith('/') ? 'username' : '/username');
+            const username = req.auth?.payload[namespace] as string || `user_${userId.slice(0, 8)}`;
             const rootDirectoryId = crypto.randomUUID();
 
             try {

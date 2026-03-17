@@ -1,0 +1,121 @@
+﻿
+.buildingCardImage {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    pointer-events: none; /* Prevents the image from being interactive */
+
+    margin-bottom: 0;
+}
+
+.buildingCardTitle {
+    font-size: 1.5rem;
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+    margin-top: 0px;
+}
+
+.buildingCard {
+    width: 220px;
+    cursor: pointer;
+    background: #202428 !important;
+    border: 1px solid #3a4048 !important;
+    border-radius: 0.5rem;
+
+    margin: 5px;
+    user-select: none;
+    transition: background-color 0.1s;
+}
+
+.buildingCard.addBuildingCard {
+    border: 1px dashed #6c757d !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: stretch;
+    min-height: 100%;
+}
+
+.addBuildingCard:hover .addBuildingCardContent {
+    color: #d0d4db !important;
+    filter: brightness(1.4);
+}
+
+.buildingCard:hover {
+    background: #393d3f;
+}
+
+.buildingCard-inputField {
+    width: 55%;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: #2d3233;
+
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    user-select: none;
+    text-align: center;
+
+}
+.buildingCard-inputField:focus {
+    outline: none;
+}
+
+.removeBuildingButton {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    color: white;
+}
+
+.somersloopInput {
+    width: 100%;
+}
+
+.smallSloop {
+    width: 40px;
+    height: 40px;
+}
+.bigSloop {
+    width: 55px;
+    height: 55px;
+    margin: 0 0;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Adjust as needed */
+}
+
+.sloopInputField {
+    width: 40%;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: #2d3233;
+
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    user-select: none;
+    text-align: center;
+}
+
+.somersloopInput .form-control[readonly] {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-secondary-color);
+    opacity: 1;
+    cursor: default;
+    pointer-events: none;
+}

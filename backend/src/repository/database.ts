@@ -23,7 +23,8 @@ export async function initDatabase() {
                 REFERENCES directories ON DELETE CASCADE,
             owner            TEXT NOT NULL CONSTRAINT directories_users_id_fk
                 REFERENCES users ON DELETE CASCADE,
-            name             TEXT NOT NULL
+            name             TEXT NOT NULL,
+            public           BOOLEAN NOT NULL DEFAULT FALSE
         );
 
         CREATE TABLE IF NOT EXISTS projects
@@ -33,7 +34,8 @@ export async function initDatabase() {
                 REFERENCES directories ON DELETE CASCADE,
             name             TEXT NOT NULL,
             description      TEXT NOT NULL,
-            chart            jsonb NOT NULL
+            chart            jsonb NOT NULL,
+            public           BOOLEAN NOT NULL DEFAULT FALSE
         );
 
         CREATE TABLE IF NOT EXISTS share_directories
@@ -44,5 +46,46 @@ export async function initDatabase() {
                 REFERENCES directories ON DELETE CASCADE,
             CONSTRAINT share_directories_pk PRIMARY KEY ("user", directory)
         );
+    `);
+    
+    // Add public field migration
+    await pool.query(`
+        ALTER TABLE directories
+        ADD COLUMN IF NOT EXISTS public BOOLEAN NOT NULL DEFAULT FALSE;
+        
+        ALTER TABLE projects
+        ADD COLUMN IF NOT EXISTS public BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    // Add performance indices
+    await pool.query(`
+        -- Speed up all queries that filter/join on directories.parent_directory
+        -- (getDirectories, countDirectories, recursive CTEs traversing the tree)
+        CREATE INDEX IF NOT EXISTS idx_directories_parent_directory
+            ON directories (parent_directory);
+
+        -- Speed up queries that filter/join on directories.owner
+        -- (canEditDirectory, getDirectoryTree access checks, getUserStorageUsed)
+        CREATE INDEX IF NOT EXISTS idx_directories_owner
+            ON directories (owner);
+
+        -- Speed up queries that filter/join on projects.parent_directory
+        -- (getProjectsInDirectory, countProjectsInDirectory, recursive project CTEs, getUserStorageUsed)
+        CREATE INDEX IF NOT EXISTS idx_projects_parent_directory
+            ON projects (parent_directory);
+
+        -- The composite PK (user, directory) on share_directories covers lookups by user,
+        -- but NOT lookups by directory alone (existsShare, getSharedWith, getDirectoryTree access checks).
+        CREATE INDEX IF NOT EXISTS idx_share_directories_directory
+            ON share_directories (directory);
+    `);
+    
+    // Add creation timestamp to projects and directories for sorting by creation date
+    await pool.query(`
+        ALTER TABLE directories
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+        
+        ALTER TABLE projects
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
     `);
 }

@@ -9,11 +9,6 @@ export interface RouterContext {
     auth: Auth0ContextType | undefined;
 }
 
-export type staticRouterData = {
-    title?: string;
-    showNav?: boolean;
-}
-
 // Create the router instance
 export const router = createRouter({
     routeTree,
@@ -33,5 +28,6 @@ declare module '@tanstack/react-router' {
     interface StaticDataRouteOption {
         showNav: boolean,
         title: string,
+        requireAuth: boolean,
     }
 }

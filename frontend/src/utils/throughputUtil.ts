@@ -13,8 +13,20 @@ export function isClassSolid(className: string) {
     return isItemSolid(item);
 }
 
+export function roundTo4Decimals(value: number): number {
+    return Math.round((value + Number.EPSILON) * 10000) / 10000;
+}
+
 export function roundTo3Decimals(value: number): number {
     return Math.round((value + Number.EPSILON) * 1000) / 1000;
+}
+
+export function cleanThroughputToDisplay(className: string, throughput: number): number {
+    if (isClassSolid(className)) {
+        return roundTo3Decimals(throughput);
+    } else {
+        return roundTo3Decimals(throughput / 1000);
+    }
 }
 
 export function throughputToDisplay(className: string, throughput: number){

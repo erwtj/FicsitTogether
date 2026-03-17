@@ -1,11 +1,12 @@
 import { useCallback, useState } from "react";
-import { Offcanvas } from "react-bootstrap";
+import { Offcanvas, Toast } from "react-bootstrap";
 import {
     ArrowLeft,
     BoxArrowDown,
     BoxArrowInDown,
     Buildings,
     ChevronRight,
+    Download,
     Gear,
     LightningFill,
 } from "react-bootstrap-icons";
@@ -17,6 +18,8 @@ import "./OverviewSidePanel.css";
 import { Link } from "@tanstack/react-router";
 import {ClientSettingsModal} from "../../../components/modals/ClientSettingsModal.tsx";
 import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from "dtolib";
+import {downloadProject} from "../../../api/apiCalls.ts";
+import {useAuth0Context} from "../../../auth/useAuth0Context.ts";
 
 // ─── Item / Building list renderers ──────────────────────────────────────────
 
@@ -113,7 +116,7 @@ function DocumentInfoPanel({
 
 // ─── Panel ────────────────────────────────────────────────────────────────────
 
-export function OverviewSidePanel() {
+export function OverviewSidePanel({projectId}: {projectId: string}) {
     const [showPanel, setShowPanel] = useState(false);
     const [showDocInfo, setShowDocInfo] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -125,6 +128,27 @@ export function OverviewSidePanel() {
         useFactoryStats(nodes);
 
     const netPower = powerProductionMW - powerConsumptionMW;
+
+    const auth = useAuth0Context();
+    const [apiError, setApiError] = useState<string | null>(null);
+
+    const handleDownloadProject = async () => {
+        downloadProject(auth, projectId).catch((err) => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Cannot download this project. Please try again.');
+            } else {
+                setApiError('An error occurred while downloading the project. Please try again.');
+            }
+            console.error('Error downloading project:', err)
+        }).then(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${metadata.name}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
 
     return (
         <>
@@ -156,7 +180,8 @@ export function OverviewSidePanel() {
                         }
                     </Offcanvas.Title>
                     <div className="d-flex flex-row align-items-center gap-2 ms-auto">
-                        <Gear size={20} className="text-body-secondary clickable-link ms-auto" role="button"
+                        <Download size={20} className="text-body-secondary clickable-link ms-auto me-2" role="button" onClick={handleDownloadProject}/>
+                        <Gear size={20} className="text-body-secondary clickable-link" role="button"
                               onClick={() => setShowSettings(true)}/>
                         <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowPanel(false)}></button>
                     </div>
@@ -223,6 +248,13 @@ export function OverviewSidePanel() {
                     </div>
                 </Offcanvas.Body>
             </Offcanvas>
+
+            <Toast show={apiError !== null} onClose={() => setApiError(null)} className="position-fixed top-0 end-0 m-3" delay={5000} autohide>
+                <Toast.Header>
+                    <strong className="me-auto text-danger">An error occurred</strong>
+                </Toast.Header>
+                <Toast.Body>{apiError}</Toast.Body>
+            </Toast>
         </>
     );
 }

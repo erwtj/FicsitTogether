@@ -11,8 +11,8 @@ Login and session management is handled via [OAuth 2.0](https://oauth.net/2/) us
 
 
 ## How to build
-``docker build --platform=linux/arm64 -t {username}/factory-server:latest .`` \
-``docker push {username}/factory-server:latest``
+``docker build --platform=linux/arm64 -t {username}/ficsit-together-backend:latest .`` \
+``docker push {username}/ficsit-together-backend:latest``
 > You can choose whatever platform, linux/arm64 was chosen as an example for hosting on a raspi
 
 ## Volumes, Ports and Environment Variables
@@ -23,12 +23,15 @@ Login and session management is handled via [OAuth 2.0](https://oauth.net/2/) us
 
 ### Environment Variables
 #### API
-- API_PORT: Port to run the API server on
-- WS_PORT: Port to run the WebSocket server on
-- CORS_ORIGIN: CORS origin to allow
-- HTTPS: Whether to run the server with HTTPS (true/false)
+- ``API_PORT``: Port to run the API server on
+- ``WS_PORT``: Port to run the WebSocket server on
+- ``CORS_ORIGIN``: CORS origin to allow
+- ``HTTPS``: Whether to run the server with HTTPS (true/false)
+- ``TRUST_PROXY``: Express trust proxy setting (for example: false, true, 1)
+- ``PUBLIC_RATE_LIMIT_WINDOW_MS``: Time window for unauthenticated public endpoint limits (default 60000)
+- ``PUBLIC_RATE_LIMIT_MAX_REQUESTS``: Max requests per IP in that window for `/api/public/*` (default 60)
 
 #### AUTH0
-- AUTH0_AUDIENCE: AUTH0 API Audience
-- AUTH0_DOMAIN: AUTH0 Application Domain
-- AUTH0_CLIENT_ID: AUTH0 Application Client ID
+- ``AUTH0_AUDIENCE``: AUTH0 API Audience
+- ``AUTH0_DOMAIN``: AUTH0 Application Domain
+- ``AUTH0_CLIENT_ID``: AUTH0 Application Client ID

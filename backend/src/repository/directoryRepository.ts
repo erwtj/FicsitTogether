@@ -5,6 +5,7 @@ export type Directory = {
     parentDirectoryId: string;
     owner: string;
     name: string;
+    public: boolean;
 }
 
 export type DirectoryMinimalInfo = {
@@ -53,14 +54,21 @@ export async function getDirectoryDepth(directoryId: string): Promise<number> {
     return res.rows[0]?.depth ?? 0;
 }
 
-/**
- * Returns the number of immediate subdirectories inside a directory (excluding itself).
- */
 export async function countDirectories(parentDirectoryId: string): Promise<number> {
     const res = await pool.query<{ count: string }>(
         'SELECT COUNT(*) AS count FROM directories WHERE parent_directory = $1 AND id != $1',
         [parentDirectoryId]
     );
+    return parseInt(res.rows[0]?.count ?? '0', 10);
+}
+
+export async function countTotalDirectoriesForUser(userId: string): Promise<number> {
+    const res = await pool.query<{ count: string }>(`
+        SELECT COUNT(*) AS count
+        FROM directories
+        WHERE owner = $1
+          AND id != parent_directory
+    `, [userId]);
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 
@@ -73,7 +81,7 @@ export async function createDirectory(id: string, parentDirectoryId: string, own
 
 export async function getDirectory(id: string) {
     const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories WHERE id = $1',
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories WHERE id = $1',
         [id]
     );
     return res.rows[0] ?? undefined;
@@ -81,16 +89,17 @@ export async function getDirectory(id: string) {
 
 export async function getAllDirectories() {
     const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories'
+        'SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories'
     );
     return res.rows;
 }
 
 export async function getDirectories(parentDirectoryId: string) {
-    const res = await pool.query<Directory>(
-        'SELECT id, name, owner, parent_directory as "parentDirectoryId" FROM directories WHERE parent_directory = $1 AND id != $1',
-        [parentDirectoryId]
-    );
+    const res = await pool.query<Directory>(`
+        SELECT id, name, owner, parent_directory as "parentDirectoryId", public FROM directories 
+        WHERE parent_directory = $1 AND id != $1
+        ORDER BY created_at ASC, id ASC
+    `,[parentDirectoryId]);
     return res.rows;
 }
 
@@ -100,13 +109,13 @@ export async function deleteDirectory(id: string) {
 
 export async function getDirectoriesRecursive(directoryId: string) {
     const res = await pool.query<Directory>(`
-        WITH RECURSIVE subdirs(id, parent_directory, owner, name) AS (
-            SELECT id, parent_directory, owner, name FROM directories WHERE id = $1
+        WITH RECURSIVE subdirs(id, parent_directory, owner, name, public) AS (
+            SELECT id, parent_directory, owner, name, public FROM directories WHERE id = $1
             UNION ALL
-            SELECT d.id, d.parent_directory, d.owner, d.name
+            SELECT d.id, d.parent_directory, d.owner, d.name, d.public
             FROM directories d INNER JOIN subdirs sd ON d.parent_directory = sd.id
         )
-        SELECT id, parent_directory as "parentDirectoryId", owner, name FROM subdirs
+        SELECT id, parent_directory as "parentDirectoryId", owner, name, public FROM subdirs
     `, [directoryId]);
     return res.rows;
 }
@@ -137,7 +146,7 @@ export async function getSharedDirectories(userId: string) {
                  JOIN directories d ON sd.directory = d.id
                  JOIN users u ON d.owner = u.id
         WHERE sd.user = $1
-        ORDER BY d.name
+        ORDER BY d.created_at ASC, d.id ASC
     `, [userId]);
     return res.rows;
 }
@@ -190,6 +199,7 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
                     SELECT d.id, d.parent_directory, d.owner
                     FROM directories d
                              INNER JOIN check_access ca ON d.id = ca.parent_directory
+                    WHERE d.id != d.parent_directory
                 )
                 SELECT 1
                 FROM check_access ca
@@ -204,4 +214,42 @@ export async function getDirectoryTree(directoryId: string, userId: string): Pro
     `, [directoryId, userId, userId]);
 
     return res.rows.map(({ id, name }) => ({ id, name }));
+}
+
+export async function getPublicDirectoryTree(directoryId: string): Promise<DirectoryMinimalInfo[]> {
+    const res = await pool.query<DirectoryTreeRow>(`
+        WITH RECURSIVE parent_dirs(id, parent_directory, name, depth, public) AS (
+            SELECT id, parent_directory, name, 0, public
+            FROM directories
+            WHERE id = $1
+
+            UNION ALL
+
+            SELECT d.id, d.parent_directory, d.name, pd.depth + 1, d.public
+            FROM directories d
+                INNER JOIN parent_dirs pd ON d.id = pd.parent_directory
+            WHERE d.id != d.parent_directory
+        ),
+        max_public_depth AS (
+            SELECT MAX(depth) AS depth
+            FROM parent_dirs
+            WHERE public = true
+        )
+        SELECT pd.id, pd.name, pd.depth
+        FROM parent_dirs pd
+            CROSS JOIN max_public_depth mpd
+        WHERE pd.id != pd.parent_directory
+          AND mpd.depth IS NOT NULL
+          AND pd.depth <= mpd.depth
+        ORDER BY pd.depth DESC
+    `, [directoryId]);
+
+    return res.rows.map(({ id, name }) => ({ id, name }));
+}
+
+export async function updateDirectoryPublic(directoryId: string, isPublic: boolean) {
+    await pool.query(
+        'UPDATE directories SET public = $1 WHERE id = $2',
+        [isPublic, directoryId]
+    );
 }

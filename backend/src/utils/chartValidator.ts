@@ -1,13 +1,12 @@
-﻿import type { ChartDataDTO, NodeDTO, EdgeDTO, RecipeNodeData, ItemSpawnerNodeData, EndNodeData, PowerNodeData } from "dtolib";
+﻿import type { SloopData, ChartDataDTO, NodeDTO, EdgeDTO, RecipeNodeData, ItemSpawnerNodeData, EndNodeData, PowerNodeData } from "dtolib";
 import { hasRecipe, getRecipe, hasItem, getBuilding } from "ficlib";
 import { MAX_CHART_NODES, MAX_CHART_EDGES, MAX_MOVABLE_POINTS } from "dtolib";
 
 // Maximum sensible values
 const MAX_COORD = 1_000_000;
 const MAX_NODE_SIZE = 10_000;
-const MAX_THROUGHPUT = 1_000_000;
-const MAX_OUTPUT_AMOUNT = 1_000_000_000; // mL/min for fluids
-const MAX_SOMERSLOOPS = 4;
+const MAX_THROUGHPUT = 10_000_000;
+const MAX_OUTPUT_AMOUNT = 10_000_000_000; // mL/min for fluids
 const MAX_PERCENTAGE = 250;
 const MAX_MOVABLE_POINT_COORD = 1_000_000;
 
@@ -85,28 +84,36 @@ function sanitizeRecipeNodeData(raw: unknown): RecipeNodeData | null {
 
     const recipe = getRecipe(d.recipeClassName)!;
     const building = getBuilding(recipe.producedIn);
-    const maxSloops = building?.somersloopsNeeded ?? 0;
+    const maxSloops = Math.max(0, building?.somersloopsNeeded ?? 0);
 
-    const somersloops = typeof d.somersloops === 'number'
-        ? Math.max(0, Math.min(MAX_SOMERSLOOPS, Math.floor(d.somersloops)))
-        : 0;
-
-    // percentage is one entry per building count (number of buildings running this recipe)
-    let percentage: number[] = [];
-    if (Array.isArray(d.percentage)) {
-        percentage = (d.percentage as unknown[])
-            .filter(isFiniteNumber)
-            .map(p => Math.max(0, Math.min(MAX_PERCENTAGE, p)));
+    if (!d.sloopData || !Array.isArray(d.sloopData) || maxSloops === 0) {
+        return {
+            recipeClassName: d.recipeClassName,
+        };
     }
-    if (percentage.length === 0) percentage = [100];
-
-    // Validate somersloops doesn't exceed building's allowed max
-    const clampedSloops = maxSloops === -1 ? 0 : Math.min(somersloops, maxSloops);
-
+    
+    const data = d.sloopData as unknown[];
+    if (!data.every(s => {
+        if (!s || typeof s !== 'object') return false;
+        const sloopBuildingData = s as Record<string, unknown>;
+        
+        return isFiniteNumber(sloopBuildingData.sloopAmount) && isFiniteNumber(sloopBuildingData.overclockPercentage) 
+    })) {
+        return {
+            recipeClassName: d.recipeClassName,
+        };
+    }
+    
+    const sloopData = data as SloopData[];
+    
+    const sanitizedSloopData = sloopData.map(s => ({
+        sloopAmount: Math.max(0, Math.min(maxSloops, s.sloopAmount)),
+        overclockPercentage: Math.max(0, Math.min(MAX_PERCENTAGE, s.overclockPercentage)),
+    }));
+    
     return {
         recipeClassName: d.recipeClassName,
-        somersloops: clampedSloops,
-        percentage,
+        sloopData: sanitizedSloopData,
     };
 }
 
