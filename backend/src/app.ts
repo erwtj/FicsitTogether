@@ -25,18 +25,20 @@ app.use(cors({
     credentials: true
 }));
 
-app.use((req, res, next) => {
-    const start = performance.now();
-    const orig = res.json.bind(res);
+if (config.environment === 'development') {
+    app.use((req, res, next) => {
+        const start = performance.now();
+        const orig = res.json.bind(res);
 
-    res.json = (body) => {
-        const ms = (performance.now() - start).toFixed(1);
-        console.log(`[TIMING] ${req.method} ${req.originalUrl} → ${res.statusCode} in ${ms}ms`);
-        return orig(body);
-    };
+        res.json = (body) => {
+            const ms = (performance.now() - start).toFixed(1);
+            console.log(`[TIMING] ${req.method} ${req.originalUrl} → ${res.statusCode} in ${ms}ms`);
+            return orig(body);
+        };
 
-    next();
-});
+        next();
+    });
+}
 
 // TODO: Type check incoming data (e.g. project creation, user registration) to prevent malformed data from reaching the database. This can be done with a library like Joi or Zod, or manually in the controller functions.
 

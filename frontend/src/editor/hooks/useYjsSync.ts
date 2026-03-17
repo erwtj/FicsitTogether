@@ -9,7 +9,7 @@ const MESSAGE_AWARENESS = 1;
 
 interface UseYjsSyncProps {
     projectId: string;
-    token: string | null;
+    getAccessToken: () => Promise<string | null>;
     ydocRef: React.RefObject<Y.Doc | null>;
     setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
     setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
@@ -19,7 +19,7 @@ const LOCAL_ORIGIN = "local";
 
 const RECONNECT_DELAY_MS = 5000;
 
-export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: UseYjsSyncProps) {
+export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEdges }: UseYjsSyncProps) {
     const reactFlow = useReactFlow();
     const wsRef = useRef<WebSocket | null>(null);
     const [connected, setConnected] = useState(false);
@@ -39,8 +39,6 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
     }, []);
 
     useEffect(() => {
-        if (!token) return;
-
         destroyedRef.current = false;
 
         const doc = new Y.Doc();
@@ -126,11 +124,30 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
 
         // --- WebSocket with auto-reconnect ---
 
-        const connect = () => {
+        const connect = async () => {
             if (destroyedRef.current) return;
 
             // Not synced until the server sends us its initial state
             syncedRef.current = false;
+
+            let token: string | null = null;
+            try {
+                token = await getAccessToken();
+            } catch (error) {
+                console.warn("Failed to get access token for websocket connection", error);
+            }
+
+            if (destroyedRef.current) return;
+
+            if (!token) {
+                setConnected(false);
+                if (!destroyedRef.current) {
+                    reconnectTimerRef.current = setTimeout(() => {
+                        void connect();
+                    }, RECONNECT_DELAY_MS);
+                }
+                return;
+            }
 
             const ws = new WebSocket(
                 `${import.meta.env.VITE_WS_URL}/${projectId}`,
@@ -154,7 +171,9 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
                 wsRef.current = null;
                 if (!destroyedRef.current) {
                     console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
-                    reconnectTimerRef.current = setTimeout(connect, RECONNECT_DELAY_MS);
+                    reconnectTimerRef.current = setTimeout(() => {
+                        void connect();
+                    }, RECONNECT_DELAY_MS);
                 } else {
                     console.log("WebSocket closed.");
                 }
@@ -190,7 +209,7 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
             };
         };
 
-        connect();
+        void connect();
 
         return () => {
             destroyedRef.current = true;
@@ -206,7 +225,9 @@ export function useYjsSync({ projectId, token, ydocRef, setNodes, setEdges }: Us
             ydocRef.current = null;
             wsRef.current = null;
         };
-    }, [projectId, token]); // DO NOT ADD reactFlow, setNodes, setEdges
+        // This effect intentionally avoids depending on rapidly-changing editor refs/state.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [projectId, getAccessToken]); // DO NOT ADD reactFlow, setNodes, setEdges
 
     return { wsRef, connected };
 }

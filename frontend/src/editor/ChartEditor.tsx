@@ -1,4 +1,4 @@
-﻿import {useCallback, useEffect, useRef, useState } from "react";
+﻿import {useCallback, useRef } from "react";
 import * as Y from "yjs";
 import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -31,9 +31,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     const auth = useAuth0Context();
     const ydocRef = useRef<Y.Doc | null>(null);
 
-    const [token, setToken] = useState<string | null>(null);
-    useEffect(() => {
-        auth?.getAccessTokenSilently()?.then(setToken).catch(console.error);
+    const getAccessToken = useCallback(async () => {
+        return auth?.getAccessTokenSilently() ?? null;
     }, [auth]);
 
     const {clientSettings} = useClientSettings();
@@ -56,7 +55,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     useFactorySync(edges as Edge<ItemEdgeData>[], nodes);
 
     // Sync document using Yjs
-    const {connected} = useYjsSync({ projectId, token, setNodes, setEdges, ydocRef });
+    const {connected} = useYjsSync({ projectId, getAccessToken, setNodes, setEdges, ydocRef });
 
     // Connection validation
     const { isValidConnection } = useConnectionValidation();
