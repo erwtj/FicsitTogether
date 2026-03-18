@@ -96,7 +96,9 @@ export async function downloadProject(req: Request, res: Response, next: NextFun
 
         const plainName = `${project.name}.json`;
         const encodedName = encodeURIComponent(plainName);
-        res.setHeader('Content-Disposition', `attachment; filename="${plainName}"; filename*=UTF-8''${encodedName}`);
+        // ASCII-safe fallback: replace non-ASCII characters with underscore
+        const asciiFallback = plainName.replace(/[^\x20-\x7E]/g, '_');
+        res.setHeader('Content-Disposition', `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodedName}`);
         res.setHeader('Content-Type', 'application/json');
 
         res.status(200).json({
