@@ -5,11 +5,9 @@ import type {AppError} from "../middlewares/errorHandler.js";
 import {getUserByUsername} from "../repository/userRepository.js";
 import type {DirectoryDTO, DirectoryContentDTO, SharedDirectoryDTO, MinimalUserInfoDTO, TotalCountsDTO} from "dtolib";
 import {
-    MAX_DESCRIPTION_LENGTH,
     MAX_DIRECTORIES_PER_DIRECTORY,
     MAX_DIRECTORIES_PER_USER,
     MAX_DIRECTORY_DEPTH,
-    MAX_NAME_LENGTH,
     MAX_PROJECTS_PER_DIRECTORY,
     MAX_PROJECTS_PER_USER,
 } from "dtolib";
@@ -17,6 +15,7 @@ import {sanitizeChart} from "../utils/chartValidator.js";
 
 export async function getDirectory(req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware
         const directoryId = req.params.directoryId as string;
         const [directory, subDirectories, projects, directoryTree] = await Promise.all([
             directoryRepository.getDirectory(directoryId),
@@ -43,20 +42,9 @@ export async function getRootDirectory(req: Request, res: Response, next: NextFu
 
 export async function createDirectory(req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware
         const parentDirectoryId = req.body.directoryId as string;
         const name = req.body.name as string;
-
-        if (!parentDirectoryId || !name) {
-            const error: AppError = new Error('Missing parameters.');
-            error.status = 400;
-            return next(error);
-        }
-
-        if (name.length > MAX_NAME_LENGTH) {
-            const error: AppError = new Error(`Directory name exceeds max length (${MAX_NAME_LENGTH}).`);
-            error.status = 400;
-            return next(error);
-        }
 
         const [parentDepth, siblingCount, totalDirectoriesForUser, parentDirectory] = await Promise.all([
             directoryRepository.getDirectoryDepth(parentDirectoryId),
@@ -121,14 +109,9 @@ export async function deleteDirectory(req: Request, res: Response, next: NextFun
 
 export async function shareDirectory(req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware
         const directoryId = req.params.directoryId as string;
         const username = req.body.user as string;
-
-        if (!directoryId || !username) {
-            const error: AppError = new Error('Missing parameters.');
-            error.status = 400;
-            return next(error);
-        }
 
         if (directoryId === req.user.root_directory) {
             const error: AppError = new Error('Not allowed to share root directory.');
@@ -166,23 +149,11 @@ export async function shareDirectory(req: Request, res: Response, next: NextFunc
 
 export async function unshareDirectory(req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware
         const directoryId = req.params.directoryId as string;
         const userId = req.body.userId as string;
 
-        if (!directoryId || !userId) {
-            const error: AppError = new Error('Missing parameters.');
-            error.status = 400;
-            return next(error);
-        }
-
-        const directory = await directoryRepository.getDirectory(directoryId);
-
-        // Only the owner of the directory can unshare it with other users, but users can unshare themselves
-        if (!(directory!.owner === req.user.id || userId === req.user.id)) {
-            const error: AppError = new Error('Unauthorized');
-            error.status = 401;
-            return next(error);
-        }
+        // Middleware already checked that we are the owner
 
         await directoryRepository.unshareDirectory(userId, directoryId);
         res.sendStatus(200);
@@ -193,14 +164,9 @@ export async function unshareDirectory(req: Request, res: Response, next: NextFu
 
 export async function leaveDirectory(req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware
         const directoryId = req.params.directoryId as string;
         const userId = req.user.id;
-
-        if (!directoryId || !userId) {
-            const error: AppError = new Error('Missing parameters.');
-            error.status = 400;
-            return next(error);
-        }
 
         await directoryRepository.unshareDirectory(userId, directoryId);
         res.sendStatus(200);
@@ -251,7 +217,11 @@ export async function getSharedDirectories(req: Request, res: Response, next: Ne
 
 export async function uploadProject(req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware (params and parsed JSON body)
         const directoryId = req.params.directoryId as string;
+        const name = req.body.name as string;
+        const description = req.body.description as string;
+        const chart = sanitizeChart(req.body.chart);
         const file = (req as Request & { file?: Express.Multer.File }).file;
 
         if (directoryId === req.user.root_directory) {
@@ -289,26 +259,6 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
             return next(error);
         }
 
-        let projectData: { name?: unknown; description?: unknown; chart?: unknown };
-        try {
-            projectData = JSON.parse(file.buffer.toString('utf-8'));
-        } catch {
-            const error: AppError = new Error('Invalid JSON file.');
-            error.status = 400;
-            return next(error);
-        }
-
-        if (typeof projectData.name !== 'string' || !projectData.name ||
-            typeof projectData.description !== 'string' || !projectData.chart) {
-            const error: AppError = new Error('Invalid project data. Missing required fields.');
-            error.status = 400;
-            return next(error);
-        }
-
-        const name = projectData.name.slice(0, MAX_NAME_LENGTH);
-        const description = projectData.description.slice(0, MAX_DESCRIPTION_LENGTH);
-        const chart = sanitizeChart(projectData.chart);
-
         const projectId = crypto.randomUUID();
         await projectRepository.createProject(projectId, directoryId, name, description, chart);
 
@@ -320,7 +270,8 @@ export async function uploadProject(req: Request, res: Response, next: NextFunct
 
 export async function updateDirectoryPublic(req: Request, res: Response, next: NextFunction) {
     try {
-        const id = req.params.directoryId as string; // won't even route if no id is included
+        // Validated by Zod middleware
+        const id = req.params.directoryId as string;
         const isPublic = req.body.isPublic as boolean;
         
         // Stops root directory from being shared
@@ -343,6 +294,7 @@ export async function updateDirectoryPublic(req: Request, res: Response, next: N
 
 export async function countTotalsForDirectoryOwner (req: Request, res: Response, next: NextFunction) {
     try {
+        // Validated by Zod middleware
         const directoryId = req.params.directoryId as string;
 
         const totalDirectories = await directoryRepository.countTotalDirectoriesForDirectoryOwner(directoryId)

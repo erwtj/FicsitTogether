@@ -135,10 +135,9 @@ export async function shareDirectory(auth: Auth0ContextType, dirID: string, user
 export async function unshareDirectory(auth: Auth0ContextType, dirID: string, userId: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
-    const response = await api.delete(`directories/${dirID}/share`, {
-        data: {
-            userId: userId
-        },
+    const response = await api.post(`directories/${dirID}/unshare`, {
+        userId: userId
+    }, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -149,7 +148,7 @@ export async function unshareDirectory(auth: Auth0ContextType, dirID: string, us
 export async function leaveDirectory(auth: Auth0ContextType, dirID: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
-    const response = await api.get(`directories/${dirID}/leave`, {
+    const response = await api.post(`directories/${dirID}/leave`, {}, {
         headers: {
             Authorization: `Bearer ${token}`
         }

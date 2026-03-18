@@ -41,9 +41,9 @@ function ShareModal({ show, directoryId, directoryName, onClose}: ShareModalProp
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     useEffect(() => {
-        if (directoryId.length === 0) return;
+        if (directoryId.length === 0 || !show) return;
         fetchSharedWith(auth, directoryId).then(users => setSharedWith(users));
-    }, [auth, directoryId])
+    }, [auth, directoryId, show])
 
     const shareWithUser = (username: string) => {
         shareDirectory(auth, directoryId, username).then(success => {

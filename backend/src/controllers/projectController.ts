@@ -2,33 +2,16 @@
 import * as repository from "../repository/projectRepository.js";
 import type {AppError} from "../middlewares/errorHandler.js";
 import type {ProjectDTO} from "dtolib";
-import {MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH, MAX_PROJECTS_PER_DIRECTORY, MAX_PROJECTS_PER_USER} from "dtolib";
+import {MAX_PROJECTS_PER_DIRECTORY, MAX_PROJECTS_PER_USER} from "dtolib";
 
 const emptyChart = {nodes: [], edges: []};
 
 export async function createProject(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+        // Validated by Zod middleware
         const directoryId = req.body.directoryId as string;
         const name = req.body.name as string;
         const description = req.body.description as string;
-        
-        if (!directoryId || !name || !description) {
-            const error: AppError = new Error('Missing parameters.');
-            error.status = 400;
-            return next(error);
-        }
-
-        if (name.length > MAX_NAME_LENGTH) {
-            const error: AppError = new Error(`Directory name exceeds max length (${MAX_NAME_LENGTH}).`);
-            error.status = 400;
-            return next(error);
-        }
-        
-        if (description.length > MAX_DESCRIPTION_LENGTH) {
-            const error: AppError = new Error(`Directory description exceeds max length (${MAX_DESCRIPTION_LENGTH}).`);
-            error.status = 400;
-            return next(error);
-        }
         
         if (directoryId === req.user.root_directory) {
             const error: AppError = new Error('Not allowed to make projects in root directory!');
@@ -69,7 +52,8 @@ export async function createProject(req: Request, res: Response, next: NextFunct
 
 export async function getProject(req: Request, res: Response, next: NextFunction) {
     try {
-        const id = req.params.projectId as string; // won't even route if no id is included
+        // Validated by Zod middleware
+        const id = req.params.projectId as string;
         const project = await repository.getProject(id);
 
         if (!project) { // Should be impossible due to checkProjectAccess middleware
@@ -86,7 +70,8 @@ export async function getProject(req: Request, res: Response, next: NextFunction
 
 export async function deleteProject(req: Request, res: Response, next: NextFunction) {
     try {
-        const id = req.params.projectId as string; // won't even route if no id is included
+        // Validated by Zod middleware
+        const id = req.params.projectId as string;
         
         await repository.deleteProject(id);
 
@@ -98,7 +83,8 @@ export async function deleteProject(req: Request, res: Response, next: NextFunct
 
 export async function downloadProject(req: Request, res: Response, next: NextFunction) {
     try {
-        const id = req.params.projectId as string; // won't even route if no id is included
+        // Validated by Zod middleware
+        const id = req.params.projectId as string;
         const project = await repository.getProject(id);
         const chart = await repository.getProjectChart(id);
 
@@ -125,7 +111,8 @@ export async function downloadProject(req: Request, res: Response, next: NextFun
 
 export async function updateProjectPublic(req: Request, res: Response, next: NextFunction) {
     try {
-        const id = req.params.projectId as string; // won't even route if no id is included
+        // Validated by Zod middleware
+        const id = req.params.projectId as string;
         const isPublic = req.body.isPublic as boolean;
         
         await repository.updateProjectPublic(id, isPublic);

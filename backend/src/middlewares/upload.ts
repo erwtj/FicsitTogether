@@ -2,6 +2,7 @@
 import type {AppError} from "./errorHandler.js";
 import type {Request, Response, NextFunction} from "express";
 import { MAX_PROJECT_SIZE_BYTES } from "dtolib";
+import { uploadProjectBodySchema } from '../validation/schemas.js';
 
 const upload = multer({
     storage: multer.memoryStorage(), // Keep file in memory as Buffer, no disk I/O needed
@@ -20,7 +21,7 @@ const upload = multer({
 });
 
 export const uploadSingleJson = (req: Request, res: Response, next: NextFunction) => {
-    upload.single('file')(req, res, (err) => {
+    upload.single('file')(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             if (err.code === 'LIMIT_FILE_SIZE') {
                 const appError: AppError = new Error(`File exceeds the maximum allowed size of ${MAX_PROJECT_SIZE_BYTES / (1024 * 1024)} MB.`);
@@ -31,6 +32,35 @@ export const uploadSingleJson = (req: Request, res: Response, next: NextFunction
             appError.status = 400;
             return next(appError);
         }
-        next(err);
+        
+        if (err) {
+            return next(err);
+        }
+
+        // Parse and validate the uploaded JSON file
+        const file = (req as Request & { file?: Express.Multer.File }).file;
+        
+        if (!file) {
+            const appError: AppError = new Error('No file uploaded.');
+            appError.status = 400;
+            return next(appError);
+        }
+
+        try {
+            const projectData = JSON.parse(file.buffer.toString('utf-8'));
+            // Validate the parsed JSON against the schema
+            const validated = await uploadProjectBodySchema.parseAsync(projectData);
+            // Attach the validated data to req.body for the controller
+            req.body = validated;
+            next();
+        } catch (parseError) {
+            if (parseError instanceof SyntaxError) {
+                const appError: AppError = new Error('Invalid JSON file.');
+                appError.status = 400;
+                return next(appError);
+            }
+            // Zod validation errors are handled by the error handler
+            next(parseError);
+        }
     });
 };

@@ -40,8 +40,6 @@ if (config.environment === 'development') {
     });
 }
 
-// TODO: Type check incoming data (e.g. project creation, user registration) to prevent malformed data from reaching the database. This can be done with a library like Joi or Zod, or manually in the controller functions.
-
 // Public routes (no auth required)
 app.use('/api/public', publicRateLimit, publicRoutes);
 
