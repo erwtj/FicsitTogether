@@ -6,6 +6,8 @@ import { stripComputedFields } from "../utils/idUtils";
 
 const MESSAGE_SYNC = 0;
 const MESSAGE_AWARENESS = 1;
+const MESSAGE_SYNC_STEP_1 = 2; // Client sends state vector to server
+const MESSAGE_SYNC_STEP_2 = 3; // Server sends missing updates to client
 
 interface UseYjsSyncProps {
     projectId: string;
@@ -159,6 +161,12 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
             ws.onopen = () => {
                 setConnected(true);
                 console.log("WebSocket connected");
+                
+                // Send our state vector to the server so it knows what we have
+                // Server will send us only the updates we're missing
+                const stateVector = Y.encodeStateVector(doc);
+                const syncStep1Message = new Uint8Array([MESSAGE_SYNC_STEP_1, ...stateVector]);
+                ws.send(syncStep1Message);
             };
 
             ws.onerror = (error) => {
@@ -186,10 +194,24 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 const content = message.slice(1);
 
                 if (messageType === MESSAGE_SYNC) {
+                    // Regular sync update from another client
                     Y.applyUpdate(doc, content);
-                    // Mark as synced after the first state update from the server.
-                    // Only now is it safe to send local changes outward.
+                } else if (messageType === MESSAGE_SYNC_STEP_1) {
+                    // Server is requesting our updates based on their state vector
+                    const serverStateVector = content;
+                    const updateForServer = Y.encodeStateAsUpdate(doc, serverStateVector);
+                    if (updateForServer.length > 0) {
+                        console.log("Sending updates server is missing");
+                        const syncMessage = new Uint8Array([MESSAGE_SYNC, ...updateForServer]);
+                        ws.send(syncMessage);
+                    }
+                } else if (messageType === MESSAGE_SYNC_STEP_2) {
+                    // Server's response to our state vector - contains updates we're missing
+                    Y.applyUpdate(doc, content);
+                    
+                    // Mark as synced - we can now send future updates
                     syncedRef.current = true;
+                    console.log("Sync completed");
                 } else if (messageType === MESSAGE_AWARENESS) {
                     // TODO: Do some shit with awareness
                     console.log("Awareness update received");

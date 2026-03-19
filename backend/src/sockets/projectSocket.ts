@@ -37,6 +37,8 @@ const projectContextMap = new Map<string, ProjectContext>(); // projectId -> Pro
 
 const MESSAGE_SYNC = 0;      // Yjs document sync
 const MESSAGE_AWARENESS = 1;  // Awareness updates
+const MESSAGE_SYNC_STEP_1 = 2; // Client sends state vector
+const MESSAGE_SYNC_STEP_2 = 3; // Server sends missing updates
 
 
 async function saveDocument(projectId: string, context: ProjectContext) {
@@ -193,10 +195,9 @@ export function setupWebSocketServer(server: Server) {
             ws.clientId = context.nextClientId++;
             context.clients.add(ws);
 
-            const stateVector = Y.encodeStateAsUpdate(context.doc);
-            const syncMessage = new Uint8Array([MESSAGE_SYNC, ...stateVector]);
-            ws.send(syncMessage);
-
+            // Don't send initial state immediately - wait for client to send their state vector
+            // This allows proper CRDT merging on reconnection
+            
             const awarenessUpdate = encodeAwarenessUpdate(
                 context.awareness,
                 Array.from(context.awareness.getStates().keys())
@@ -223,7 +224,21 @@ export function setupWebSocketServer(server: Server) {
             const messageType = message[0];
             const content = message.slice(1);
 
-            if (messageType === MESSAGE_SYNC) {
+            if (messageType === MESSAGE_SYNC_STEP_1) {
+                // Client sent their state vector - bidirectional sync
+                const clientStateVector = content;
+
+                // Send client the updates they're missing from server
+                const updateForClient = Y.encodeStateAsUpdate(context.doc, clientStateVector);
+                const syncStep2Message = new Uint8Array([MESSAGE_SYNC_STEP_2, ...updateForClient]);
+                ws.send(syncStep2Message);
+
+                // Request updates from client that server is missing
+                const serverStateVector = Y.encodeStateVector(context.doc);
+                const syncRequestMessage = new Uint8Array([MESSAGE_SYNC_STEP_1, ...serverStateVector]);
+                ws.send(syncRequestMessage);
+
+            } else if (messageType === MESSAGE_SYNC) {
                 Y.applyUpdate(context.doc, content);
 
                 context.clients.forEach((client) => {
