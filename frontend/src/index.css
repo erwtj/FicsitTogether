@@ -31,3 +31,7 @@ img, .no-drag {
 .default-orange {
     color: #e26d13 !important;
 }
+
+.default-orange-desaturated {
+    color: #d56d25 !important;
+}
