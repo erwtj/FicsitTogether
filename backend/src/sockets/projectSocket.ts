@@ -209,9 +209,22 @@ export function setupWebSocketServer(server: Server) {
             return;
         }
 
+        // Cloudflare has a 100-second idle timeout, so ping every 30s to stay alive
+        let isAlive = true;
+        ws.on('pong', () => {
+            isAlive = true;
+        });
+
         const interval = setInterval(() => {
+            if (!isAlive) {
+                console.log(`WebSocket client ${ws.clientId} failed to respond to ping, terminating`);
+                ws.terminate();
+                return;
+            }
+            
             if (ws.readyState === ws.OPEN) {
-                ws.ping()
+                isAlive = false;
+                ws.ping();
             }
         }, 30000)
 
