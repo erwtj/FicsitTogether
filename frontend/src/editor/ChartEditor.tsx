@@ -1,4 +1,4 @@
-﻿import {useCallback, useRef } from "react";
+﻿import {useCallback, useMemo, useRef } from "react";
 import * as Y from "yjs";
 import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -22,6 +22,13 @@ import { Toast } from "react-bootstrap";
 import {useSloopModal} from "./hooks/modals/useSloopModal.ts";
 import {SloopModal} from "./components/modals/SloopModal.tsx";
 import {useClientSettings} from "../hooks/useClientSettings.ts";
+
+// Static constants to prevent recreation on every render
+const reactFlowStyle = { outline: "none" };
+const panelStyle = { placeContent: "center" as const };
+const defaultEdgeOptions = { style: { strokeWidth: 1.75 } };
+const deleteKeyCodes: string[] = ['Backspace', 'Delete'];
+const multiSelectionKeyCodes: string[] = ['Shift', 'Control'];
 
 interface ChartEditorProps {
     projectId: string;
@@ -60,6 +67,18 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
     // Connection validation
     const { isValidConnection } = useConnectionValidation();
 
+    // Memoize snap grid to prevent array recreation
+    const snapGrid = useMemo(
+        () => [clientSettings.snapSize, clientSettings.snapSize] as [number, number],
+        [clientSettings.snapSize]
+    );
+
+    // Memoize node color function for MiniMap
+    const nodeColorMemo = useMemo(
+        () => clientSettings.minimapColors ? nodeColor : undefined,
+        [clientSettings.minimapColors]
+    );
+
     const handleKeyDownCapture = useCallback((event: React.KeyboardEvent) => {
         // Ignore text inputs
         if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
@@ -84,13 +103,13 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
         <YjsContext.Provider value={ydocRef}>
             <div style={{ width: "100%", height: "100vh" }}>
                 <ReactFlow
-                    style={{outline: "none"}}
+                    style={reactFlowStyle}
                     tabIndex={-1}
                     nodes={nodes}
                     edges={edges}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
-                    defaultEdgeOptions={{ style: { strokeWidth: 1.75 } }}
+                    defaultEdgeOptions={defaultEdgeOptions}
                     onNodesChange={onNodesChangeInternal}
                     onEdgesChange={onEdgesChangeInternal}
                     onConnect={onConnect}
@@ -100,16 +119,16 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     onDoubleClickCapture={onCanvasDoubleClick}
                     zoomOnDoubleClick={false}
                     nodeOrigin={[0.5, 0.0]}
-                    deleteKeyCode={['Backspace', 'Delete']}
-                    multiSelectionKeyCode={['Shift', 'Control']}
+                    deleteKeyCode={deleteKeyCodes}
+                    multiSelectionKeyCode={multiSelectionKeyCodes}
                     onKeyDownCapture={handleKeyDownCapture}
                     fitView
                     snapToGrid={clientSettings.snappingEnabled}
-                    snapGrid={[clientSettings.snapSize, clientSettings.snapSize]}
+                    snapGrid={snapGrid}
                 >
                     <Background variant={BackgroundVariant.Cross} className="bg" color="#413D46" gap={40} />
-                    {clientSettings.minimapEnabled && <MiniMap className="bg-body" position="top-right" nodeColor={clientSettings.minimapColors ? nodeColor : undefined} />}
-                    <Panel position={"top-left"} className={"h-100"} style={{placeContent: "center"}}>
+                    {clientSettings.minimapEnabled && <MiniMap className="bg-body" position="top-right" nodeColor={nodeColorMemo} />}
+                    <Panel position={"top-left"} className={"h-100"} style={panelStyle}>
                         <OverviewSidePanel projectId={projectId}/>
                     </Panel>
                 </ReactFlow>

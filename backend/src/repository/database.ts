@@ -57,6 +57,15 @@ export async function initDatabase() {
         ADD COLUMN IF NOT EXISTS public BOOLEAN NOT NULL DEFAULT FALSE;
     `);
 
+    // Add creation timestamp to projects and directories for sorting by creation date
+    await pool.query(`
+        ALTER TABLE directories
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+        
+        ALTER TABLE projects
+        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+    `);
+
     // Add performance indices
     await pool.query(`
         -- Speed up all queries that filter/join on directories.parent_directory
@@ -78,14 +87,26 @@ export async function initDatabase() {
         -- but NOT lookups by directory alone (existsShare, getSharedWith, getDirectoryTree access checks).
         CREATE INDEX IF NOT EXISTS idx_share_directories_directory
             ON share_directories (directory);
+
+        -- Composite index for sorting directories by creation time within a parent directory
+        -- (getDirectories, getSharedDirectories with ORDER BY created_at ASC, id ASC)
+        CREATE INDEX IF NOT EXISTS idx_directories_parent_created
+            ON directories (parent_directory, created_at ASC, id ASC);
+
+        -- Composite index for sorting projects by creation time within a parent directory
+        -- (getProjectsInDirectory with ORDER BY created_at ASC, id ASC)
+        CREATE INDEX IF NOT EXISTS idx_projects_parent_created
+            ON projects (parent_directory, created_at ASC, id ASC);
+
+        -- Partial index for public directory lookups (only indexes public = TRUE rows)
+        -- (isPublicDirectory middleware, getPublicDirectoryTree recursive CTEs)
+        CREATE INDEX IF NOT EXISTS idx_directories_public
+            ON directories (public) WHERE public = TRUE;
+
+        -- Partial index for public project lookups (only indexes public = TRUE rows)
+        -- (isPublicProject middleware checks)
+        CREATE INDEX IF NOT EXISTS idx_projects_public
+            ON projects (public) WHERE public = TRUE;
     `);
-    
-    // Add creation timestamp to projects and directories for sorting by creation date
-    await pool.query(`
-        ALTER TABLE directories
-        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-        
-        ALTER TABLE projects
-        ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-    `);
+
 }

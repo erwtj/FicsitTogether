@@ -3,7 +3,7 @@ import {
     createDirectory,
     createProject,
     deleteDirectory, deleteProject,
-    downloadProject, fetchUser, updateDirectoryPublic, updateProjectPublic,
+    downloadProject, fetchTotalCounts, updateDirectoryPublic, updateProjectPublic,
     uploadProject
 } from "../../api/apiCalls.ts";
 import type {Auth0ContextType} from "../../auth/auth0.tsx";
@@ -16,7 +16,8 @@ import { Link } from "@tanstack/react-router";
 import {AddDirectoryCard} from "./AddDirectoryCard.tsx";
 import { MAX_DIRECTORIES_PER_DIRECTORY, MAX_DIRECTORY_DEPTH, MAX_PROJECTS_PER_DIRECTORY, type DirectoryContentDTO,
     type DirectoryDTO, type FullUserInfoDTO,
-    type ProjectDTO} from "dtolib";
+    type ProjectDTO,
+    type TotalCountsDTO} from "dtolib";
 import {AddProjectCard} from "./AddProjectCard.tsx";
 import { Toast } from "react-bootstrap";
 import ConfirmationModal from "../modals/ConfirmationModal.tsx";
@@ -28,13 +29,14 @@ type DirectoryExplorerProps = {
     auth?: Auth0ContextType;
     
     user?: FullUserInfoDTO;
+    totalCounts?: TotalCountsDTO;
     
     directory: DirectoryContentDTO;
 }
 
-export const DirectoryExplorer = ({ isPublic, user, auth, directory }: DirectoryExplorerProps) => {
-    const [totalProjectCount, setTotalProjectCount] = useState(user?.total_project_count);
-    const [totalDirectoryCount, setTotalDirectoryCount] = useState(user?.total_directory_count);
+export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory }: DirectoryExplorerProps) => {
+    const [totalProjectCount, setTotalProjectCount] = useState(totalCounts?.totalProjects);
+    const [totalDirectoryCount, setTotalDirectoryCount] = useState(totalCounts?.totalDirectories);
 
     const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>(directory.subDirectories);
     const [projects, setProjects] = useState<ProjectDTO[]>(directory.projects);
@@ -54,17 +56,17 @@ export const DirectoryExplorer = ({ isPublic, user, auth, directory }: Directory
     }, [directory]);
 
     useEffect(() => {
-        setTotalProjectCount(user?.total_project_count);
-        setTotalDirectoryCount(user?.total_directory_count);
-    }, [user]);
+        setTotalProjectCount(totalCounts?.totalProjects);
+        setTotalDirectoryCount(totalCounts?.totalDirectories);
+    }, [totalCounts]);
     
     const refetchCounts = () => {
         if (!auth) return;
         
-        fetchUser(auth)
-        .then(updatedUser => {
-            setTotalProjectCount(updatedUser.total_project_count);
-            setTotalDirectoryCount(updatedUser.total_directory_count);
+        fetchTotalCounts(auth, directory.id)
+        .then(updatedCounts => {
+            setTotalProjectCount(updatedCounts.totalProjects);
+            setTotalDirectoryCount(updatedCounts.totalDirectories);
         })
         .catch(err => {
             console.error('Error fetching user data:', err);

@@ -1,5 +1,5 @@
 ﻿import { Router } from 'express';
-import {requireCanEditDirectory, requireCanEditProject, requireDirectoryOwner} from "../middlewares/directoryAccess.js";
+import {requireCanEditDirectory, requireDirectoryOwner} from "../middlewares/directoryAccess.js";
 import {
     getDirectory,
     createDirectory,
@@ -10,27 +10,39 @@ import {
     getSharedDirectories,
     getDirectorySharedWith, leaveDirectory,
     getChartsInDirectory, uploadProject,
-    updateDirectoryPublic
+    updateDirectoryPublic, countTotalsForDirectoryOwner, countTotalsForRootOwner
 } from "../controllers/directoryController.js";
 import {uploadSingleJson} from "../middlewares/upload.js";
+import { validate } from '../middlewares/validate.js';
+import {
+    createDirectoryBodySchema,
+    directoryIdParamSchema,
+    shareDirectoryBodySchema,
+    unshareDirectoryBodySchema,
+    updatePublicStatusBodySchema
+} from '../validation/schemas.js';
 
 const router = Router();
 
 // Important! /root and /share should go before /:directoryId, otherwise they will be interpreted as id's and will route incorrectly
 router.get('/root', getRootDirectory);
 router.get('/shared', getSharedDirectories);
+router.get('/root/owner/count', countTotalsForRootOwner );
 
-router.get('/:directoryId', requireCanEditDirectory, getDirectory);
-router.post('/', requireCanEditDirectory, createDirectory);
-router.delete('/:directoryId', requireCanEditDirectory, deleteDirectory);
-router.put('/:directoryId/public', requireCanEditDirectory, updateDirectoryPublic);
+router.get('/:directoryId', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, getDirectory);
+router.post('/', validate({ body: createDirectoryBodySchema }), requireCanEditDirectory, createDirectory);
+router.delete('/:directoryId', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, deleteDirectory);
+router.put('/:directoryId/public', validate({ params: directoryIdParamSchema, body: updatePublicStatusBodySchema }), requireCanEditDirectory, updateDirectoryPublic);
 
-router.post('/:directoryId/share', requireDirectoryOwner, shareDirectory);
-router.delete('/:directoryId/share', requireCanEditDirectory, unshareDirectory); // Both the owner and shared users can unshare (the owner can unshare others, and shared users can unshare themselves to remove their access)
-router.get('/:directoryId/share', requireCanEditDirectory, getDirectorySharedWith);
-router.get('/:directoryId/charts', requireCanEditDirectory, getChartsInDirectory);
-router.get('/:directoryId/leave', requireCanEditDirectory, leaveDirectory);
+router.get('/:directoryId/owner/count', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, countTotalsForDirectoryOwner );
 
-router.post('/:directoryId/upload', requireCanEditDirectory, uploadSingleJson, uploadProject);
+router.post('/:directoryId/share', validate({ params: directoryIdParamSchema, body: shareDirectoryBodySchema }), requireDirectoryOwner, shareDirectory);
+router.post('/:directoryId/unshare', validate({ params: directoryIdParamSchema, body: unshareDirectoryBodySchema }), requireDirectoryOwner, unshareDirectory); // Post not delete since we are sending the userId in the body, not the url
+router.post('/:directoryId/leave', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, leaveDirectory);
+
+router.get('/:directoryId/share', validate({ params: directoryIdParamSchema }), requireDirectoryOwner, getDirectorySharedWith);
+router.get('/:directoryId/charts', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, getChartsInDirectory);
+
+router.post('/:directoryId/upload', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, uploadSingleJson, uploadProject);
 
 export default router;

@@ -17,6 +17,7 @@ type SharedDirectory = {
     id: string;
     name: string;
     parentDirectoryId: string;
+    public: boolean;
     ownerUsername: string;
     ownerId: string;
 }
@@ -62,13 +63,16 @@ export async function countDirectories(parentDirectoryId: string): Promise<numbe
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 
-export async function countTotalDirectoriesForUser(userId: string): Promise<number> {
+export async function countTotalDirectoriesForDirectoryOwner(directoryId: string): Promise<number> {
     const res = await pool.query<{ count: string }>(`
-        SELECT COUNT(*) AS count
+        SELECT COUNT(*)
         FROM directories
-        WHERE owner = $1
-          AND id != parent_directory
-    `, [userId]);
+        WHERE owner = (
+            SELECT owner
+            FROM directories
+            WHERE id = $1
+        )
+    `, [directoryId]);
     return parseInt(res.rows[0]?.count ?? '0', 10);
 }
 
@@ -140,6 +144,7 @@ export async function getSharedDirectories(userId: string) {
             d.id,
             d.name,
             d.parent_directory as "parentDirectoryId",
+            d.public,
             u.username as "ownerUsername",
             u.id as "ownerId"
         FROM share_directories sd

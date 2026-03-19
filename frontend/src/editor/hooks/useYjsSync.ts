@@ -6,6 +6,8 @@ import { stripComputedFields } from "../utils/idUtils";
 
 const MESSAGE_SYNC = 0;
 const MESSAGE_AWARENESS = 1;
+const MESSAGE_SYNC_STEP_1 = 2; // Client sends state vector to server
+const MESSAGE_SYNC_STEP_2 = 3; // Server sends missing updates to client
 
 interface UseYjsSyncProps {
     projectId: string;
@@ -25,16 +27,23 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
     const [connected, setConnected] = useState(false);
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const destroyedRef = useRef(false);
-    // Only true after the server's initial state has been received and applied.
-    // No local updates are sent until this is set (prevents a blank doc from wiping the server)
-    const syncedRef = useRef(false);
+    // Tracks sync phases: false = not synced, 'receiving' = received step 2, 'sending' = sent response to step 1, true = fully synced
+    const syncedRef = useRef<boolean | 'receiving' | 'sending'>(false);
+    const pendingUpdatesRef = useRef<Uint8Array[]>([]);
 
-    const sendUpdate = useCallback((update: Uint8Array) => {
+    const sendUpdate = useCallback((update: Uint8Array, origin: unknown) => {
+        // Don't send updates that we received from the server
+        if (origin !== LOCAL_ORIGIN) return;
+        
         console.log("Sending local update")
         const ws = wsRef.current;
-        if (ws?.readyState === WebSocket.OPEN && syncedRef.current) {
+        if (ws?.readyState === WebSocket.OPEN && syncedRef.current === true) {
             const message = new Uint8Array([MESSAGE_SYNC, ...update]);
             ws.send(message);
+        } else if (syncedRef.current !== true) {
+            // Queue updates that happen before initial sync completes
+            console.log("Queueing update until synced");
+            pendingUpdatesRef.current.push(update);
         }
     }, []);
 
@@ -159,6 +168,12 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
             ws.onopen = () => {
                 setConnected(true);
                 console.log("WebSocket connected");
+                
+                // Send our state vector to the server so it knows what we have
+                // Server will send us only the updates we're missing
+                const stateVector = Y.encodeStateVector(doc);
+                const syncStep1Message = new Uint8Array([MESSAGE_SYNC_STEP_1, ...stateVector]);
+                ws.send(syncStep1Message);
             };
 
             ws.onerror = (error) => {
@@ -169,6 +184,9 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 setConnected(false);
                 syncedRef.current = false;
                 wsRef.current = null;
+                // Clear any pending updates on disconnect - they should already be in the Yjs doc
+                // and will be synced properly on reconnect via the state vector exchange
+                pendingUpdatesRef.current = [];
                 if (!destroyedRef.current) {
                     console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
                     reconnectTimerRef.current = setTimeout(() => {
@@ -186,22 +204,62 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 const content = message.slice(1);
 
                 if (messageType === MESSAGE_SYNC) {
-                    // Capture what the server knows before merging its state in
-                    const serverStateVector = Y.encodeStateVectorFromUpdate(content);
-                    // Compute what the local doc has that the server is missing (e.g. offline edits)
-                    const localDiff = Y.encodeStateAsUpdate(doc, serverStateVector);
-
+                    // Regular sync update from another client
                     Y.applyUpdate(doc, content);
-
-                    // Send the diff back so the server learns about any offline changes.
-                    // Only send if there is actually something new (an empty update is 2 bytes).
-                    if (localDiff.length > 2) {
-                        const diffMessage = new Uint8Array([MESSAGE_SYNC, ...localDiff]);
-                        ws.send(diffMessage);
+                } else if (messageType === MESSAGE_SYNC_STEP_1) {
+                    // Server is requesting our updates based on their state vector
+                    const serverStateVector = content;
+                    const updateForServer = Y.encodeStateAsUpdate(doc, serverStateVector);
+                    if (updateForServer.length > 0) {
+                        console.log("Sending updates server is missing");
+                        const syncMessage = new Uint8Array([MESSAGE_SYNC, ...updateForServer]);
+                        ws.send(syncMessage);
                     }
-
-                    // Mark as synced — from this point on all local changes are forwarded normally.
-                    syncedRef.current = true;
+                    
+                    // Check if we're now fully synced
+                    if (syncedRef.current === 'receiving') {
+                        // We've already received server updates, now fully synced
+                        syncedRef.current = true;
+                        console.log("Bidirectional sync completed");
+                        
+                        // Send any updates that were queued during sync
+                        if (pendingUpdatesRef.current.length > 0) {
+                            console.log(`Sending ${pendingUpdatesRef.current.length} queued updates`);
+                            pendingUpdatesRef.current.forEach(update => {
+                                const message = new Uint8Array([MESSAGE_SYNC, ...update]);
+                                ws.send(message);
+                            });
+                            pendingUpdatesRef.current = [];
+                        }
+                    } else {
+                        // We received server's request before its updates, mark that we've sent our side
+                        syncedRef.current = 'sending';
+                        console.log("Sent client updates, waiting for server updates...");
+                    }
+                } else if (messageType === MESSAGE_SYNC_STEP_2) {
+                    // Server's response to our state vector - contains updates we're missing
+                    Y.applyUpdate(doc, content);
+                    
+                    // Check if we're now fully synced
+                    if (syncedRef.current === 'sending') {
+                        // We've already sent our updates to server, now fully synced
+                        syncedRef.current = true;
+                        console.log("Bidirectional sync completed");
+                        
+                        // Send any updates that were queued during sync
+                        if (pendingUpdatesRef.current.length > 0) {
+                            console.log(`Sending ${pendingUpdatesRef.current.length} queued updates`);
+                            pendingUpdatesRef.current.forEach(update => {
+                                const message = new Uint8Array([MESSAGE_SYNC, ...update]);
+                                ws.send(message);
+                            });
+                            pendingUpdatesRef.current = [];
+                        }
+                    } else {
+                        // We received server updates first, mark and wait for sync request
+                        syncedRef.current = 'receiving';
+                        console.log("Received server updates, waiting for sync request...");
+                    }
                 } else if (messageType === MESSAGE_AWARENESS) {
                     // TODO: Do some shit with awareness
                     console.log("Awareness update received");

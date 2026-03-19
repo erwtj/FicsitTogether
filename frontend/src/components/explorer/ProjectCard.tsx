@@ -53,10 +53,6 @@ export const ProjectCard = ({to, project, changePublic, deleteProject, downloadP
                         <ThreeDotsVertical size={20} className={"text-secondary"} role={"button"} data-bs-toggle={"dropdown"} aria-expanded={false} />
                     </Dropdown.Toggle>
                     <Dropdown.Menu className={"p-0 z-2"} popperConfig={{ strategy: 'fixed' }} renderOnMount>
-                        {deleteProject && <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
-                                       onClick={() => deleteProject(project)}>
-                            Delete
-                        </Dropdown.Item>}
                         {downloadProject && <Dropdown.Item href={"#"} className={"dropdown-option download-option user-select-none"}
                                        onClick={() => downloadProject(project)}>
                             Download
@@ -64,6 +60,10 @@ export const ProjectCard = ({to, project, changePublic, deleteProject, downloadP
                         {changePublic && <Dropdown.Item href={"#"} className={"dropdown-option public-option user-select-none"}
                                        onClick={() => changePublic(project)}>
                             Publicize
+                        </Dropdown.Item>}
+                        {deleteProject && <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}
+                                       onClick={() => deleteProject(project)}>
+                            Delete
                         </Dropdown.Item>}
                     </Dropdown.Menu>
                 </Dropdown>}
