@@ -27,16 +27,23 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
     const [connected, setConnected] = useState(false);
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const destroyedRef = useRef(false);
-    // Only true after the server's initial state has been received and applied.
-    // No local updates are sent until this is set (prevents a blank doc from wiping the server)
-    const syncedRef = useRef(false);
+    // Tracks sync phases: false = not synced, 'receiving' = received step 2, 'sending' = sent response to step 1, true = fully synced
+    const syncedRef = useRef<boolean | 'receiving' | 'sending'>(false);
+    const pendingUpdatesRef = useRef<Uint8Array[]>([]);
 
-    const sendUpdate = useCallback((update: Uint8Array) => {
+    const sendUpdate = useCallback((update: Uint8Array, origin: unknown) => {
+        // Don't send updates that we received from the server
+        if (origin !== LOCAL_ORIGIN) return;
+        
         console.log("Sending local update")
         const ws = wsRef.current;
-        if (ws?.readyState === WebSocket.OPEN && syncedRef.current) {
+        if (ws?.readyState === WebSocket.OPEN && syncedRef.current === true) {
             const message = new Uint8Array([MESSAGE_SYNC, ...update]);
             ws.send(message);
+        } else if (syncedRef.current !== true) {
+            // Queue updates that happen before initial sync completes
+            console.log("Queueing update until synced");
+            pendingUpdatesRef.current.push(update);
         }
     }, []);
 
@@ -177,6 +184,9 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 setConnected(false);
                 syncedRef.current = false;
                 wsRef.current = null;
+                // Clear any pending updates on disconnect - they should already be in the Yjs doc
+                // and will be synced properly on reconnect via the state vector exchange
+                pendingUpdatesRef.current = [];
                 if (!destroyedRef.current) {
                     console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
                     reconnectTimerRef.current = setTimeout(() => {
@@ -205,13 +215,51 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                         const syncMessage = new Uint8Array([MESSAGE_SYNC, ...updateForServer]);
                         ws.send(syncMessage);
                     }
+                    
+                    // Check if we're now fully synced
+                    if (syncedRef.current === 'receiving') {
+                        // We've already received server updates, now fully synced
+                        syncedRef.current = true;
+                        console.log("Bidirectional sync completed");
+                        
+                        // Send any updates that were queued during sync
+                        if (pendingUpdatesRef.current.length > 0) {
+                            console.log(`Sending ${pendingUpdatesRef.current.length} queued updates`);
+                            pendingUpdatesRef.current.forEach(update => {
+                                const message = new Uint8Array([MESSAGE_SYNC, ...update]);
+                                ws.send(message);
+                            });
+                            pendingUpdatesRef.current = [];
+                        }
+                    } else {
+                        // We received server's request before its updates, mark that we've sent our side
+                        syncedRef.current = 'sending';
+                        console.log("Sent client updates, waiting for server updates...");
+                    }
                 } else if (messageType === MESSAGE_SYNC_STEP_2) {
                     // Server's response to our state vector - contains updates we're missing
                     Y.applyUpdate(doc, content);
                     
-                    // Mark as synced - we can now send future updates
-                    syncedRef.current = true;
-                    console.log("Sync completed");
+                    // Check if we're now fully synced
+                    if (syncedRef.current === 'sending') {
+                        // We've already sent our updates to server, now fully synced
+                        syncedRef.current = true;
+                        console.log("Bidirectional sync completed");
+                        
+                        // Send any updates that were queued during sync
+                        if (pendingUpdatesRef.current.length > 0) {
+                            console.log(`Sending ${pendingUpdatesRef.current.length} queued updates`);
+                            pendingUpdatesRef.current.forEach(update => {
+                                const message = new Uint8Array([MESSAGE_SYNC, ...update]);
+                                ws.send(message);
+                            });
+                            pendingUpdatesRef.current = [];
+                        }
+                    } else {
+                        // We received server updates first, mark and wait for sync request
+                        syncedRef.current = 'receiving';
+                        console.log("Received server updates, waiting for sync request...");
+                    }
                 } else if (messageType === MESSAGE_AWARENESS) {
                     // TODO: Do some shit with awareness
                     console.log("Awareness update received");
