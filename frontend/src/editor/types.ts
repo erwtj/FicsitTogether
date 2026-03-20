@@ -42,8 +42,11 @@ export type AppNode =
 
 export type MovablePoint = {
     id: string;
-    x: number;
-    y: number;
+    // Relative position along the source-target axis (0 = source, 1 = target)
+    t: number;
+    // Offset from the interpolated point on the source-target line
+    dx: number;
+    dy: number;
 }
 
 export type ItemEdgeData = {
