@@ -5,6 +5,7 @@ import {
     getBezierPath,
     type EdgeProps,
     useReactFlow,
+    useStore,
 } from "@xyflow/react";
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
@@ -41,6 +42,10 @@ export const ItemEdge = memo(function ItemEdge({
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
 
+    // Subscribe to specific nodes so edge re-renders when node data or selection changes
+    const sourceNode = useStore((store) => store.nodeLookup.get(source));
+    const targetNode = useStore((store) => store.nodeLookup.get(target));
+
     // During a drag we buffer intermediate positions in local state so the SVG
     const [dragBuffer, setDragBuffer] = useState<MovablePoint[] | null>(null);
 
@@ -57,9 +62,6 @@ export const ItemEdge = memo(function ItemEdge({
         sourceX, sourceY, sourcePosition,
         targetX, targetY, targetPosition,
     });
-
-    const sourceNode = reactFlow.getNode(source);
-    const targetNode = reactFlow.getNode(target);
 
     const sourceItem: Item | null = useMemo(() => {
         if (!sourceNode) return null;

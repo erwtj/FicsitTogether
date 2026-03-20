@@ -24,7 +24,6 @@ export function useYjsMutation() {
             if (node) {
                 nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
             }
-
         },
         [ydocRef],
     );
@@ -61,7 +60,7 @@ export function useYjsMutation() {
                     edge.source === nodeId
             );
 
-
+            nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
 
             if (outgoingEdges.length === 1) {
                 const edge = outgoingEdges[0];
@@ -71,11 +70,7 @@ export function useYjsMutation() {
                     throughput: patch.outputAmount as number | undefined,
                 }
 
-                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
                 edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...edgePatch } });
-            }
-            else {
-                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
             }
         },
         [ydocRef],
