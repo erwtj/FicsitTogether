@@ -7,7 +7,7 @@ import {
     type OnConnectStart,
 } from "@xyflow/react";
 import { MAX_CHART_EDGES } from "dtolib";
-import { type ItemEdgeData } from "../types";
+import {type ItemEdgeData, type ItemSpawnerNodeData} from "../types";
 import {
     maxSourceThroughput, maxTargetThroughput,
     usedSourceThroughput, usedTargetThroughput,
@@ -177,6 +177,8 @@ export function useNodeEdgeHandlers(
                 throughput = Math.max(0, max - usedTargetThroughput(allEdges, target, targetHandle));
         }
 
+        connectingInfo.current = null;
+
         const edgeId = generateEdgeId();
         doc.getMap<Edge>("edges").set(edgeId, {
             id: edgeId,
@@ -184,7 +186,22 @@ export function useNodeEdgeHandlers(
             source, target, sourceHandle, targetHandle,
             data: { throughput },
         });
-        connectingInfo.current = null;
+
+        if (sourceNode.type === "item-spawner-node") {
+            const sourceData = sourceNode.data as ItemSpawnerNodeData;
+
+            const newThrough = usedSourceThroughput(allEdges, source, sourceHandle) + throughput;
+
+            const maxOut = Math.max(newThrough, sourceData.outputAmount);
+
+            if (maxOut !== sourceData.outputAmount) {
+                const nodeMap = doc.getMap<Node>("nodes");
+                const node = nodeMap.get(source);
+                if (node) {
+                    nodeMap.set(source, stripComputedFields({ ...node, data: { ...node.data, outputAmount: maxOut } }));
+                }
+            }
+        }
     }, [ydocRef, reactFlow]);
 
     return {
