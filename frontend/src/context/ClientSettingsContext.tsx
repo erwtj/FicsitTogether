@@ -20,6 +20,10 @@ export type ClientSettings = {
     /* Overview */
     showWaterUsage: boolean;
     showPhotonUsage: boolean;
+
+    /* Personal */
+    showUsernames: boolean;
+    showEmail: boolean;
 }
 
 const defaultClientSettings: ClientSettings = {
@@ -31,6 +35,8 @@ const defaultClientSettings: ClientSettings = {
     enableIONetto: false,
     showWaterUsage: true,
     showPhotonUsage: true,
+    showUsernames: true,
+    showEmail: true,
 };
 
 type ClientSettingsContextType = {

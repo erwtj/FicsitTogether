@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/Button';
 import {ClientSettingsModal} from "../modals/ClientSettingsModal.tsx";
 import "./UserPopover.tsx.css";
 import { BoxArrowUpRight } from "react-bootstrap-icons";
+import {useClientSettings} from "../../hooks/useClientSettings.ts";
 
 export type UserPopoverProps = {
     auth0Context: Auth0ContextType
@@ -17,6 +18,10 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
 
     const [showSettings, setShowSettings] = useState(false);
     const [showPopover, setShowPopover] = useState(false);
+
+    const { clientSettings } = useClientSettings();
+    const showUsernames = clientSettings.showUsernames;
+    const showEmail = clientSettings.showEmail;
 
     useEffect(() => {
         if (auth0Context.getAccessTokenSilently) {
@@ -49,8 +54,14 @@ const UserPopover: React.FC<UserPopoverProps> = ({ auth0Context, children }) => 
 
                 <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
 
-                <p className="text-muted mb-1 fs-6">@{username}</p>
-                <h6 className="mb-3">{user!.email}</h6>
+                {showUsernames ?
+                    <p className="text-muted mb-1 fs-6">@{username}</p> :
+                    <p className="text-muted mb-1 fs-6 fst-italic">Username hidden</p>
+                }
+                {showEmail ?
+                    <h6 className="mb-3">{user!.email}</h6> :
+                    <h6 className="mb-3 text-muted fw-normal fst-italic">Email hidden</h6>
+                }
 
                 <hr style={{marginLeft: '-1rem', marginRight: '-1rem'}}/>
 
