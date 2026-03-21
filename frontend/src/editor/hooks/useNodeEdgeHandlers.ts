@@ -179,29 +179,31 @@ export function useNodeEdgeHandlers(
 
         connectingInfo.current = null;
 
-        const edgeId = generateEdgeId();
-        doc.getMap<Edge>("edges").set(edgeId, {
-            id: edgeId,
-            type: "item-edge",
-            source, target, sourceHandle, targetHandle,
-            data: { throughput },
-        });
+        doc.transact(() => {
+            const edgeId = generateEdgeId();
+            doc.getMap<Edge>("edges").set(edgeId, {
+                id: edgeId,
+                type: "item-edge",
+                source, target, sourceHandle, targetHandle,
+                data: { throughput },
+            });
 
-        if (sourceNode.type === "item-spawner-node") {
-            const sourceData = sourceNode.data as ItemSpawnerNodeData;
+            if (sourceNode.type === "item-spawner-node") {
+                const sourceData = sourceNode.data as ItemSpawnerNodeData;
 
-            const newThrough = usedSourceThroughput(allEdges, source, sourceHandle) + throughput;
+                const newThrough = usedSourceThroughput(allEdges, source, sourceHandle) + throughput;
 
-            const maxOut = Math.max(newThrough, sourceData.outputAmount);
+                const maxOut = Math.max(newThrough, sourceData.outputAmount);
 
-            if (maxOut !== sourceData.outputAmount) {
-                const nodeMap = doc.getMap<Node>("nodes");
-                const node = nodeMap.get(source);
-                if (node) {
-                    nodeMap.set(source, stripComputedFields({ ...node, data: { ...node.data, outputAmount: maxOut } }));
+                if (maxOut !== sourceData.outputAmount) {
+                    const nodeMap = doc.getMap<Node>("nodes");
+                    const node = nodeMap.get(source);
+                    if (node) {
+                        nodeMap.set(source, stripComputedFields({ ...node, data: { ...node.data, outputAmount: maxOut } }));
+                    }
                 }
             }
-        }
+        }, LOCAL_ORIGIN);
     }, [ydocRef, reactFlow]);
 
     return {

@@ -1,8 +1,10 @@
 ﻿import { useCallback } from "react";
-import { type Node, type Edge } from "@xyflow/react";
+import { type Node, type Edge, useReactFlow } from "@xyflow/react";
 import { useYjsDoc } from "../context/YjsContext";
 import { stripComputedFields } from "../utils/idUtils";
 import type {ItemEdgeData} from "../types.ts";
+
+const LOCAL_ORIGIN = "local";
 
 /**
  * Returns helpers to update node / edge data in the shared Y.Doc.
@@ -10,6 +12,7 @@ import type {ItemEdgeData} from "../types.ts";
  */
 export function useYjsMutation() {
     const ydocRef = useYjsDoc();
+    const reactflow = useReactFlow();
 
     /**
      * Merge `patch` into the data of the node with the given id.
@@ -22,10 +25,18 @@ export function useYjsMutation() {
             const nodeMap = doc.getMap<Node>("nodes");
             const node = nodeMap.get(nodeId);
             if (node) {
-                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+                reactflow.setNodes((nds) =>
+                    nds.map((n) =>
+                        n.id === nodeId ? stripComputedFields({ ...n, data: { ...n.data, ...patch } }) : n,
+                    ),
+                );
+
+                doc.transact(() => {
+                    nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+                }, LOCAL_ORIGIN);
             }
         },
-        [ydocRef],
+        [reactflow, ydocRef],
     );
 
     /**
@@ -38,7 +49,9 @@ export function useYjsMutation() {
             const edgeMap = doc.getMap<Edge>("edges");
             const edge = edgeMap.get(edgeId);
             if (edge) {
-                edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...patch } });
+                doc.transact(() => {
+                    edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...patch } });
+                }, LOCAL_ORIGIN);
             }
         },
         [ydocRef],
@@ -60,20 +73,33 @@ export function useYjsMutation() {
                     edge.source === nodeId
             );
 
-            nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+            doc.transact(() => {
+                nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+                reactflow.setNodes((nds) =>
+                    nds.map((n) =>
+                        n.id === nodeId ? stripComputedFields({ ...n, data: { ...n.data, ...patch } }) : n,
+                    ),
+                );
 
-            if (outgoingEdges.length === 1) {
-                const edge = outgoingEdges[0];
-                const edgeId = edge.id;
+                if (outgoingEdges.length === 1) {
+                    const edge = outgoingEdges[0];
+                    const edgeId = edge.id;
 
-                const edgePatch: Partial<ItemEdgeData> = {
-                    throughput: patch.outputAmount as number | undefined,
+                    const edgePatch: Partial<ItemEdgeData> = {
+                        throughput: patch.outputAmount as number | undefined,
+                    }
+
+                    reactflow.setEdges((eds) =>
+                        eds.map((e) =>
+                            e.id === edgeId ? { ...e, data: { ...e.data, ...edgePatch } } : e,
+                        ),
+                    );
+
+                    edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...edgePatch } });
                 }
-
-                edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...edgePatch } });
-            }
+            }, LOCAL_ORIGIN);
         },
-        [ydocRef],
+        [reactflow, ydocRef],
     )
 
     return { updateNodeData, updateEdgeData, updateNodeAndSingleEdgeData };

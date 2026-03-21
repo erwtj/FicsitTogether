@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef, useCallback, useState } from "react";
 import * as Y from "yjs";
-import { YMapEvent } from "yjs";
+import { YMapEvent, UndoManager } from "yjs";
 import { type Node, type Edge, applyNodeChanges, applyEdgeChanges, useReactFlow } from "@xyflow/react";
 import { stripComputedFields } from "../utils/idUtils";
 
@@ -30,6 +30,7 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
     // Only true after the server's initial state has been received and applied.
     // No local updates are sent until this is set (prevents a blank doc from wiping the server)
     const syncedRef = useRef(false);
+    const undoManagerRef = useRef<UndoManager | null>(null);
 
     const sendUpdate = useCallback((update: Uint8Array) => {
         console.log("Sending local update")
@@ -124,6 +125,71 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
         // Forward local Yjs changes to server
         doc.on("update", sendUpdate);
 
+        // --- Undo/Redo Manager ---
+
+        const undoManager = new UndoManager([nodeMap, edgeMap], {
+            trackedOrigins: new Set([LOCAL_ORIGIN]), // Only undo local changes, not remote ones
+            captureTimeout: 500, // Group rapid changes within 500ms into a single undo step
+        });
+        undoManagerRef.current = undoManager;
+
+        // Keyboard shortcuts for undo/redo
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't intercept undo/redo when user is typing in an input field
+            const target = e.target as HTMLElement;
+            const isInputField = target.tagName === 'INPUT' || 
+                                 target.tagName === 'TEXTAREA' || 
+                                 target.isContentEditable;
+            
+            if (isInputField) return;
+
+            // Ctrl+Z or Cmd+Z (undo)
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+                e.preventDefault();
+                undoManager.undo();
+                // Manually sync React state from Yjs after undo
+                syncReactStateFromYjs();
+            } 
+            // Ctrl+Shift+Z or Cmd+Shift+Z or Ctrl+Y or Cmd+Y (redo)
+            else if ((e.ctrlKey || e.metaKey) && (e.shiftKey && e.key === 'z' || e.key === 'y')) {
+                e.preventDefault();
+                undoManager.redo();
+                // Manually sync React state from Yjs after redo
+                syncReactStateFromYjs();
+            }
+        };
+
+        // Helper function to sync React state from Yjs document
+        const syncReactStateFromYjs = () => {
+            const nodesFromYjs = Array.from(nodeMap.values());
+            const edgesFromYjs = Array.from(edgeMap.values());
+            
+            setNodes(nodesFromYjs.map(node => {
+                const existing = reactFlow.getNode(node.id);
+                if (existing) {
+                    // Preserve ReactFlow internal state
+                    return {
+                        ...node,
+                        selected: existing.selected,
+                        width: existing.width,
+                        height: existing.height,
+                        measured: existing.measured,
+                    };
+                }
+                return node;
+            }));
+            
+            setEdges(edgesFromYjs.map(edge => {
+                const existing = reactFlow.getEdge(edge.id);
+                if (existing) {
+                    return { ...edge, selected: existing.selected };
+                }
+                return edge;
+            }));
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
         // --- WebSocket with auto-reconnect ---
 
         const connect = async () => {
@@ -177,6 +243,12 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 setConnected(false);
                 syncedRef.current = false;
                 wsRef.current = null;
+                
+                // Clear undo stack on disconnect to avoid confusion when server state diverges
+                if (undoManagerRef.current) {
+                    undoManagerRef.current.clear();
+                }
+                
                 if (!destroyedRef.current) {
                     console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
                     reconnectTimerRef.current = setTimeout(() => {
@@ -226,6 +298,11 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
             if (reconnectTimerRef.current !== null) {
                 clearTimeout(reconnectTimerRef.current);
                 reconnectTimerRef.current = null;
+            }
+            window.removeEventListener('keydown', handleKeyDown);
+            if (undoManagerRef.current) {
+                undoManagerRef.current.clear();
+                undoManagerRef.current = null;
             }
             nodeMap.unobserve(updateNodes);
             edgeMap.unobserve(updateEdges);
