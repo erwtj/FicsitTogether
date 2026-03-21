@@ -19,7 +19,7 @@ interface UseYjsSyncProps {
 
 const LOCAL_ORIGIN = "local";
 
-const RECONNECT_DELAY_MS = 5000;
+const RECONNECT_DELAY_MS = -1;
 
 export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEdges }: UseYjsSyncProps) {
     const reactFlow = useReactFlow();
@@ -53,7 +53,10 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
         // --- Yjs observers ---
 
         const updateNodes = (event: YMapEvent<Node>) => {
-            if (event.transaction.origin === LOCAL_ORIGIN) return;
+            // Skip local changes UNLESS they're from undo/redo
+            // UndoManager uses the original transaction's origin, so we need to check if it's an undo operation
+            const isUndoRedo = event.transaction.origin === undoManagerRef.current;
+            if (event.transaction.origin === LOCAL_ORIGIN && !isUndoRedo) return;
 
             const nodeChanges: Parameters<typeof applyNodeChanges>[0] = [];
 
@@ -94,7 +97,9 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
         };
 
         const updateEdges = (event: YMapEvent<Edge>) => {
-            if (event.transaction.origin === LOCAL_ORIGIN) return;
+            // Skip local changes UNLESS they're from undo/redo
+            const isUndoRedo = event.transaction.origin === undoManagerRef.current;
+            if (event.transaction.origin === LOCAL_ORIGIN && !isUndoRedo) return;
 
             const edgeChanges: Parameters<typeof applyEdgeChanges>[0] = [];
 
@@ -147,45 +152,12 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
             if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
                 e.preventDefault();
                 undoManager.undo();
-                // Manually sync React state from Yjs after undo
-                syncReactStateFromYjs();
             } 
             // Ctrl+Shift+Z or Cmd+Shift+Z or Ctrl+Y or Cmd+Y (redo)
             else if ((e.ctrlKey || e.metaKey) && (e.shiftKey && e.key === 'z' || e.key === 'y')) {
                 e.preventDefault();
                 undoManager.redo();
-                // Manually sync React state from Yjs after redo
-                syncReactStateFromYjs();
             }
-        };
-
-        // Helper function to sync React state from Yjs document
-        const syncReactStateFromYjs = () => {
-            const nodesFromYjs = Array.from(nodeMap.values());
-            const edgesFromYjs = Array.from(edgeMap.values());
-            
-            setNodes(nodesFromYjs.map(node => {
-                const existing = reactFlow.getNode(node.id);
-                if (existing) {
-                    // Preserve ReactFlow internal state
-                    return {
-                        ...node,
-                        selected: existing.selected,
-                        width: existing.width,
-                        height: existing.height,
-                        measured: existing.measured,
-                    };
-                }
-                return node;
-            }));
-            
-            setEdges(edgesFromYjs.map(edge => {
-                const existing = reactFlow.getEdge(edge.id);
-                if (existing) {
-                    return { ...edge, selected: existing.selected };
-                }
-                return edge;
-            }));
         };
 
         window.addEventListener('keydown', handleKeyDown);
@@ -209,7 +181,7 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
 
             if (!token) {
                 setConnected(false);
-                if (!destroyedRef.current) {
+                if (!destroyedRef.current && RECONNECT_DELAY_MS > 0) {
                     reconnectTimerRef.current = setTimeout(() => {
                         void connect();
                     }, RECONNECT_DELAY_MS);
@@ -249,7 +221,7 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                     undoManagerRef.current.clear();
                 }
                 
-                if (!destroyedRef.current) {
+                if (!destroyedRef.current && RECONNECT_DELAY_MS > 0) {
                     console.log(`WebSocket closed. Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`);
                     reconnectTimerRef.current = setTimeout(() => {
                         void connect();

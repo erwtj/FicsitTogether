@@ -49,12 +49,17 @@ export function useYjsMutation() {
             const edgeMap = doc.getMap<Edge>("edges");
             const edge = edgeMap.get(edgeId);
             if (edge) {
+                reactflow.setEdges((eds) =>
+                    eds.map((e) =>
+                        e.id === edgeId ? { ...e, data: { ...e.data, ...patch } } : e,
+                    ),
+                );
                 doc.transact(() => {
                     edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...patch } });
                 }, LOCAL_ORIGIN);
             }
         },
-        [ydocRef],
+        [reactflow, ydocRef],
     );
 
     const updateNodeAndSingleEdgeData = useCallback(
@@ -69,8 +74,7 @@ export function useYjsMutation() {
             if (!node) return;
 
             const outgoingEdges = Array.from(edgeMap.values()).filter(
-                (edge) =>
-                    edge.source === nodeId
+                (edge) => edge.source === nodeId
             );
 
             doc.transact(() => {

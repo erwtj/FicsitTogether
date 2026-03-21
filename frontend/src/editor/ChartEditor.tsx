@@ -143,7 +143,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                             <strong className={"text-warning me-auto"}>Warning</strong>
                         </Toast.Header>
                         <Toast.Body>
-                            Connection to server lost...
+                            Connection to server lost, please refresh the page!
+                            Any changes made without a connection will be lost.
                         </Toast.Body>
                     </Toast>
                 </div>
