@@ -91,7 +91,7 @@ function RootComponent() {
                 let openPage: string | undefined = undefined;
                 
                 if (path.includes('/directories/') || path.includes('/home')) {
-                    openPage = 'folders';
+                    openPage = 'directories';
                 } else if (path.includes('/edit/') || path.includes('/view/projects/')) {
                     openPage = 'nodes';
                 }

@@ -18,8 +18,6 @@ export type PageInfo = {
     content?: React.ReactNode;
 }
 
-
-//TODO: Add the buttons to the correct positions and let them automatically open the good page
 export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
     const allPages = contents.flatMap(page => page.subPages ?? [page]);
     const defaultKey = openPage ?? allPages[0]?.id;

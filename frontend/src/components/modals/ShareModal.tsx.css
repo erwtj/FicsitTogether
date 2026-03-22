@@ -5,3 +5,7 @@
 .unshare-button:hover {
     background: rgba(255, 255, 255, 0.21) !important;
 }
+
+.unshare-button:active {
+    background: rgba(255, 255, 255, 0.39) !important;
+}

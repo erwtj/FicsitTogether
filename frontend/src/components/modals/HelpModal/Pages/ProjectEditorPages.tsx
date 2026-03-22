@@ -1,14 +1,12 @@
 import {VideoAccordion} from "../VideoAccordion.tsx";
 import "../HelpModal.tsx.css"
 
+const scrollToRef = (key: string) => {
+    const ref = document.getElementById(key);
+    ref!.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 export function NodesPageContent() {
-
-    const ScrollToRef = (key: string) => {
-        const ref = document.getElementById(key);
-        ref!.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
     return (
         <div className="text-start justify-content-center">
             <h1>Nodes</h1>
@@ -19,7 +17,7 @@ export function NodesPageContent() {
                     <button
                         type="button"
                         className="btn btn-link p-0 fw-bold align-baseline text-decoration-none"
-                        onClick={() => ScrollToRef("input-nodes")}
+                        onClick={() => scrollToRef("input-nodes")}
                     >
                         Input Nodes
                     </button>
@@ -29,7 +27,7 @@ export function NodesPageContent() {
                     <button
                         type="button"
                         className="btn btn-link p-0 fw-bold align-baseline text-decoration-none"
-                        onClick={() => ScrollToRef("recipe-nodes")}
+                        onClick={() => scrollToRef("recipe-nodes")}
                     >
                         Recipe Nodes
                     </button>
@@ -39,7 +37,7 @@ export function NodesPageContent() {
                     <button
                         type="button"
                         className="btn btn-link p-0 fw-bold align-baseline text-decoration-none"
-                        onClick={() => ScrollToRef("output-nodes")}
+                        onClick={() => scrollToRef("output-nodes")}
                     >
                         Output Nodes
                     </button>
@@ -49,7 +47,7 @@ export function NodesPageContent() {
                     <button
                         type="button"
                         className="btn btn-link p-0 fw-bold align-baseline text-decoration-none"
-                        onClick={() => ScrollToRef("power-nodes")}
+                        onClick={() => scrollToRef("power-nodes")}
                     >
                         Power Nodes
                     </button>
@@ -126,11 +124,6 @@ export function EdgesPageContent() {
 }
 
 export function SloopingPageContent() {
-    const scrollToRef = (key: string) => {
-        const ref = document.getElementById(key);
-        ref!.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
     return (
         <div className="text-start justify-content-center">
             <h1>Using Somersloops</h1>

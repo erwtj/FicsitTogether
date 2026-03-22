@@ -1,34 +1,41 @@
 import type {PageInfo} from "../HelpModal.tsx";
 import {EdgesPageContent, NodesPageContent, SloopingPageContent, SidePanelPageContent} from "./ProjectEditorPages.tsx";
+import {AccountPageContent, SettingsPageContent, TroubleshootingPageContent} from "./GeneralPages.tsx";
+import {
+    DirectoriesPageContent, OverviewPageContent,
+    ProjectsPageContent,
+    PublicSharingPageContent,
+    SharingPageContent
+} from "./DirectoryViewerPages.tsx";
 
 const directoryViewerPages: PageInfo = {
     id: "dirViewer",
     title: "Directory Viewer",
     subPages: [
         {
-            id: "folders",
-            title: "Folders",
-            content: (<div>General1</div>)
+            id: "directories",
+            title: "Directories",
+            content: <DirectoriesPageContent/>
         },
         {
             id: "projects",
             title: "Projects",
-            content: (<div>General2</div>)
+            content: <ProjectsPageContent/>
         },
         {
             id: "sharing",
             title: "Sharing",
-            content: (<div>General3</div>)
+            content: <SharingPageContent/>
         },
         {
             id: "publicSharing",
             title: "Public Sharing",
-            content: (<div>General3</div>)
+            content: <PublicSharingPageContent/>
         },
         {
             id: "overviewPage",
             title: "Overview Page",
-            content: (<div>General3</div>)
+            content: <OverviewPageContent/>
         }
     ]
 }
@@ -66,18 +73,18 @@ const generalPages: PageInfo = {
     subPages: [
         {
             id: "account",
-            title: "Account Management",
-            content: (<div>General1</div>)
+            title: "Your Account",
+            content: <AccountPageContent/>
         },
         {
             id: "settings",
-            title: "Settings",
-            content: (<div>General2</div>)
+            title: "Client Settings",
+            content: <SettingsPageContent/>
         },
         {
             id: "troubleshooting",
             title: "Troubleshooting",
-            content: (<div>General3</div>)
+            content: <TroubleshootingPageContent/>
         }
     ]
 }
