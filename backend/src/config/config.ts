@@ -10,6 +10,8 @@ interface Config {
     auth0Audience: string;
     auth0Domain: string;
     auth0ClientId: string;
+    auth0MgmtClientId: string;
+    auth0MgmtClientSecret: string;
     environment: string;
     databaseUrl: string;
     trustProxy: boolean | number | string;
@@ -47,6 +49,8 @@ const config: Config = {
     auth0Audience: process.env.AUTH0_AUDIENCE || "AUTH0-AUDIENCE",
     auth0Domain: process.env.AUTH0_DOMAIN || "AUTH0-DOMAIN",
     auth0ClientId: process.env.AUTH0_CLIENT_ID || "AUTH0-CLIENT-ID",
+    auth0MgmtClientId: process.env.AUTH0_MGMT_CLIENT_ID || "AUTH0-MGMT-CLIENT-ID",
+    auth0MgmtClientSecret: process.env.AUTH0_MGMT_CLIENT_SECRET || "AUTH0-MGMT-CLIENT-SECRET",
     environment: process.env.NODE_ENV || 'development',
     databaseUrl: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/ficsittogether",
     trustProxy: parseTrustProxy(),

@@ -1,7 +1,25 @@
 import { useState } from "react";
 import {ClientSettingsModal} from "../../ClientSettingsModal.tsx";
+import {deleteMe} from "../../../../api/apiCalls.ts";
+import {useAuth0Context} from "../../../../auth/useAuth0Context.ts";
+import ConfirmationModal from "../../ConfirmationModal.tsx";
 
 export function AccountPageContent() {
+    const auth = useAuth0Context();
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    
+    const deleteAccount = () => {
+        deleteMe(auth)
+        .then((result) => {
+            if (result) {
+                auth.logout();
+            }
+        })
+        .catch((error) => {
+            console.error("Error deleting account:", error);
+        })
+    }
+    
     return (
         <div>
             <h1>Your Account</h1>
@@ -29,8 +47,27 @@ export function AccountPageContent() {
                 Your profile picture is fetched from <a className="clickable-link default-purple" href="https://www.gravatar.com/">Gravatar</a> using the email associated with your Auth0 account.
                 You can change your profile picture by changing the profile picture associated with your email on Gravatar.
             </p>
-            
-            <h3 className="mt-3">TODO: Deleting your account!</h3>
+
+            {auth && auth.isAuthenticated && (
+                <>
+                <div>
+                    <h3 className="mt-3">Deleting your account</h3>
+                    <p>
+                        If you want to delete your account, you can click on the button below.
+                        This will <b>permanently</b> delete your account and all your projects and data. This action <b>CAN NOT</b> be undone, so please be sure before you click the button.
+                    </p>
+                    <button className="btn btn-danger" onClick={() => setShowDeleteConfirmation(true)}>Delete account</button>
+                </div>
+                    
+                    <ConfirmationModal 
+                        show={showDeleteConfirmation} 
+                        title="Are you sure you want to delete your account?"
+                        message="Deleting your account will permanently delete all your projects and data. This action CAN NOT be undone."
+                        onConfirm={deleteAccount}
+                        onCancel={() => setShowDeleteConfirmation(false)}
+                    />
+                </>
+            )}
         </div>
     );
 }
