@@ -87,9 +87,18 @@ function RootComponent() {
             if (isTypingTarget) return;
 
             if (e.code === 'KeyH') {
+                const path = state.matches[1]?.pathname || '';
+                let openPage: string | undefined = undefined;
+                
+                if (path.includes('/directories/') || path.includes('/home')) {
+                    openPage = 'folders';
+                } else if (path.includes('/edit/') || path.includes('/view/projects/')) {
+                    openPage = 'nodes';
+                }
+                
                 window.dispatchEvent(
                     new CustomEvent('openHelpModal', {
-                        detail: { openPage: 'somersloop' }, // or specific page id
+                        detail: { openPage },
                     }),
                 );
             }
@@ -106,6 +115,7 @@ function RootComponent() {
                 show={show}
                 openPage={details?.openPage}
                 onModalClose={onModalClose}
+                key={details?.openPage}
             />
             <Outlet/>
         </div>

@@ -3,8 +3,7 @@ import "./HelpModal.tsx.css"
 import { useState } from "react";
 import React from "react";
 import {CaretDown, CaretRight } from "react-bootstrap-icons";
-import {directoryViewerPages, projectEditorPages} from "./Pages/pages.tsx";
-
+import {contents} from "./Pages/pages.tsx";
 
 export type HelpModalProps = {
     show: boolean;
@@ -19,18 +18,13 @@ export type PageInfo = {
     content?: React.ReactNode;
 }
 
-const contents: PageInfo[] = [
-    directoryViewerPages,
-    projectEditorPages,
-];
-
-
 
 //TODO: Add the buttons to the correct positions and let them automatically open the good page
 export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
     const allPages = contents.flatMap(page => page.subPages ?? [page]);
     const defaultKey = openPage ?? allPages[0]?.id;
     const [activeKey, setActiveKey] = useState<string>(defaultKey);
+
     // Track which top-level section is open
     const [openSections, setOpenSections] = useState<Set<string>>(
         new Set(
@@ -52,7 +46,6 @@ export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
         });
     };
 
-
     return (
         <Modal show={show} onHide={onModalClose} scrollable size={'xl'} className="HelpModal" >
             <Modal.Header closeButton>
@@ -63,8 +56,8 @@ export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
                     defaultActiveKey={defaultKey}
                     onSelect={(key) => key && setActiveKey(key)}
                 >
-                    <Row className="h-100">
-                        <Col xs={2} className="help-sidebar mt-0 pt-0">
+                    <Row className="h-100 g-2 g-lg-0">
+                        <Col xs={12} lg="auto" className="help-sidebar mt-0 pt-0">
                             <Nav className="flex-column">
                                 {contents.map(section => {
                                     const isOpen = openSections.has(section.id);
@@ -95,11 +88,10 @@ export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
                                             </Collapse>
                                         </React.Fragment>
                                     )
-
                                 })}
                             </Nav>
                         </Col>
-                        <Col xs={9}>
+                        <Col xs={12} lg className="help-content mt-2 mt-lg-0 ps-lg-3 pb-2">
                             <Tab.Content>
                                 {allPages.map(page => (
                                     <Tab.Pane key={page.id} eventKey={page.id}>
@@ -109,13 +101,8 @@ export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
                             </Tab.Content>
                         </Col>
                     </Row>
-
                 </Tab.Container>
-
-
             </Modal.Body>
-
-
         </Modal>
     )
 }

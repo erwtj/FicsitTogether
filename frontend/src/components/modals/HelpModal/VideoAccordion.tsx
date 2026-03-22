@@ -12,14 +12,7 @@ export function VideoAccordion({source, title}: VideoAccordionProps) {
     return (
         <Accordion>
             <Accordion.Item ref={itemRef} eventKey={source} className="w-75">
-                <Accordion.Header
-                    onClick={() => {
-                        // Wait for collapse animation, then scroll video block into view
-                        setTimeout(() => {
-                            itemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }, 250);
-                    }}
-                >
+                <Accordion.Header>
                     {title}
                 </Accordion.Header>
                 <Accordion.Body>
@@ -30,6 +23,5 @@ export function VideoAccordion({source, title}: VideoAccordionProps) {
                 </Accordion.Body>
             </Accordion.Item>
         </Accordion>
-
-    )
+    );
 }
