@@ -1,5 +1,5 @@
 ﻿const CategorySidebar = ({ categories }: { categories: string[] }) => (
-    <div className="col-3">
+    <div className="d-none d-md-block col-3">
         <ol className="sticky-top categoryList">
             {categories.map(category => (
                 <li key={category}>
