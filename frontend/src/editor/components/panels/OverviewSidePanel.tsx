@@ -179,8 +179,8 @@ export function OverviewSidePanel({projectId}: {projectId: string}) {
                             : <span className="text-muted fst-italic clickable-link" role={"button"} onClick={() => setShowDocInfo(true)}>No name</span>
                         }
                     </Offcanvas.Title>
-                    <div className="d-flex flex-row align-items-center gap-2 ms-auto">
-                        <Download size={20} className="text-body-secondary clickable-link ms-auto me-2" role="button" onClick={handleDownloadProject}/>
+                    <div className="d-flex flex-row align-items-center gap-1 ms-auto">
+                        <Download size={20} className="text-body-secondary clickable-link me-2" role="button" onClick={handleDownloadProject}/>
                         <Gear size={20} className="text-body-secondary clickable-link" role="button"
                               onClick={() => setShowSettings(true)}/>
                         <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowPanel(false)}></button>

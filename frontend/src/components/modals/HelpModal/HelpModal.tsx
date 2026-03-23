@@ -61,6 +61,13 @@ export function HelpModal({ show, openPage, onModalClose }: HelpModalProps) {
                                     const isOpen = openSections.has(section.id);
                                     const pages = section.subPages ?? [section];
 
+                                    if (pages.length === 1)
+                                        return (
+                                            <Nav.Link eventKey={pages[0].id} className={`text-white help-side-bar-top-level ${activeKey === pages[0].id ? "selected" : ""}`}>
+                                                <span className="h5 text-white mb-0">{pages[0].title}</span>
+                                            </Nav.Link>  
+                                        );
+                                    
                                     return (
                                         <React.Fragment key={section.id}>
                                             <div

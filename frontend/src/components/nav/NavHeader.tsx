@@ -3,13 +3,19 @@ import { Nav, Navbar } from "react-bootstrap";
 import { Link } from "@tanstack/react-router";
 import { useAuth0Context } from "../../auth/useAuth0Context.ts";
 import UserPopover from "../popovers/UserPopover.tsx";
-import { Calculator, Table, House, InfoCircle } from "react-bootstrap-icons";
+import { Calculator, Table, House, InfoCircle, QuestionCircle } from "react-bootstrap-icons";
 
 function NavHeader() {
     const auth0Context = useAuth0Context();
     const { user } = auth0Context;
     const [expanded, setExpanded] = useState(false);
 
+    const openHelp = () => {
+        window.dispatchEvent(
+            new CustomEvent('openHelpModal', {detail: {openPage: 'account'}}),
+        );
+    }
+    
     return (
         <Navbar
             bg="dark"
@@ -25,6 +31,7 @@ function NavHeader() {
                 </Navbar.Brand>
 
                 <div className="d-flex align-items-center">
+                    <QuestionCircle className="me-3 help-circle d-lg-none" role="button" onClick={openHelp}/>
                     <Nav className="mh-100 me-3 d-lg-none" style={{ aspectRatio: 1 }}>
                         <UserPopover auth0Context={auth0Context}>
                             <img
@@ -32,7 +39,7 @@ function NavHeader() {
                                 alt={user!.name}
                                 className="rounded-circle"
                                 role="button"
-                                style={{ height: "40px", width: "40px" }}
+                                style={{ height: "45px", width: "45px" }}
                             />
                         </UserPopover>
                     </Nav>
@@ -68,8 +75,12 @@ function NavHeader() {
                             </Link>
                         </Nav.Item>
                     </Nav>
+                    
+                    <div className="ms-auto d-none d-lg-block me-3">
+                        <QuestionCircle className="help-circle" role="button" onClick={openHelp}/>
+                    </div>
 
-                    <Nav className="ms-auto mh-100 me-2 d-none d-lg-flex" style={{ aspectRatio: 1 }}>
+                    <Nav className="mh-100 me-2 gap-2 d-none d-lg-flex align-items-center" style={{ aspectRatio: 1 }}>
                         <UserPopover auth0Context={auth0Context}>
                             <img
                                 src={user!.picture}

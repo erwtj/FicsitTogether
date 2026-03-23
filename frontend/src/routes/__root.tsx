@@ -71,6 +71,17 @@ function RootComponent() {
     useEffect(() => {
         document.title = state.matches[1]?.staticData?.title || 'Ficsit Together';
     }, [state]);
+    
+    useEffect(() => {
+        if (state.matches[1]?.pathname?.includes('home') && auth && auth.isAuthenticated) {
+            if (window.localStorage.getItem('firstTimeUser') === null) {
+                window.localStorage.setItem('firstTimeUser', 'false');
+                window.dispatchEvent(
+                    new CustomEvent('openHelpModal', {detail: {openPage: 'welcome'}})
+                );
+            }
+        }
+    }, [auth, state.matches])
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -90,9 +101,9 @@ function RootComponent() {
                 const path = state.matches[1]?.pathname || '';
                 let openPage: string | undefined = undefined;
                 
-                if (path.includes('/directories/') || path.includes('/home')) {
+                if (path.includes('directories/') || path.includes('home')) {
                     openPage = 'directories';
-                } else if (path.includes('/edit/') || path.includes('/view/projects/')) {
+                } else if (path.includes('edit/') || path.includes('projects/')) {
                     openPage = 'nodes';
                 }
                 
