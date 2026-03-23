@@ -27,7 +27,7 @@ export function useYjsMutation() {
             if (node) {
                 reactflow.setNodes((nds) =>
                     nds.map((n) =>
-                        n.id === nodeId ? stripComputedFields({ ...n, data: { ...n.data, ...patch } }) : n,
+                        n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
                     ),
                 );
 
