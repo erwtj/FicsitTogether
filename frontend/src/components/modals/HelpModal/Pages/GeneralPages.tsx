@@ -113,7 +113,14 @@ export function TroubleshootingPageContent() {
     return (
         <div>
             <h1>Troubleshooting</h1>
-            <p>If you find any issues that you deem important, please report them on <a className="clickable-link default-purple" href="https://github.com/erwtj/FicsitTogether/issues">GitHub</a>.</p>
+            <p className="mb-0">If you find any issues that you deem important, please report them on <a className="clickable-link default-purple fw-semibold" href="https://github.com/erwtj/FicsitTogether/issues">GitHub</a>.</p>
+            <p className="d-inline-flex flex-wrap align-items-center justify-content-center mb-2 mt-0">
+                You can also reach out to us on reddit
+                <a href="https://www.reddit.com/user/Dorito009/" className="clickable-link default-purple fw-semibold">&nbsp;u/dorito009&nbsp;</a> 
+                and 
+                <a href="https://www.reddit.com/user/GamingIkno/" className="clickable-link default-purple fw-semibold">&nbsp;u/GamingIkno</a>
+                .
+            </p>
         </div>
     );
 }

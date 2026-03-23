@@ -75,21 +75,22 @@ function RouteComponent() {
         <>
             <BuyMeCoffeeWidget/>
 
-            <main className="d-flex justify-content-center px-3" style={{ marginTop: "2vh" }}>
+            <main className="d-flex justify-content-center px-3 mt-2">
                 <div style={{ maxWidth: "720px", width: "100%" }}>
 
-                    <header className="text-center mb-4">
+                    <header className="text-center mb-3">
                         <h1 className="mb-2">Welcome to Ficsit Together</h1>
                         <p className="fs-5 mb-2">Yet another Satisfactory factory planner, but this time, together! (wow)</p>
                         <p className="text-muted mb-0">Ficsit Together is a factory planner that allows you to design a factory with your friends.</p>
                         <p className="text-muted mb-0">Changes to a document are automatically saved and synchronized with other connected users, allowing for live collaboration.</p>
 
                         {(!auth || !auth.isAuthenticated) && <p className="text-muted">Ready to make an account? <Link to="/login" className="text-white clickable-link default-purple">Click here!</Link></p>}
-                    </header>
 
+                    </header>
+                    
                     <hr/>
 
-                    <section className="text-center my-4" aria-labelledby="features-heading">
+                    <section className="text-center my-3" aria-labelledby="features-heading">
                         <h2 id="features-heading" className="mb-3 text-muted text-uppercase h5" style={{ letterSpacing: "0.05em", fontSize: "0.8rem" }}>What does it do?</h2>
                         <div className="d-flex flex-wrap justify-content-center gap-2" role="list">
                             <Feature
@@ -127,15 +128,23 @@ function RouteComponent() {
 
                     <hr/>
 
-                    <section className="text-center my-4" aria-labelledby="examples-heading">
+                    <section className="text-center my-3" aria-labelledby="examples-heading">
                         <h2 id="examples-heading" className="visually-hidden">Example Projects</h2>
                         <p className="mb-1">What does it look like? Check out <a href="https://ficsit-together.com/view/directories/5ea1a0e0-5239-42bc-b1ca-7d1f169a9f47" className="clickable-link default-purple" aria-label="View example Satisfactory factory projects">these</a> example projects!</p>
                         <p className="text-muted">These are public projects, they can be viewed by anyone, but not edited. You can download them and upload them to your own folder if you want to edit them.</p>
                     </section>
 
+                    
                     <hr/>
 
-                    <footer className="text-center mt-4 text-muted">
+                    <footer className="text-center mt-2 text-muted">
+                        <div className="d-inline-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
+                            <span className="text-muted small" style={{ letterSpacing: '0.04em' }}>MADE BY</span>
+                            <a href="https://www.reddit.com/user/Dorito009/" className="clickable-link default-purple fw-semibold">u/dorito009</a>
+                            <span className="text-muted">and</span>
+                            <a href="https://www.reddit.com/user/GamingIkno/" className="clickable-link default-purple fw-semibold">u/GamingIkno</a>
+                        </div>
+                        
                         <p className="mb-1">This project is open source, <a href="https://github.com/erwtj/FicsitTogether" className="clickable-link default-purple" rel="noopener noreferrer" target="_blank">take a look on GitHub</a> if you're curious or want to contribute.</p>
                         <p className="mb-1">Inspired by <a className="clickable-link default-purple" href="https://satisfactory-planner.vercel.app/" rel="noopener noreferrer" target="_blank">this planner</a>, which sadly doesn't seem to get updates anymore.</p>
                         <p className="mb-0 small text-body-tertiary">Ficsit Together is not affiliated with Coffee Stain Studios.</p>
@@ -146,5 +155,3 @@ function RouteComponent() {
         </>
     );
 }
-
-
