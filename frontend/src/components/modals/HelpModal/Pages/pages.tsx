@@ -1,39 +1,62 @@
 import type {PageInfo} from "../HelpModal.tsx";
 import {EdgesPageContent, NodesPageContent, SloopingPageContent, SidePanelPageContent} from "./ProjectEditorPages.tsx";
+import {AccountPageContent, SettingsPageContent, TroubleshootingPageContent} from "./GeneralPages.tsx";
+import {
+    DirectoriesPageContent, OverviewPageContent,
+    ProjectsPageContent,
+    PublicSharingPageContent,
+    SharingPageContent
+} from "./DirectoryViewerPages.tsx";
+import { QuestionCircle } from "react-bootstrap-icons";
 
-export const directoryViewerPages: PageInfo = {
+const welcomePage: PageInfo = {
+    id: "welcome",
+    title: "Welcome!",
+    content: (
+        <div>
+            <h1>Welcome pioneer!</h1>
+            <p>
+                This is probably your first time using Ficsit Together. We recommend you at least skim through some of the content in this popup.
+                Use the sidebar to navigate through different sections of the help documentation.
+            </p>
+            <p>You can open this popup whenever you see a <QuestionCircle style={{marginBottom: ".1rem"}}/> by clicking on it, or by pressing 'h' on your keyboard anywhere (yes, anywhere).</p>
+        </div>
+    )
+}
+
+const directoryViewerPages: PageInfo = {
     id: "dirViewer",
     title: "Directory Viewer",
     subPages: [
         {
-            id: "Folders",
-            title: "Folders",
-            content: (<div>General1</div>)
+            id: "directories",
+            title: "Directories",
+            content: <DirectoriesPageContent/>
         },
         {
-            id: "Projects",
+            id: "projects",
             title: "Projects",
-            content: (<div>General2</div>)
+            content: <ProjectsPageContent/>
         },
         {
-            id: "Sharing",
+            id: "sharing",
             title: "Sharing",
-            content: (<div>General3</div>)
+            content: <SharingPageContent/>
         },
         {
-            id: "Public Sharing",
+            id: "publicSharing",
             title: "Public Sharing",
-            content: (<div>General3</div>)
+            content: <PublicSharingPageContent/>
         },
         {
             id: "overviewPage",
             title: "Overview Page",
-            content: (<div>General3</div>)
+            content: <OverviewPageContent/>
         }
     ]
 }
 
-export const projectEditorPages: PageInfo = {
+const projectEditorPages: PageInfo = {
     id: "projectEditor",
     title: "Project Editor",
     subPages: [
@@ -59,3 +82,33 @@ export const projectEditorPages: PageInfo = {
         }
     ]
 }
+
+const generalPages: PageInfo = {
+    id: "general",
+    title: "General",
+    subPages: [
+        {
+            id: "account",
+            title: "Your Account",
+            content: <AccountPageContent/>
+        },
+        {
+            id: "settings",
+            title: "Client Settings",
+            content: <SettingsPageContent/>
+        },
+        {
+            id: "troubleshooting",
+            title: "Troubleshooting",
+            content: <TroubleshootingPageContent/>
+        }
+    ]
+}
+
+
+export const contents: PageInfo[] = [
+    welcomePage,
+    generalPages,
+    directoryViewerPages,
+    projectEditorPages,
+];

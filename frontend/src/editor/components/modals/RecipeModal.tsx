@@ -1,4 +1,4 @@
-import {useState, useMemo} from "react";
+import {useState, useMemo, createRef, useEffect} from "react";
 import {getItemCategories, getAllCategories, getRecipesByInputItem, getAllItems, getItem, getRecipesByOutputItem} from "ficlib"
 import {Modal} from "react-bootstrap";
 import "./RecipeModal.tsx.css";
@@ -23,11 +23,19 @@ function getRelevantItemsForInput(requiredInput: string): string[] {
 function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: RecipeModalProps) {
     const [selectedItem, setSelectedItem] = useState<string | null>(RequiredOutput ?? null);
     const [searchTerm, setSearchTerm] = useState("");
+    const searchBarRef = createRef<HTMLInputElement>();
+
+    useEffect(() => {
+        if (show) 
+            searchBarRef.current?.focus();
+    }, [searchBarRef, show]);
+    
     const handleClose = () => {
         setSelectedItem(null);
         setSearchTerm("");
         onModalSubmit('none', null);
     }
+    
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     }
@@ -114,7 +122,7 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
                 <div className="w-100 d-flex flex-row justify-content-between me-2">
                     <Modal.Title>Items</Modal.Title>
                     {!RequiredOutput && (
-                        <input type="text" placeholder="Search" value={searchTerm}
+                        <input type="text" placeholder="Search" value={searchTerm} ref={searchBarRef}
                                onChange={handleSearch} className="form-control w-50"/>
                     )}
                 </div>

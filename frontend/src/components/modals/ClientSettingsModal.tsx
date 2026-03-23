@@ -48,7 +48,13 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
         updateClientSettings({showPhotonUsage: showPhotonUsage});
     }
 
+    const setShowUsernames = (showUsernames: boolean) => {
+        updateClientSettings({showUsernames: showUsernames});
+    }
 
+    const setShowEmail = (showEmail: boolean) => {
+        updateClientSettings({showEmail: showEmail});
+    }
 
     let snapSize = clientSettings.snapSize ?? 20;
     snapSize = snapSize < 0 ? 0 : snapSize;
@@ -76,6 +82,7 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                     <Form.Check type="checkbox" id={"check-tooltips"} label="Show tooltips"
                                 checked={clientSettings.showToolTips}
                                 onChange={(e) => setShowToolTips(e.target.checked)}/>
+                    <Form.Label className="text-muted mb-0">Show tooltips on node handles and in the somersloop modal.</Form.Label>
                 </Form>
                 <hr/>
                 <Form onSubmit={handleSubmit}>
@@ -102,6 +109,8 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                     <Form.Check type="checkbox" id={"check-ionetto"} label="Enable input/output summing"
                                 checked={clientSettings.enableIONetto}
                                 onChange={(e) => setEnableIONetto(e.target.checked)}/>
+                    <Form.Label className="text-muted mb-0">Sums I/O on sidepanel, to see total resource usage in a chart.</Form.Label>
+                    <Form.Label className="text-muted">(i.e. if a node spawns 10 and another outputs 40, total out is 30).</Form.Label>
                 </Form>
 
 
@@ -114,6 +123,18 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                     <Form.Check type="checkbox" id={"check-showPhoton"} label="Show excited photonic matter usage"
                                 checked={clientSettings.showPhotonUsage}
                                 onChange={(e) => setShowPhotonUsage(e.target.checked)}/>
+                </Form>
+
+                <hr/>
+                <Form onSubmit={handleSubmit}>
+                    <h5>Privacy</h5>
+                    <Form.Check type="checkbox" id={"check-showUsernames"} label="Show usernames"
+                                checked={clientSettings.showUsernames}
+                                onChange={(e) => setShowUsernames(e.target.checked)}/>
+                    <Form.Check type="checkbox" id={"check-showEmail"} label="Show email addresses"
+                                checked={clientSettings.showEmail}
+                                onChange={(e) => setShowEmail(e.target.checked)}/>
+                    <Form.Label className="text-muted">Turn these off when streaming or sharing your screen!</Form.Label>
                 </Form>
             </Modal.Body>
         </Modal>

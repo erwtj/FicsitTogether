@@ -4,6 +4,7 @@ import {useState} from "react";
 import {Card} from "react-bootstrap";
 import "./ExplorerComponents.css"
 import {Link} from "@tanstack/react-router";
+import {useClientSettings} from "../../hooks/useClientSettings.ts";
 
 export type DirectoryInfo = {
     id: string;
@@ -26,6 +27,8 @@ export type DirectoryCardProps = {
 export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory, shareDirectory, leaveDirectory}: DirectoryCardProps) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const displayDropdown = deleteDirectory || shareDirectory || (leaveDirectory && directoryInfo.isShared);
+    
+    const {clientSettings} = useClientSettings();
 
     return (
         <Card
@@ -53,7 +56,12 @@ export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory,
                     }
 
                     {directoryInfo.isShared && directoryInfo.sharedBy && (
-                        <small className={"text-muted"}>Shared by: {directoryInfo.sharedBy}</small>
+                        <small className={"text-muted"}>Shared by:
+                            {clientSettings.showUsernames ? 
+                                <span> {directoryInfo.sharedBy}</span> : 
+                                <span className="text-body-tertiary fst-italic"> Username hidden</span>
+                            }
+                        </small>
                     )}
                 </div>
                 <div className="ms-auto d-flex flex-row align-items-center gap-2 flex-nowrap">

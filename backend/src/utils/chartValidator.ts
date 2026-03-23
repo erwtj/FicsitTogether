@@ -235,20 +235,22 @@ function sanitizeEdge(raw: unknown, validNodeIds: Set<string>, handleMap: Map<st
     if (data && Array.isArray(data.movablePoints)) {
         const sanitized = (data.movablePoints as unknown[])
             .slice(0, MAX_MOVABLE_POINTS)
-            .filter((p): p is { id: string; x: number; y: number } => {
+            .filter((p): p is { id: string; t: number; dx: number; dy: number } => {
                 if (!p || typeof p !== 'object') return false;
                 const pt = p as Record<string, unknown>;
                 return (
                     isString(pt.id) &&
                     pt.id.length > 0 &&
                     pt.id.length <= 100 &&
-                    isFiniteNumber(pt.x) &&
-                    isFiniteNumber(pt.y) &&
-                    Math.abs(pt.x as number) <= MAX_MOVABLE_POINT_COORD &&
-                    Math.abs(pt.y as number) <= MAX_MOVABLE_POINT_COORD
+                    isFiniteNumber(pt.t) &&
+                    pt.t >= 0 && pt.t <= 1 &&
+                    isFiniteNumber(pt.dx) &&
+                    isFiniteNumber(pt.dy) &&
+                    Math.abs(pt.dx as number) <= MAX_MOVABLE_POINT_COORD &&
+                    Math.abs(pt.dy as number) <= MAX_MOVABLE_POINT_COORD
                 );
             })
-            .map(p => ({ id: p.id, x: p.x, y: p.y }));
+            .map(p => ({ id: p.id, t: p.t, dx: p.dx, dy: p.dy }));
 
         if (sanitized.length > 0) movablePoints = sanitized;
     }

@@ -38,3 +38,10 @@ export async function getUserByAuth0Id(id: string) {
     );
     return res.rows[0] ?? undefined;
 }
+
+export async function deleteUser(id: string) {
+    await pool.query(
+        'DELETE FROM users WHERE id = $1',
+        [id]
+    );
+}

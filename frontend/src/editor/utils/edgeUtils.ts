@@ -1,5 +1,3 @@
-import type {MovablePoint} from "../types.ts";
-
 export type CustomEdgeCurves = {
     middlePoints: { x: number; y: number }[];
     path: string;
@@ -24,13 +22,13 @@ function evalCubicBezier(b0: Vec2, b1: Vec2, b2: Vec2, b3: Vec2, t: number): Vec
     };
 }
 
-export function getCustomBezierCurve(points: MovablePoint[], alpha: number = 0.4, precision = 3): CustomEdgeCurves {
+export function getCustomBezierCurve(points: Vec2[], alpha: number = 0.4, precision = 3): CustomEdgeCurves {
     if (points.length < 2) return { middlePoints: [], path: "" };
 
     const N = points.length;
     const k = alpha / 3;
 
-    const get = (i: number): MovablePoint => {
+    const get = (i: number): Vec2 => {
         if (i < 0) return points[0];
         if (i >= N) return points[N - 1];
         return points[i];

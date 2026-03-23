@@ -115,7 +115,7 @@ export function OverviewSidePanel({project}: {project: PublicProjectDTO}) {
                         }
                     </Offcanvas.Title>
                     <div className="d-flex flex-row align-items-center gap-2 ms-auto">
-                        <Download size={20} className="text-body-secondary clickable-link ms-auto me-2" role="button" onClick={handleDownloadProject}/>
+                        <Download size={20} className="text-body-secondary clickable-link me-2" role="button" onClick={handleDownloadProject}/>
                         <Gear size={20} className="text-body-secondary clickable-link" role="button"
                               onClick={() => setShowSettings(true)}/>
                         <button type="button" className="btn-close" aria-label="Close" onClick={() => setShowPanel(false)}></button>

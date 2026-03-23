@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import * as Y from "yjs";
-import { type Edge } from "@xyflow/react";
+import {useReactFlow, type Edge } from "@xyflow/react";
 import { getRecipe } from "ficlib";
 import { MAX_CHART_NODES, MAX_CHART_EDGES } from "dtolib";
 import {
@@ -13,6 +13,8 @@ import {
 } from "../types";
 import {generateEdgeId, generateNodeId, stripComputedFields} from "../utils/idUtils";
 import { getHandleItemClassName } from "../utils/throughput";
+
+const LOCAL_ORIGIN = "local";
 
 type SpawnType = "recipe" | "item-spawner" | "item-end" | "power";
 type Position = { x: number; y: number };
@@ -27,6 +29,8 @@ export type PendingConnection = {
 };
 
 export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
+    const reactFlow = useReactFlow();
+
     /**
      * Spawn a node of the given type at `position`.
      * If `pendingConnection` is provided, also creates the connecting edge.
@@ -65,6 +69,8 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
 
             doc.transact(() => {
                 nodeMap.set(nodeId, stripComputedFields(newNode!));
+                reactFlow.setNodes((nodes) => [...nodes, stripComputedFields(newNode!)]);
+
                 if (!pendingConnection) return;
 
                 const { nodeId: existingId, handleId, handleType, throughput } = pendingConnection;
@@ -104,15 +110,17 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
 
                 const edgeId = generateEdgeId();
 
-                edgeMap.set(edgeId, {
+                const newEdge = {
                     id: edgeId,
                     type: "item-edge",
                     source, target, sourceHandle, targetHandle,
                     data: { throughput },
-                });
-            });
+                };
+                edgeMap.set(edgeId, newEdge);
+                reactFlow.setEdges((edges) => [...edges, newEdge]);
+            }, LOCAL_ORIGIN);
         },
-        [ydocRef],
+        [reactFlow, ydocRef],
     );
 
     return { spawnNode };

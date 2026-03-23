@@ -5,6 +5,7 @@ import {
     getBezierPath,
     type EdgeProps,
     useReactFlow,
+    useStore,
 } from "@xyflow/react";
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
@@ -41,14 +42,12 @@ export const ItemEdge = memo(function ItemEdge({
     const { updateEdgeData } = useYjsMutation();
     const reactFlow = useReactFlow();
 
+    // Subscribe to specific nodes so edge re-renders when node data or selection changes
+    const sourceNode = useStore((store) => store.nodeLookup.get(source));
+    const targetNode = useStore((store) => store.nodeLookup.get(target));
+
     // During a drag we buffer intermediate positions in local state so the SVG
     const [dragBuffer, setDragBuffer] = useState<MovablePoint[] | null>(null);
-
-    // The effective movable points: drag buffer while dragging, data prop otherwise.
-    const movablePoints: MovablePoint[] = useMemo(
-        () => dragBuffer ?? (data?.movablePoints ?? []),
-        [dragBuffer, data?.movablePoints],
-    );
 
     sourceY = sourceY - 10; // Nudge source handle up by 10px to align with item icon center
     targetY = targetY + 10; // Nudge target handle up by 10px to align with item icon center
@@ -58,8 +57,45 @@ export const ItemEdge = memo(function ItemEdge({
         targetX, targetY, targetPosition,
     });
 
-    const sourceNode = reactFlow.getNode(source);
-    const targetNode = reactFlow.getNode(target);
+    // Convert stored points to absolute coordinates for rendering
+    const convertToAbsolute = useCallback((point: MovablePoint): { id: string; x: number; y: number } => {
+        // Calculate absolute position from relative
+        const baseX = sourceX + point.t * (targetX - sourceX);
+        const baseY = sourceY + point.t * (targetY - sourceY);
+        return { id: point.id, x: baseX + point.dx, y: baseY + point.dy };
+    }, [sourceX, sourceY, targetX, targetY]);
+
+    // Convert absolute coordinates to relative format
+    const convertToRelative = useCallback((absX: number, absY: number): { t: number; dx: number; dy: number } => {
+        // Find the closest point on the source-target line
+        const lineVecX = targetX - sourceX;
+        const lineVecY = targetY - sourceY;
+        const lineLen2 = lineVecX * lineVecX + lineVecY * lineVecY;
+        
+        // Handle degenerate case where source and target are at same position
+        if (lineLen2 === 0) {
+            return { t: 0.5, dx: absX - sourceX, dy: absY - sourceY };
+        }
+        
+        // Project point onto line to find t
+        const pointVecX = absX - sourceX;
+        const pointVecY = absY - sourceY;
+        const t = Math.max(0, Math.min(1, (pointVecX * lineVecX + pointVecY * lineVecY) / lineLen2));
+        
+        // Calculate base point and offset
+        const baseX = sourceX + t * lineVecX;
+        const baseY = sourceY + t * lineVecY;
+        const dx = absX - baseX;
+        const dy = absY - baseY;
+        
+        return { t, dx, dy };
+    }, [sourceX, sourceY, targetX, targetY]);
+
+    // The effective movable points in absolute coordinates for rendering
+    const movablePointsAbsolute = useMemo(() => {
+        const points = dragBuffer ?? (data?.movablePoints ?? []);
+        return points.map(convertToAbsolute);
+    }, [dragBuffer, data?.movablePoints, convertToAbsolute]);
 
     const sourceItem: Item | null = useMemo(() => {
         if (!sourceNode) return null;
@@ -129,15 +165,15 @@ export const ItemEdge = memo(function ItemEdge({
     };
 
     const { edgePath, labelX, labelY, middlePoints } = useMemo(() => {
-        if (movablePoints.length > 0) {
-            const points = [{ id: "source", x: sourceX, y: sourceY }, ...movablePoints, { id: "target", x: targetX, y: targetY }];
+        if (movablePointsAbsolute.length > 0) {
+            const points = [{ id: "source", x: sourceX, y: sourceY }, ...movablePointsAbsolute, { id: "target", x: targetX, y: targetY }];
             const customPath = getCustomBezierCurve(points);
-            const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? { id: "label", x: baseLabelX, y: baseLabelY };
+            const labelPoint = movablePointsAbsolute.find(p => p.id === "label") ?? { id: "label", x: baseLabelX, y: baseLabelY };
             return {
                 edgePath: customPath.path,
                 labelX: labelPoint.x,
                 labelY: labelPoint.y,
-                middlePoints: movablePoints.length < MAX_MOVABLE_POINTS ? customPath.middlePoints : [],
+                middlePoints: movablePointsAbsolute.length < MAX_MOVABLE_POINTS ? customPath.middlePoints : [],
             };
         }
         return {
@@ -146,19 +182,21 @@ export const ItemEdge = memo(function ItemEdge({
             labelY: baseLabelY,
             middlePoints: [{ x: baseLabelX, y: baseLabelY }],
         };
-    }, [movablePoints, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
+    }, [movablePointsAbsolute, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
 
     const addMovablePoint = useCallback((idx: number) => {
         const current = data?.movablePoints ?? [];
         if (current.length >= MAX_MOVABLE_POINTS) return;
         const middlePoint = middlePoints[idx];
         const newId = current.length === 0 ? "label" : `${current.length}`;
-        const newPoint: MovablePoint = { id: newId, x: middlePoint.x, y: middlePoint.y };
+        // Convert the absolute middle point to relative coordinates
+        const { t, dx, dy } = convertToRelative(middlePoint.x, middlePoint.y);
+        const newPoint: MovablePoint = { id: newId, t, dx, dy };
         const next = [...current];
         next.splice(idx, 0, newPoint);
         // Write directly to Yjs — data prop update will re-render with the new point.
         updateEdgeData(id, { movablePoints: next });
-    }, [middlePoints, data?.movablePoints, id, updateEdgeData]);
+    }, [middlePoints, data?.movablePoints, id, updateEdgeData, convertToRelative]);
 
     const handleDragStart = useCallback((e: React.MouseEvent, idx: number) => {
         e.stopPropagation();
@@ -169,6 +207,9 @@ export const ItemEdge = memo(function ItemEdge({
         const origin = (data?.movablePoints ?? [])[idx];
         const base = [...(data?.movablePoints ?? [])];
         const { zoom } = reactFlow.getViewport();
+        
+        // Convert origin to absolute coordinates for dragging
+        const originAbsolute = convertToAbsolute(origin);
 
         // Seed the drag buffer from the current Yjs data.
         setDragBuffer(base);
@@ -180,7 +221,11 @@ export const ItemEdge = memo(function ItemEdge({
         function onMouseMove(moveEvent: MouseEvent) {
             const dx = (moveEvent.clientX - startX) / zoom;
             const dy = (moveEvent.clientY - startY) / zoom;
-            scratch[idx] = { ...origin, x: origin.x + dx, y: origin.y + dy };
+            const newAbsX = originAbsolute.x + dx;
+            const newAbsY = originAbsolute.y + dy;
+            // Convert back to relative coordinates
+            const { t, dx: relDx, dy: relDy } = convertToRelative(newAbsX, newAbsY);
+            scratch[idx] = { ...origin, t, dx: relDx, dy: relDy };
             setDragBuffer([...scratch]);
         }
         
@@ -200,7 +245,7 @@ export const ItemEdge = memo(function ItemEdge({
 
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp, { capture: true });
-    }, [data?.movablePoints, reactFlow, id, updateEdgeData]);
+    }, [data?.movablePoints, reactFlow, id, updateEdgeData, convertToAbsolute, convertToRelative]);
 
     const DraggablePoints = useCallback(() => {
         return (
@@ -218,8 +263,8 @@ export const ItemEdge = memo(function ItemEdge({
                               addMovablePoint(idx);
                           }}/>
                 ))}
-                {movablePoints.length > 0 &&
-                    movablePoints.map((p, idx) => (
+                {movablePointsAbsolute.length > 0 &&
+                    movablePointsAbsolute.map((p, idx) => (
                         <div
                             key={idx}
                             style={{
@@ -236,7 +281,7 @@ export const ItemEdge = memo(function ItemEdge({
                     ))}
             </>
         );
-    }, [middlePoints, movablePoints, addMovablePoint, handleDragStart]);
+    }, [middlePoints, movablePointsAbsolute, addMovablePoint, handleDragStart]);
 
     // ── Render ─────────────────────────────────────────────────────────────
     return (

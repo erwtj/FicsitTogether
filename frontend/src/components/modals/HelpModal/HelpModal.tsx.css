@@ -24,8 +24,23 @@
 }
 
 .help-sidebar {
+    width: clamp(220px, 24vw, 320px);
+    flex: 0 0 auto;
     padding: 12px 4px;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-content {
+    min-width: 0;
+}
+
+@media (max-width: 991.98px) {
+    .help-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+    }
 }
 
 .help-side-bar-top-level {

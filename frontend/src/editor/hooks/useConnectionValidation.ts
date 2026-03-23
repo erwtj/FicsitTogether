@@ -15,6 +15,9 @@ export function useConnectionValidation() {
             const targetNode = reactFlow.getNode(target ?? "");
 
             if (!sourceNode || !targetNode) return false;
+            
+            const existingEdge = reactFlow.getEdges().some(edge => edge.targetHandle === targetHandle && edge.sourceHandle === sourceHandle);
+            if (existingEdge) return false; // Prevent multiple edges between the same handles
 
             const sourceItem = getHandleItemClassName(sourceNode, sourceHandle, "source");
             const targetItem = getHandleItemClassName(targetNode, targetHandle, "target");

@@ -74,8 +74,9 @@ export type EdgeDTO = {
         throughput: number;
         movablePoints?: {
             id: string;
-            x: number;
-            y: number;
+            t: number;
+            dx: number;
+            dy: number;
         }[]
     }
 

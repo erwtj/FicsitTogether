@@ -9,6 +9,7 @@ import {AddBuildingCard} from "./SloopModalComponents/AddbuildingCard.tsx";
 import {BuildingCard} from "./SloopModalComponents/BuildingCard.tsx";
 import {roundTo4Decimals} from "../../../utils/throughputUtil.ts";
 import {useClientSettings} from "../../../hooks/useClientSettings.ts";
+import { QuestionCircle } from "react-bootstrap-icons";
 
 export type SloopModalProps = {
     show: boolean;
@@ -72,14 +73,21 @@ export function SloopModal({ show, nodeId, onModalClose }: SloopModalProps) {
         updateNodeData(nodeId, { sloopData: allSloopData });
         onModalClose();
     }
+    
+    const openHelp = () => {
+        window.dispatchEvent(
+            new CustomEvent('openHelpModal', { detail: { openPage: 'somersloop' } })
+        );
+    }
 
     return (
         <Modal size="xl" show={show} onHide={handleClose} scrollable>
             <Modal.Header closeButton>
                 <div className="d-flex align-items-center w-100 me-2">
-                    <Modal.Title className={`me-auto`}>
+                    <Modal.Title className="me-2">
                         Configure Somerslooping
                     </Modal.Title>
+                    <QuestionCircle className="me-auto help-circle mt-2" role="button" onClick={openHelp}/>
                     {inputMode === "input" && (
                         <span className="text-muted d-flex align-items-center gap-2">
                             <OverlayTrigger

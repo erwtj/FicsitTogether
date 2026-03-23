@@ -7,7 +7,7 @@ import {
     type OnConnectStart,
 } from "@xyflow/react";
 import { MAX_CHART_EDGES } from "dtolib";
-import { type ItemEdgeData } from "../types";
+import {type ItemEdgeData, type ItemSpawnerNodeData} from "../types";
 import {
     maxSourceThroughput, maxTargetThroughput,
     usedSourceThroughput, usedTargetThroughput,
@@ -55,8 +55,8 @@ export function useNodeEdgeHandlers(
             const target = event.target as HTMLElement;
             if (!target.classList.contains("react-flow__pane")) return;
 
-            const clientX = "clientX" in event ? event.clientX : event.touches[0].clientX;
-            const clientY = "clientY" in event ? event.clientY : event.touches[0].clientY;
+            const clientX = "clientX" in event ? event.clientX : event.changedTouches[0].clientX;
+            const clientY = "clientY" in event ? event.clientY : event.changedTouches[0].clientY;
             const position = reactFlow.screenToFlowPosition({ x: clientX, y: clientY });
 
             const allEdges = reactFlow.getEdges() as Edge<ItemEdgeData>[];
@@ -177,14 +177,33 @@ export function useNodeEdgeHandlers(
                 throughput = Math.max(0, max - usedTargetThroughput(allEdges, target, targetHandle));
         }
 
-        const edgeId = generateEdgeId();
-        doc.getMap<Edge>("edges").set(edgeId, {
-            id: edgeId,
-            type: "item-edge",
-            source, target, sourceHandle, targetHandle,
-            data: { throughput },
-        });
         connectingInfo.current = null;
+
+        doc.transact(() => {
+            const edgeId = generateEdgeId();
+            doc.getMap<Edge>("edges").set(edgeId, {
+                id: edgeId,
+                type: "item-edge",
+                source, target, sourceHandle, targetHandle,
+                data: { throughput },
+            });
+
+            if (sourceNode.type === "item-spawner-node") {
+                const sourceData = sourceNode.data as ItemSpawnerNodeData;
+
+                const newThrough = usedSourceThroughput(allEdges, source, sourceHandle) + throughput;
+
+                const maxOut = Math.max(newThrough, sourceData.outputAmount);
+
+                if (maxOut !== sourceData.outputAmount) {
+                    const nodeMap = doc.getMap<Node>("nodes");
+                    const node = nodeMap.get(source);
+                    if (node) {
+                        nodeMap.set(source, stripComputedFields({ ...node, data: { ...node.data, outputAmount: maxOut } }));
+                    }
+                }
+            }
+        }, LOCAL_ORIGIN);
     }, [ydocRef, reactFlow]);
 
     return {

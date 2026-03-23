@@ -261,3 +261,15 @@ export async function fetchPublicDirectory(dirID: string): Promise<DirectoryCont
 
     return response?.data as DirectoryContentDTO;
 }
+
+export async function deleteMe(auth: Auth0ContextType): Promise<boolean> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.delete(`users/me`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response?.status === 204;
+}

@@ -1,10 +1,10 @@
-﻿import { memo, useMemo } from "react";
+﻿import { memo, useCallback, useMemo } from "react";
 import {
     BaseEdge,
     EdgeLabelRenderer,
     getBezierPath,
     type EdgeProps,
-    useReactFlow,
+    useStore,
 } from "@xyflow/react";
 import { getItem, getRecipe } from "ficlib";
 import { type Item } from "ficlib";
@@ -34,10 +34,9 @@ export const ItemEdge = memo(function ItemEdge({
     markerEnd,
     style,
 }: EdgeProps<ItemEdgeType>) {
-    const reactFlow = useReactFlow();
-
-    // The effective movable points: drag buffer while dragging, data prop otherwise.
-    const movablePoints: MovablePoint[] = useMemo(() => data?.movablePoints ?? [], [data?.movablePoints]);
+    // Subscribe to specific nodes so edge re-renders when node data or selection changes
+    const sourceNode = useStore((store) => store.nodeLookup.get(source));
+    const targetNode = useStore((store) => store.nodeLookup.get(target));
 
     sourceY = sourceY - 10; // Nudge source handle up by 10px to align with item icon center
     targetY = targetY + 10; // Nudge target handle up by 10px to align with item icon center
@@ -47,8 +46,19 @@ export const ItemEdge = memo(function ItemEdge({
         targetX, targetY, targetPosition,
     });
 
-    const sourceNode = reactFlow.getNode(source);
-    const targetNode = reactFlow.getNode(target);
+    // Convert stored points to absolute coordinates for rendering
+    const convertToAbsolute = useCallback((point: MovablePoint): { id: string; x: number; y: number } => {
+        // Calculate absolute position from relative
+        const baseX = sourceX + point.t * (targetX - sourceX);
+        const baseY = sourceY + point.t * (targetY - sourceY);
+        return { id: point.id, x: baseX + point.dx, y: baseY + point.dy };
+    }, [sourceX, sourceY, targetX, targetY]);
+
+    // The effective movable points in absolute coordinates for rendering
+    const movablePointsAbsolute = useMemo(() => {
+        const points = data?.movablePoints ?? [];
+        return points.map(convertToAbsolute);
+    }, [data?.movablePoints, convertToAbsolute]);
 
     const sourceItem: Item | null = useMemo(() => {
         if (!sourceNode) return null;
@@ -107,10 +117,10 @@ export const ItemEdge = memo(function ItemEdge({
     };
 
     const { edgePath, labelX, labelY } = useMemo(() => {
-        if (movablePoints.length > 0) {
-            const points = [{ id: "source", x: sourceX, y: sourceY }, ...movablePoints, { id: "target", x: targetX, y: targetY }];
+        if (movablePointsAbsolute.length > 0) {
+            const points = [{ id: "source", x: sourceX, y: sourceY }, ...movablePointsAbsolute, { id: "target", x: targetX, y: targetY }];
             const customPath = getCustomBezierCurve(points);
-            const labelPoint: MovablePoint = movablePoints.find(p => p.id === "label") ?? { id: "label", x: baseLabelX, y: baseLabelY };
+            const labelPoint = movablePointsAbsolute.find(p => p.id === "label") ?? { id: "label", x: baseLabelX, y: baseLabelY };
             return {
                 edgePath: customPath.path,
                 labelX: labelPoint.x,
@@ -122,7 +132,7 @@ export const ItemEdge = memo(function ItemEdge({
             labelX: baseLabelX,
             labelY: baseLabelY,
         };
-    }, [movablePoints, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
+    }, [movablePointsAbsolute, sourceX, sourceY, targetX, targetY, basePath, baseLabelX, baseLabelY]);
 
     // ── Render ─────────────────────────────────────────────────────────────
     return (
