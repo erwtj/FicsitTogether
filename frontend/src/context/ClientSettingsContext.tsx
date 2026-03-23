@@ -7,6 +7,9 @@ export type ClientSettings = {
     minimapEnabled: boolean;
     minimapColors: boolean;
 
+    // Control overlay
+    showControls: boolean;
+
     // Handle ToolTips
     showToolTips: boolean;
 
@@ -29,6 +32,7 @@ export type ClientSettings = {
 const defaultClientSettings: ClientSettings = {
     minimapEnabled: true,
     minimapColors: true,
+    showControls: true,
     snappingEnabled: false,
     snapSize: 20,
     showToolTips: true,

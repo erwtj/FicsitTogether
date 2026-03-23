@@ -11,7 +11,7 @@ import {DirectoryCard, type DirectoryInfo} from "./DirectoryCard.tsx";
 import {ProjectCard, type ProjectInfo} from "./ProjectCard.tsx";
 import BuyMeCoffeeWidget from "../BuyMeCoffeeButton.tsx";
 import DirectoryTree from "./DirectoryTree.tsx";
-import { Folder, Globe } from "react-bootstrap-icons";
+import {Arrow90degUp, Folder, Globe } from "react-bootstrap-icons";
 import { Link } from "@tanstack/react-router";
 import {AddDirectoryCard} from "./AddDirectoryCard.tsx";
 import { MAX_DIRECTORIES_PER_DIRECTORY, MAX_DIRECTORY_DEPTH, MAX_PROJECTS_PER_DIRECTORY, type DirectoryContentDTO,
@@ -247,21 +247,29 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
         <>
             <BuyMeCoffeeWidget />
             <DirectoryTree dirTree={directory.directoryTree} to={isPublic ? "view/directories" : "directories"}/>
-            <div className="mt-4 align-items-center px-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
-                <span/>
-                <div className="position-relative d-flex flex-row flex-nowrap gap-3 align-items-center justify-content-center">
-                    <Folder size={32}/>
-                    {!isPublic && directory.public && <Globe size={20} className={`public-globe position-absolute default-purple`} style={{
+            <div className="mt-4 align-items-center px-2 px-md-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
+                <div className="d-flex justify-content-start">
+                    <Link 
+                        to={directory.id === directory.directoryTree[0].id ? '/home' : '/directories/$dir'} 
+                        params={{dir: directory.parentDirectoryId}} 
+                        className="d-sm-none text-muted"
+                    >
+                        <Arrow90degUp size={20}/>
+                    </Link>
+                </div>
+                <div className="position-relative d-flex flex-row flex-nowrap gap-2 mx-4 gap-md-3 align-items-center justify-content-center" style={{ minWidth: 0 }}>
+                    <Folder size={32} className="flex-shrink-0"/>
+                    {!isPublic && directory.public && <Globe size={20} className={`public-globe position-absolute default-purple flex-shrink-0`} style={{
                         borderRadius: "50%",
                         left: "1.2rem",
                         top: "1rem",
                         padding: "2px",
                         zIndex: 1,
                     }}/>}
-                    <h3 className="mb-0 no-drag">{directory.name}</h3>
+                    <h3 className="mb-0 no-drag text-truncate" style={{ maxWidth: "100%", minWidth: 0 }} title={directory.name}>{directory.name}</h3>
                 </div>
-                {!isPublic && <div className="d-flex justify-content-end align-items-center">
-                    <Link to={"/overview/$dir"} params={{ dir: directory.id }} className="text-body-secondary clickable-link">
+                {!isPublic && <div className="d-none d-sm-flex justify-content-end align-items-center">
+                    <Link to={"/overview/$dir"} params={{ dir: directory.id }} className="text-nowrap text-body-secondary clickable-link">
                         <span className="ms-2">Go to overview</span>
                     </Link>
                 </div>}
