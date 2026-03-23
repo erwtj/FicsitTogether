@@ -181,12 +181,15 @@ export function useNodeEdgeHandlers(
 
         doc.transact(() => {
             const edgeId = generateEdgeId();
-            doc.getMap<Edge>("edges").set(edgeId, {
+            const newEdge = {
                 id: edgeId,
                 type: "item-edge",
                 source, target, sourceHandle, targetHandle,
                 data: { throughput },
-            });
+            };
+
+            doc.getMap<Edge>("edges").set(edgeId, newEdge);
+            reactFlow.setEdges((edges) => [...edges, newEdge]);
 
             if (sourceNode.type === "item-spawner-node") {
                 const sourceData = sourceNode.data as ItemSpawnerNodeData;
@@ -200,6 +203,7 @@ export function useNodeEdgeHandlers(
                     const node = nodeMap.get(source);
                     if (node) {
                         nodeMap.set(source, stripComputedFields({ ...node, data: { ...node.data, outputAmount: maxOut } }));
+                        reactFlow.setNodes((nodes) => nodes.map(n => n.id === source ? { ...n, data: { ...n.data, outputAmount: maxOut } } : n));
                     }
                 }
             }
