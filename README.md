@@ -1,5 +1,7 @@
 # FicsitTogether
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-gray?logo=buy-me-a-coffee&logoColor=white&style=flat-square)](https://www.buymeacoffee.com/ikno).
+
 A collaborative factory planner web application for Satisfactory. FicsitTogether allows players to design and plan their in-game factories together in real-time with a visual, node-based editor.
 
 ## Features
