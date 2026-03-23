@@ -120,11 +120,11 @@ function RecipeModal({ show, onModalSubmit, RequiredInput, RequiredOutput }: Rec
     return (
         <Modal show={show} animation={false} centered onHide={handleClose} dialogClassName="recipe-dialog">
             <Modal.Header closeButton className="w-100">
-                <div className="w-100 d-flex flex-row justify-content-between align-items-center me-2 gap-2">
-                    <Modal.Title className="mb-0">Items</Modal.Title>
+                <div className="w-100 d-flex flex-row justify-content-between me-2">
+                    <Modal.Title>Items</Modal.Title>
                     {!RequiredOutput && (
                         <input type="text" placeholder="Search" value={searchTerm} ref={searchBarRef}
-                               onChange={handleSearch} className="form-control flex-grow-1" style={{maxWidth: '300px'}}/>
+                               onChange={handleSearch} className="form-control w-50"/>
                     )}
                 </div>
             </Modal.Header>
