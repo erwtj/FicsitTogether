@@ -18,6 +18,12 @@
     fill: rgba(48, 55, 58, 0.53);
 }
 
+.react-flow__controls-button {
+    background-color: #282b2f !important;
+    border-color: var(--bs-border-color-translucent);
+    color: white;
+}
+
 .node-selected-by-other {
     outline: red solid 1px;
 }

@@ -1,6 +1,6 @@
 ﻿import {useCallback, useMemo, useRef } from "react";
 import * as Y from "yjs";
-import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
+import { Background, BackgroundVariant, ControlButton, Controls, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
 
@@ -16,12 +16,13 @@ import { useConnectionValidation } from "./hooks/useConnectionValidation.ts";
 import { useFactorySync } from "./hooks/useFactorySync.ts";
 import { useYjsSync } from "./hooks/useYjsSync.ts";
 import { useNodeModal } from "./hooks/modals/useNodeModal.ts";
-import type { Edge, NodeChange } from "@xyflow/react";
+import type { Edge, EdgeChange, NodeChange } from "@xyflow/react";
 import {OverviewSidePanel} from "./components/panels/OverviewSidePanel.tsx";
 import { Toast } from "react-bootstrap";
 import {useSloopModal} from "./hooks/modals/useSloopModal.ts";
 import {SloopModal} from "./components/modals/SloopModal.tsx";
 import {useClientSettings} from "../hooks/useClientSettings.ts";
+import { Trash } from "react-bootstrap-icons";
 
 // Static constants to prevent recreation on every render
 const reactFlowStyle = { outline: "none" };
@@ -99,6 +100,35 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
         }
     }, [nodes, onNodesChangeInternal]);
 
+    const handleDeleteControlClick = useCallback(() => {
+        const removeNodeChanges: NodeChange[] = [];
+        const removeEdgeChanges: EdgeChange[] = [];
+
+        const deletedNodeIds = new Set<string>();
+
+        for (const node of nodes) {
+            if (node.selected) {
+                removeNodeChanges.push({
+                    type: "remove",
+                    id: node.id
+                });
+            }
+            deletedNodeIds.add(node.id);
+        }
+
+        for (const edge of edges) {
+            if (edge.selected || deletedNodeIds.has(edge.source) || deletedNodeIds.has(edge.target)) { // Also remove incident edges
+                removeEdgeChanges.push({
+                    type: "remove",
+                    id: edge.id
+                });
+            }
+        }
+
+        onEdgesChangeInternal(removeEdgeChanges);
+        onNodesChangeInternal(removeNodeChanges);
+    }, [edges, nodes, onEdgesChangeInternal, onNodesChangeInternal]);
+
     return (
         <YjsContext.Provider value={ydocRef}>
             <div style={{ width: "100%", height: "100vh" }}>
@@ -131,6 +161,11 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     <Panel position={"top-left"} className={"h-100"} style={panelStyle}>
                         <OverviewSidePanel projectId={projectId}/>
                     </Panel>
+                    {clientSettings.showControls && <Controls position="bottom-right">
+                        <ControlButton onClick={handleDeleteControlClick} title="Delete selected nodes and edges">
+                            <Trash size={18} />
+                        </ControlButton>
+                    </Controls>}
                 </ReactFlow>
 
                 <div className="experimental-ribbon no-drag">
