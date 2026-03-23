@@ -90,6 +90,7 @@ export function SettingsPageContent() {
                 
                 <ul>
                     <li><strong>Minimap:</strong> Show or hide the minimap in the project editor.</li>
+                    <li><strong>Controls</strong> Show or hide control buttons, useful on mobile.</li>
                     <li><strong>Tooltips:</strong> Show tooltips when hovering over certain elements.</li>
                     <li><strong>Snapping:</strong> Enable or disable snapping to grid when moving nodes in the project editor.</li>
                     <li><strong>I/O Summing:</strong> Enable input/output summing in the side panel.</li>

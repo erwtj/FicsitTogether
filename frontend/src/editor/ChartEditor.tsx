@@ -112,8 +112,8 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     type: "remove",
                     id: node.id
                 });
+                deletedNodeIds.add(node.id);
             }
-            deletedNodeIds.add(node.id);
         }
 
         for (const edge of edges) {
