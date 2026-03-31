@@ -7,11 +7,13 @@ import {ClientSettingsProvider} from "./context/ClientSettingsContext.tsx";
 import { init } from "@plausible-analytics/tracker";
 
 // TODO: Move domain name to env
-init({
-    domain: 'ficsit-together.com',
-    endpoint: 'https://plausible.ficsit-together.com/api/event',
-    fileDownloads: true,
-})
+if (import.meta.env.VITE_PLAUSIBLE_DOMAIN && import.meta.env.VITE_PLAUSIBLE_ENDPOINT) {
+    init({
+        domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN,
+        endpoint: import.meta.env.VITE_PLAUSIBLE_ENDPOINT,
+        fileDownloads: true,
+    })
+}
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
