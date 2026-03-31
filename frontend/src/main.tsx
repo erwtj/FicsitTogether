@@ -9,7 +9,7 @@ import { init } from "@plausible-analytics/tracker";
 // TODO: Move domain name to env
 init({
     domain: 'ficsit-together.com',
-    endpoint: 'https://plausible.ficsit-together.com',
+    endpoint: 'https://plausible.ficsit-together.com/api/event',
     fileDownloads: true,
 })
 
