@@ -189,51 +189,14 @@ export function setupWebSocketServer(server: Server) {
     });
 
     wss.on('connection', async (ws: AuthenticatedWebSocket) => {
-        let context: ProjectContext;
-        try {
-            context = await createContext(ws.projectId);
-            ws.clientId = context.nextClientId++;
-            context.clients.add(ws);
-
-            // Don't send initial state immediately - wait for client to send their state vector
-            // This allows proper CRDT merging on reconnection
+        let context: ProjectContext | null = null;
+        let isReady = false; // Flag to track if context is initialized
+        const pendingMessages: Buffer[] = []; // Queue messages received before context is ready
+        
+        const processMessage = (data: Buffer) => {
+            if (!context) return; // Safety check, should never happen when isReady is true
             
-            const awarenessUpdate = encodeAwarenessUpdate(
-                context.awareness,
-                Array.from(context.awareness.getStates().keys())
-            );
-            const awarenessMessage = new Uint8Array([MESSAGE_AWARENESS, ...awarenessUpdate]);
-            ws.send(awarenessMessage);
-        } catch (e) {
-            ws.close(1008, 'Connection failed.');
-            return;
-        }
-
-        // Cloudflare has a 100-second idle timeout, so ping every 30s to stay alive
-        let isAlive = true;
-        ws.on('pong', () => {
-            isAlive = true;
-        });
-
-        const interval = setInterval(() => {
-            if (!isAlive) {
-                console.log(`WebSocket client ${ws.clientId} failed to respond to ping, terminating`);
-                ws.terminate();
-                return;
-            }
-            
-            if (ws.readyState === ws.OPEN) {
-                isAlive = false;
-                ws.ping();
-            }
-        }, 30000)
-
-        ws.on('message', (data) => {
-            if (!(data instanceof Buffer || data instanceof ArrayBuffer)) {
-                return;
-            }
-
-            const message = new Uint8Array(data as ArrayBuffer);
+            const message = new Uint8Array(data);
             const messageType = message[0];
             const content = message.slice(1);
 
@@ -262,7 +225,7 @@ export function setupWebSocketServer(server: Server) {
 
                 if (context.saveTimeout) clearTimeout(context.saveTimeout);
                 context.saveTimeout = setTimeout(() => {
-                    saveDocument(ws.projectId, context);
+                    saveDocument(ws.projectId, context!);
                 }, 2000);
 
             } else if (messageType === MESSAGE_AWARENESS) {
@@ -274,10 +237,74 @@ export function setupWebSocketServer(server: Server) {
                     }
                 });
             }
+        };
+        
+        // Set up message handler immediately to capture any messages that arrive
+        // while we're waiting for createContext to complete
+        ws.on('message', (data) => {
+            if (!(data instanceof Buffer || data instanceof ArrayBuffer)) {
+                return;
+            }
+
+            // If context isn't ready yet, queue the message for later processing
+            if (!isReady) {
+                pendingMessages.push(Buffer.from(data as ArrayBuffer));
+                return;
+            }
+
+            processMessage(data as Buffer);
         });
+
+        // Initialize context
+        try {
+            context = await createContext(ws.projectId);
+            ws.clientId = context.nextClientId++;
+            context.clients.add(ws);
+
+            // Send awareness state to new client
+            const awarenessUpdate = encodeAwarenessUpdate(
+                context.awareness,
+                Array.from(context.awareness.getStates().keys())
+            );
+            const awarenessMessage = new Uint8Array([MESSAGE_AWARENESS, ...awarenessUpdate]);
+            ws.send(awarenessMessage);
+            
+            // Mark as ready and process any queued messages
+            isReady = true;
+            for (const msg of pendingMessages) {
+                processMessage(msg);
+            }
+            pendingMessages.length = 0; // Clear the queue
+        } catch (e) {
+            console.error('Failed to create context for project:', ws.projectId, e);
+            ws.close(1008, 'Connection failed.');
+            return;
+        }
+
+        // Cloudflare has a 100-second idle timeout, so ping every 30s to stay alive
+        let isAlive = true;
+        ws.on('pong', () => {
+            isAlive = true;
+        });
+
+        const interval = setInterval(() => {
+            if (!isAlive) {
+                console.log(`WebSocket client ${ws.clientId} failed to respond to ping, terminating`);
+                ws.terminate();
+                return;
+            }
+            
+            if (ws.readyState === ws.OPEN) {
+                isAlive = false;
+                ws.ping();
+            }
+        }, 30000);
 
         ws.on('close', async () => {
             clearInterval(interval);
+            
+            // If context was never initialized, nothing to clean up
+            if (!isReady) return;
 
             context.clients.delete(ws);
             removeAwarenessStates(context.awareness, [ws.clientId], null);
