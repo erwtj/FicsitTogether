@@ -117,7 +117,7 @@ function RootComponent() {
 
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, []);
+    }, [state.matches]);
 
     return (
         <div className="d-flex flex-column min-vh-100 m-0 flex-grow-1">
