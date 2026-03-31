@@ -69,7 +69,7 @@ export function useNodeSpawner(ydocRef: React.RefObject<Y.Doc | null>) {
 
             doc.transact(() => {
                 nodeMap.set(nodeId, stripComputedFields(newNode!));
-                reactFlow.setNodes((nodes) => [...nodes, stripComputedFields(newNode!)]);
+                reactFlow.setNodes((nodes) => [...nodes, newNode!]);
 
                 if (!pendingConnection) return;
 
