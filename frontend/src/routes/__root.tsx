@@ -27,20 +27,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             return;
         }
 
-        if (location.pathname === '/') {
-            if (context.auth && context.auth.isAuthenticated) {
-                throw redirect({
-                    to: '/home',
-                    replace: true,
-                });
-            } else {
-                throw redirect({
-                    to: '/login',
-                    replace: true,
-                });
-            }
-        }
-
         // If any matched route requires auth and the user isn't logged in, redirect to login
         const requiresAuth = matches.some((match) => match.staticData?.requireAuth);
         if (requiresAuth && !context.auth?.isAuthenticated) {
