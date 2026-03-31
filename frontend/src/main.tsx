@@ -6,7 +6,6 @@ import App from "./App.tsx";
 import {ClientSettingsProvider} from "./context/ClientSettingsContext.tsx";
 import { init } from "@plausible-analytics/tracker";
 
-// TODO: Move domain name to env
 if (import.meta.env.VITE_PLAUSIBLE_DOMAIN && import.meta.env.VITE_PLAUSIBLE_ENDPOINT) {
     init({
         domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN,
