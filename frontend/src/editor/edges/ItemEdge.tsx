@@ -22,6 +22,7 @@ import { getCustomBezierCurve } from "../utils/edgeUtils.ts";
 import "./ItemEdge.css";
 import { getItemIndexFromHandleId } from "../utils/idUtils.ts";
 import { Plus } from "react-bootstrap-icons";
+import { useClientSettings } from "../../hooks/useClientSettings.ts";
 
 export const ItemEdge = memo(function ItemEdge({
     id,
@@ -39,8 +40,9 @@ export const ItemEdge = memo(function ItemEdge({
     markerEnd,
     style,
 }: EdgeProps<ItemEdgeType>) {
-    const { updateEdgeData } = useYjsMutation();
+    const { updateEdgeData, updateEdgeDataWithBackPropagation } = useYjsMutation();
     const reactFlow = useReactFlow();
+    const { clientSettings } = useClientSettings();
 
     // Subscribe to specific nodes so edge re-renders when node data or selection changes
     const sourceNode = useStore((store) => store.nodeLookup.get(source));
@@ -139,12 +141,16 @@ export const ItemEdge = memo(function ItemEdge({
     const handleThroughputChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = parseFloat(e.target.value);
-            if (isNaN(val) || val < 0)
-                updateEdgeData(id, { throughput: 0 });
-            else
-                updateEdgeData(id, { throughput: isFluid ? val * 1000 : val });
+            const nextThroughput = isNaN(val) || val < 0 ? 0 : (isFluid ? val * 1000 : val);
+
+            if (clientSettings.autoBackPropagation) {
+                updateEdgeDataWithBackPropagation(id, nextThroughput);
+                return;
+            }
+
+            updateEdgeData(id, { throughput: nextThroughput });
         },
-        [id, isFluid, updateEdgeData],
+        [clientSettings.autoBackPropagation, id, isFluid, updateEdgeData, updateEdgeDataWithBackPropagation],
     );
 
     const fluidColor = isFluid && sourceItem?.fluidColor

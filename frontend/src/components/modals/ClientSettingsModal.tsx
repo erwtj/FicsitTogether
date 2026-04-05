@@ -41,6 +41,14 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                 </Form>
                 <hr/>
                 <Form onSubmit={handleSubmit}>
+                    <h5>Throughput</h5>
+                    <Form.Check type="checkbox" id={"check-autoBackPropagation"} label="Auto-fix upstream values"
+                                checked={clientSettings.autoBackPropagation}
+                                onChange={(e) => updateClientSettings({autoBackPropagation: e.target.checked})}/>
+                    <Form.Label className="text-muted mb-0">When changing an edge throughput, automatically updates upstream requirements instead of only marking overuse.</Form.Label>
+                </Form>
+                <hr/>
+                <Form onSubmit={handleSubmit}>
                     <h5>Tooltips</h5>
                     <Form.Check type="checkbox" id={"check-tooltips"} label="Show tooltips"
                                 checked={clientSettings.showToolTips}
