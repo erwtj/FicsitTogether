@@ -20,12 +20,14 @@ interface UseYjsSyncProps {
 const LOCAL_ORIGIN = "local";
 
 const RECONNECT_DELAY_MS = -1;
+const SYNC_TIMEOUT_MS = 5000; // Timeout for initial sync to complete
 
 export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEdges }: UseYjsSyncProps) {
     const reactFlow = useReactFlow();
     const wsRef = useRef<WebSocket | null>(null);
     const [connected, setConnected] = useState(false);
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const destroyedRef = useRef(false);
     // Only true after the server's initial state has been received and applied.
     // No local updates are sent until this is set (prevents a blank doc from wiping the server)
@@ -205,6 +207,18 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 const stateVector = Y.encodeStateVector(doc);
                 const syncStep1Message = new Uint8Array([MESSAGE_SYNC_STEP_1, ...stateVector]);
                 ws.send(syncStep1Message);
+                
+                // Set a timeout to detect if initial sync never completes
+                // This can happen if the server fails to respond or the message is lost
+                if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+                syncTimeoutRef.current = setTimeout(() => {
+                    if (!syncedRef.current && ws.readyState === WebSocket.OPEN) {
+                        console.warn("Initial sync timeout - retrying sync request");
+                        const retryStateVector = Y.encodeStateVector(doc);
+                        const retrySyncMessage = new Uint8Array([MESSAGE_SYNC_STEP_1, ...retryStateVector]);
+                        ws.send(retrySyncMessage);
+                    }
+                }, SYNC_TIMEOUT_MS);
             };
 
             ws.onerror = (error) => {
@@ -215,6 +229,12 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                 setConnected(false);
                 syncedRef.current = false;
                 wsRef.current = null;
+                
+                // Clear sync timeout
+                if (syncTimeoutRef.current) {
+                    clearTimeout(syncTimeoutRef.current);
+                    syncTimeoutRef.current = null;
+                }
                 
                 // Clear undo stack on disconnect to avoid confusion when server state diverges
                 if (undoManagerRef.current) {
@@ -253,6 +273,12 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
                     // Server's response to our state vector - contains updates we're missing
                     Y.applyUpdate(doc, content);
                     
+                    // Clear sync timeout - we successfully received initial state
+                    if (syncTimeoutRef.current) {
+                        clearTimeout(syncTimeoutRef.current);
+                        syncTimeoutRef.current = null;
+                    }
+                    
                     // Mark as synced - we can now send future updates
                     syncedRef.current = true;
                     console.log("Sync completed");
@@ -270,6 +296,10 @@ export function useYjsSync({ projectId, getAccessToken, ydocRef, setNodes, setEd
             if (reconnectTimerRef.current !== null) {
                 clearTimeout(reconnectTimerRef.current);
                 reconnectTimerRef.current = null;
+            }
+            if (syncTimeoutRef.current !== null) {
+                clearTimeout(syncTimeoutRef.current);
+                syncTimeoutRef.current = null;
             }
             window.removeEventListener('keydown', handleKeyDown);
             if (undoManagerRef.current) {

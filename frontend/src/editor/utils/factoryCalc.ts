@@ -135,10 +135,13 @@ function outputBasedFactor(recipe: Recipe, outgoingEdges: Edge<ItemEdgeData>[], 
         byHandle.set(h, (byHandle.get(h) ?? 0) + factor);
     }
 
-    const sorted = [...byHandle.values()].sort((a, b) => a - b);
-    const lowestFactor = sorted[0] ?? 1;
+    let highestFactor: number | undefined = undefined;
+    byHandle.forEach((throughput) => {
+        if (throughput > (highestFactor ?? 0)) highestFactor = throughput;
+    })
+    highestFactor = highestFactor ?? 1;
 
-    return {inputFactor: !isRawFactor ? lowestFactor : 0, outputFactor: lowestFactor};
+    return {inputFactor: !isRawFactor ? highestFactor : 0, outputFactor: highestFactor};
 }
 
 
