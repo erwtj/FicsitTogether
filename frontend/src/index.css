@@ -12,16 +12,23 @@ img, .no-drag {
     overflow-x: hidden;
 }
 
+.clickable-link.text-body-tertiary {
+    color: var(--bs-tertiary-color) !important;
+}
+
 .clickable-link{
     cursor: pointer;
     text-decoration: none;
     color: rgba(222, 226, 230, 0.75) !important;
 }
 
-
 .clickable-link:hover {
     color: #ea80fc !important;
     text-decoration: underline;
+}
+
+.clickable-link-hover-only:hover {
+    color: #ea80fc !important;
 }
 
 .default-purple {
