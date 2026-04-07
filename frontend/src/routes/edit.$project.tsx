@@ -1,6 +1,6 @@
 import {createFileRoute} from '@tanstack/react-router';
 import ChartEditor from "../editor/ChartEditor.tsx";
-import {ReactFlowProvider} from "@xyflow/react";
+import { ReactFlowProvider } from "@xyflow/react";
 
 export const Route = createFileRoute('/edit/$project')({
     component: Editor,
@@ -16,7 +16,7 @@ function Editor() {
     
     return(
         <ReactFlowProvider>
-            <ChartEditor projectId={project}/>
+            <ChartEditor key={project} projectId={project}/>
         </ReactFlowProvider>
     );
 }

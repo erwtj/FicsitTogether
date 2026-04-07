@@ -1,4 +1,4 @@
-import { createRootRouteWithContext, redirect, Outlet, useRouterState} from '@tanstack/react-router';
+import { createRootRouteWithContext, redirect, Outlet, useRouterState, Link} from '@tanstack/react-router';
 import {type RouterContext} from '../router';
 import {useEffect} from "react";
 import NavHeader from "../components/nav/NavHeader.tsx";
@@ -25,20 +25,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
                 });
             }
             return;
-        }
-
-        if (location.pathname === '/') {
-            if (context.auth && context.auth.isAuthenticated) {
-                throw redirect({
-                    to: '/home',
-                    replace: true,
-                });
-            } else {
-                throw redirect({
-                    to: '/login',
-                    replace: true,
-                });
-            }
         }
 
         // If any matched route requires auth and the user isn't logged in, redirect to login
@@ -117,7 +103,10 @@ function RootComponent() {
 
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, []);
+    }, [state.matches]);
+
+    const isCanvasPage = state.matches[1]?.pathname?.includes('edit/') || state.matches[1]?.pathname?.includes('view/projects/');
+    const currentYear = new Date().getFullYear();
 
     return (
         <div className="d-flex flex-column min-vh-100 m-0 flex-grow-1">
@@ -129,6 +118,11 @@ function RootComponent() {
                 key={details?.openPage}
             />
             <Outlet/>
+            <div className={`w-100 text-center mb-2 ${isCanvasPage ? "position-absolute bottom-0" : "mt-auto"}`}>
+                <span className={`text-body-tertiary ${isCanvasPage ? "opacity-75" : "bg-body"} rounded-3 px-2 py-1`}>
+                    © {currentYear} Ficsit Together | Satisfactory assets © Coffee Stain Studios AB | <Link to="/credits" className="clickable-link text-body-tertiary">Credits</Link>
+                </span>
+            </div>
         </div>
     );
 }

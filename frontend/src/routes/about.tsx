@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { FolderFill, ShareFill, Upload, EyeFill, PeopleFill, Diagram3Fill } from 'react-bootstrap-icons'
+import { FolderFill, ShareFill, Upload, EyeFill, PeopleFill, Diagram3Fill, Github } from 'react-bootstrap-icons'
 import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
 import {useAuth0Context} from "../auth/useAuth0Context.ts";
 
@@ -140,16 +140,14 @@ function RouteComponent() {
                     <footer className="text-center mt-2 text-muted">
                         <div className="d-inline-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
                             <span className="text-muted small" style={{ letterSpacing: '0.04em' }}>MADE BY</span>
-                            <a href="https://www.reddit.com/user/Dorito009/" className="clickable-link default-purple fw-semibold">u/dorito009</a>
+                            <a href="https://www.reddit.com/user/Dorito009/" target="_blank" className="clickable-link default-purple fw-semibold" rel="noopener noreferrer">u/Dorito009</a>
                             <span className="text-muted">and</span>
-                            <a href="https://www.reddit.com/user/GamingIkno/" className="clickable-link default-purple fw-semibold">u/GamingIkno</a>
+                            <a href="https://github.com/erwtj" target="_blank" className="clickable-link default-purple fw-semibold" rel="noopener noreferrer">Ikno</a>
                         </div>
                         
-                        <p className="mb-1">This project is open source, <a href="https://github.com/erwtj/FicsitTogether" className="clickable-link default-purple" rel="noopener noreferrer" target="_blank">take a look on GitHub</a> if you're curious or want to contribute.</p>
+                        <p className="mb-1"><Github className="me-2" style={{marginBottom: ".1rem"}} size={18}/>This project is open source, <a href="https://github.com/erwtj/FicsitTogether" className="clickable-link default-purple" rel="noopener noreferrer" target="_blank">take a look on GitHub</a> if you're curious or want to contribute.</p>
                         <p className="mb-1">Inspired by <a className="clickable-link default-purple" href="https://satisfactory-planner.vercel.app/" rel="noopener noreferrer" target="_blank">this planner</a>, which sadly doesn't seem to get updates anymore.</p>
-                        <p className="mb-0 small text-body-tertiary">Ficsit Together is not affiliated with Coffee Stain Studios.</p>
                     </footer>
-
                 </div>
             </main>
         </>
