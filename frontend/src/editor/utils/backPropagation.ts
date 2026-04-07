@@ -21,10 +21,14 @@ type AllocationTarget = {
 type MutableGraph = {
     nodesById: Map<string, AppNode>;
     edgesById: Map<string, Edge<ItemEdgeData>>;
+    originalThroughputs: Map<string, number>;
     edgeThroughputs: Map<string, number>;
+    resolvedEdgeIds: Set<string>;
     nodePatches: Record<string, Record<string, unknown>>;
     edgePatches: Record<string, Partial<ItemEdgeData>>;
 };
+
+const EPSILON = 1e-9;
 
 function sumEdgeThroughput(
     edges: Edge<ItemEdgeData>[],
@@ -60,14 +64,22 @@ function distributeTotal(
     return nextValues;
 }
 
-function getCurrentThroughput(graph: MutableGraph, edgeId: string): number {
+function getOriginalThroughput(graph: MutableGraph, edgeId: string): number {
     const edge = graph.edgesById.get(edgeId);
     if (!edge) return 0;
-    return graph.edgeThroughputs.get(edgeId) ?? edge.data?.throughput ?? 0;
+    return graph.originalThroughputs.get(edgeId) ?? edge.data?.throughput ?? 0;
 }
 
-function setEdgeThroughput(graph: MutableGraph, edgeId: string, throughput: number) {
+function setEdgeThroughput(
+    graph: MutableGraph,
+    edgeId: string,
+    throughput: number,
+    options?: { resolved?: boolean },
+) {
     graph.edgeThroughputs.set(edgeId, throughput);
+    if (options?.resolved) {
+        graph.resolvedEdgeIds.add(edgeId);
+    }
     graph.edgePatches[edgeId] = { ...(graph.edgePatches[edgeId] ?? {}), throughput };
 }
 
@@ -83,6 +95,34 @@ function getNodeIncomingEdges(graph: MutableGraph, nodeId: string): Edge<ItemEdg
     return [...graph.edgesById.values()].filter((edge) => edge.target === nodeId);
 }
 
+function isResolvedEdge(graph: MutableGraph, edgeId: string): boolean {
+    return graph.resolvedEdgeIds.has(edgeId);
+}
+
+function withThroughputSnapshot(
+    graph: MutableGraph,
+    edges: Edge<ItemEdgeData>[],
+): Edge<ItemEdgeData>[] {
+    return edges.map((edge) => ({
+        ...edge,
+        data: {
+            ...(edge.data ?? { throughput: 0 }),
+            throughput: getOriginalThroughput(graph, edge.id),
+        },
+    }));
+}
+
+function computeLinearDesiredInputFactor(
+    currentFactor: { inputFactor: number; outputFactor: number },
+    desiredOutputFactor: number,
+): number {
+    if (currentFactor.outputFactor > EPSILON) {
+        return currentFactor.inputFactor * (desiredOutputFactor / currentFactor.outputFactor);
+    }
+
+    return desiredOutputFactor;
+}
+
 function propagateFromEdge(
     graph: MutableGraph,
     edgeId: string,
@@ -92,7 +132,7 @@ function propagateFromEdge(
     const edge = graph.edgesById.get(edgeId);
     if (!edge) return false;
 
-    setEdgeThroughput(graph, edgeId, desiredThroughput);
+    setEdgeThroughput(graph, edgeId, desiredThroughput, { resolved: true });
 
     const sourceNode = graph.nodesById.get(edge.source);
     if (!sourceNode) return false;
@@ -109,7 +149,7 @@ function propagateFromEdge(
     }
 
     if (visitingNodes.has(sourceNode.id)) {
-        return false;
+        return true;
     }
 
     visitingNodes.add(sourceNode.id);
@@ -123,7 +163,14 @@ function propagateFromEdge(
 
     const incomingEdges = getNodeIncomingEdges(graph, sourceNode.id);
     const outgoingEdges = getNodeOutgoingEdges(graph, sourceNode.id);
-    const currentFactor = computeNodeFactor(recipe, recipeData.sloopData, incomingEdges, outgoingEdges);
+    const snapshotIncomingEdges = withThroughputSnapshot(graph, incomingEdges);
+    const snapshotOutgoingEdges = withThroughputSnapshot(graph, outgoingEdges);
+    const currentFactor = computeNodeFactor(
+        recipe,
+        recipeData.sloopData,
+        snapshotIncomingEdges,
+        snapshotOutgoingEdges,
+    );
     const craftsPerMinute = 60 / recipe.duration;
     const editedHandleId = edge.sourceHandle ?? "";
     const editedHandleIndex = getItemIndexFromHandleId(editedHandleId);
@@ -138,10 +185,10 @@ function propagateFromEdge(
     const desiredEditedHandleTotal = sumEdgeThroughput(editedHandleEdges, graph.edgeThroughputs);
     const outputRateAtOne = editedOutput.amount * craftsPerMinute;
     const desiredOutputFactor = outputRateAtOne > 0 ? desiredEditedHandleTotal / outputRateAtOne : 0;
-    const factorScale = currentFactor.outputFactor > 0 ? desiredOutputFactor / currentFactor.outputFactor : 1;
-    const desiredInputFactor = currentFactor.outputFactor > 0
-        ? currentFactor.inputFactor * factorScale
-        : desiredOutputFactor;
+    const desiredInputFactor = computeLinearDesiredInputFactor(
+        currentFactor,
+        desiredOutputFactor,
+    );
 
     for (let outputIndex = 0; outputIndex < recipe.output.length; outputIndex++) {
         const outputHandleId = `${sourceNode.id}-output-handle-${outputIndex}`;
@@ -156,12 +203,12 @@ function propagateFromEdge(
                 .filter((handleEdge) => handleEdge.id !== edgeId)
                 .map((handleEdge) => ({
                     edgeId: handleEdge.id,
-                    currentThroughput: getCurrentThroughput(graph, handleEdge.id),
+                    currentThroughput: getOriginalThroughput(graph, handleEdge.id),
                 }));
             const remainingTotal = Math.max(0, targetHandleTotal - desiredThroughput);
             const remainingDistribution = distributeTotal(remainingEdges, remainingTotal);
             for (const [remainingEdgeId, throughput] of remainingDistribution.entries()) {
-                setEdgeThroughput(graph, remainingEdgeId, throughput);
+                setEdgeThroughput(graph, remainingEdgeId, throughput, { resolved: true });
             }
             continue;
         }
@@ -169,13 +216,13 @@ function propagateFromEdge(
         const distribution = distributeTotal(
             handleEdges.map((handleEdge) => ({
                 edgeId: handleEdge.id,
-                currentThroughput: getCurrentThroughput(graph, handleEdge.id),
+                currentThroughput: getOriginalThroughput(graph, handleEdge.id),
             })),
             targetHandleTotal,
         );
 
         for (const [outputEdgeId, throughput] of distribution.entries()) {
-            setEdgeThroughput(graph, outputEdgeId, throughput);
+            setEdgeThroughput(graph, outputEdgeId, throughput, { resolved: true });
         }
     }
 
@@ -186,12 +233,21 @@ function propagateFromEdge(
 
         const input = recipe.input[inputIndex];
         const targetInputTotal = input.amount * craftsPerMinute * desiredInputFactor;
+        const resolvedEdges = handleEdges.filter((handleEdge) => isResolvedEdge(graph, handleEdge.id));
+        const unresolvedEdges = handleEdges.filter((handleEdge) => !isResolvedEdge(graph, handleEdge.id));
+        const resolvedTotal = sumEdgeThroughput(resolvedEdges, graph.edgeThroughputs);
+
+        if (unresolvedEdges.length === 0) {
+            continue;
+        }
+
+        const remainingTotal = Math.max(0, targetInputTotal - resolvedTotal);
         const distribution = distributeTotal(
-            handleEdges.map((handleEdge) => ({
+            unresolvedEdges.map((handleEdge) => ({
                 edgeId: handleEdge.id,
-                currentThroughput: getCurrentThroughput(graph, handleEdge.id),
+                currentThroughput: getOriginalThroughput(graph, handleEdge.id),
             })),
-            targetInputTotal,
+            remainingTotal,
         );
 
         for (const [inputEdgeId, throughput] of distribution.entries()) {
@@ -217,7 +273,9 @@ export function buildBackPropagationPatch(
     const graph: MutableGraph = {
         nodesById,
         edgesById,
+        originalThroughputs: new Map(edges.map((edge) => [edge.id, edge.data?.throughput ?? 0])),
         edgeThroughputs: new Map(edges.map((edge) => [edge.id, edge.data?.throughput ?? 0])),
+        resolvedEdgeIds: new Set<string>(),
         nodePatches: {},
         edgePatches: {},
     };
