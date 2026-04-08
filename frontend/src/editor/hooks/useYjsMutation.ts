@@ -3,6 +3,7 @@ import { type Node, type Edge, useReactFlow } from "@xyflow/react";
 import { useYjsDoc } from "../context/YjsContext";
 import { stripComputedFields } from "../utils/idUtils";
 import type {ItemEdgeData} from "../types.ts";
+import { buildBackPropagationPatch } from "../utils/backPropagation";
 
 const LOCAL_ORIGIN = "local";
 
@@ -13,6 +14,60 @@ const LOCAL_ORIGIN = "local";
 export function useYjsMutation() {
     const ydocRef = useYjsDoc();
     const reactflow = useReactFlow();
+
+    const applyGraphDataPatches = useCallback(
+        (
+            nodePatches: Record<string, Record<string, unknown>>,
+            edgePatches: Record<string, Record<string, unknown>>,
+        ) => {
+            const doc = ydocRef.current;
+            if (!doc) return false;
+
+            const nodePatchEntries = Object.entries(nodePatches);
+            const edgePatchEntries = Object.entries(edgePatches);
+            if (nodePatchEntries.length === 0 && edgePatchEntries.length === 0) return true;
+
+            const nodeMap = doc.getMap<Node>("nodes");
+            const edgeMap = doc.getMap<Edge>("edges");
+
+            doc.transact(() => {
+                if (nodePatchEntries.length > 0) {
+                    reactflow.setNodes((nds) =>
+                        nds.map((node) => {
+                            const patch = nodePatches[node.id];
+                            if (!patch) return node;
+                            return { ...node, data: { ...node.data, ...patch } };
+                        }),
+                    );
+
+                    for (const [nodeId, patch] of nodePatchEntries) {
+                        const node = nodeMap.get(nodeId);
+                        if (!node) continue;
+                        nodeMap.set(nodeId, stripComputedFields({ ...node, data: { ...node.data, ...patch } }));
+                    }
+                }
+
+                if (edgePatchEntries.length > 0) {
+                    reactflow.setEdges((eds) =>
+                        eds.map((edge) => {
+                            const patch = edgePatches[edge.id];
+                            if (!patch) return edge;
+                            return { ...edge, data: { ...edge.data, ...patch } };
+                        }),
+                    );
+
+                    for (const [edgeId, patch] of edgePatchEntries) {
+                        const edge = edgeMap.get(edgeId);
+                        if (!edge) continue;
+                        edgeMap.set(edgeId, { ...edge, data: { ...edge.data, ...patch } });
+                    }
+                }
+            }, LOCAL_ORIGIN);
+
+            return true;
+        },
+        [reactflow, ydocRef],
+    );
 
     /**
      * Merge `patch` into the data of the node with the given id.
@@ -106,5 +161,28 @@ export function useYjsMutation() {
         [reactflow, ydocRef],
     )
 
-    return { updateNodeData, updateEdgeData, updateNodeAndSingleEdgeData };
+    const updateEdgeDataWithBackPropagation = useCallback(
+        (edgeId: string, throughput: number) => {
+            const patchSet = buildBackPropagationPatch(
+                reactflow.getNodes(),
+                reactflow.getEdges() as Edge<ItemEdgeData>[],
+                edgeId,
+                throughput,
+            );
+
+            if (!patchSet) {
+                updateEdgeData(edgeId, { throughput });
+                return false;
+            }
+
+            applyGraphDataPatches(
+                patchSet.nodePatches,
+                patchSet.edgePatches as Record<string, Record<string, unknown>>,
+            );
+            return true;
+        },
+        [applyGraphDataPatches, reactflow, updateEdgeData],
+    );
+
+    return { updateNodeData, updateEdgeData, updateNodeAndSingleEdgeData, updateEdgeDataWithBackPropagation };
 }

@@ -113,7 +113,16 @@ export function EdgesPageContent() {
             </p>
             <VideoAccordion source="/media/HelpModal/Videos/Edges.webm" title="Show Edge Creation Video"/>
 
-            <h3 className="mt-3">Custom Paths</h3>
+            <h3 className="mt-3">Auto-fix Upstream</h3>
+            <p>
+                If the auto-fix upstream setting is enabled, when you edit the throughput of an edge, it will automatically adjust the throughputs of the edges before it to match the new throughput.
+                This is useful for quickly adjusting the throughput of a part of your factory without having to manually adjust all the edges leading to it.
+            </p>
+            <p>
+                This auto-fix works with feedback loops as well as branching and returning paths. It will automatically adjust all edges and spawned nodes that are affected by the change.
+            </p>
+
+            <h3>Custom Paths</h3>
             <p>
                 Sometimes the automatic edge path will not follow the route you need. In this case, you can create points that the edge will go through.
                 To create a point, select the edge, click the plus symbol, then drag the point around.

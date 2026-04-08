@@ -13,6 +13,9 @@ export type ClientSettings = {
     // Handle ToolTips
     showToolTips: boolean;
 
+    // Throughput editing
+    autoBackPropagation: boolean;
+
     // Dragging
     snappingEnabled: boolean;
     snapSize: number;
@@ -33,6 +36,7 @@ const defaultClientSettings: ClientSettings = {
     minimapEnabled: true,
     minimapColors: true,
     showControls: true,
+    autoBackPropagation: false,
     snappingEnabled: false,
     snapSize: 20,
     showToolTips: true,
