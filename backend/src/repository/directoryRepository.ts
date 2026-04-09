@@ -258,3 +258,10 @@ export async function updateDirectoryPublic(directoryId: string, isPublic: boole
         [isPublic, directoryId]
     );
 }
+
+export async function renameDirectory(id: string, name: string) {
+    await pool.query(
+        'UPDATE directories SET name = $1 WHERE id = $2',
+        [name, id]
+    );
+}

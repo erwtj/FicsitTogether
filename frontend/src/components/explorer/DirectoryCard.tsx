@@ -22,11 +22,12 @@ export type DirectoryCardProps = {
     deleteDirectory?: (directory: DirectoryInfo) => void; // Callback for deleting the directory
     shareDirectory?: (directory: DirectoryInfo) => void; // Callback for sharing the directory
     leaveDirectory?: (directory: DirectoryInfo) => void; // Optional callback for leaving the directory
+    renameDirectory?: (directory: DirectoryInfo) => void; // Optional callback for renaming the directory
 }
 
-export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory, shareDirectory, leaveDirectory}: DirectoryCardProps) => {
+export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory, shareDirectory, leaveDirectory, renameDirectory}: DirectoryCardProps) => {
     const [showDropdown, setShowDropdown] = useState(false);
-    const displayDropdown = deleteDirectory || shareDirectory || (leaveDirectory && directoryInfo.isShared);
+    const displayDropdown = deleteDirectory || shareDirectory || (leaveDirectory && directoryInfo.isShared) || renameDirectory;
     
     const {clientSettings} = useClientSettings();
 
@@ -82,6 +83,10 @@ export const DirectoryCard = ({to, directoryInfo, changePublic, deleteDirectory,
                                                onClick={() => changePublic(directoryInfo)}>
                                     Publicize
                                 </Dropdown.Item>
+                            )}
+                            {renameDirectory && (
+                                <Dropdown.Item href={"#"} className={"dropdown-option user-select-none"}
+                                               onClick={() => renameDirectory(directoryInfo)}>Rename</Dropdown.Item>
                             )}
                             {(leaveDirectory && directoryInfo.isShared) && (
                                 <Dropdown.Item href={"#"} className={"dropdown-option delete-option user-select-none"}

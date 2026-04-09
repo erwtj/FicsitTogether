@@ -4,14 +4,14 @@ import {
     createProject,
     deleteDirectory, deleteProject,
     downloadProject, fetchTotalCounts, updateDirectoryPublic, updateProjectPublic,
-    uploadProject
+    uploadProject, renameDirectory
 } from "../../api/apiCalls.ts";
 import type {Auth0ContextType} from "../../auth/auth0.tsx";
 import {DirectoryCard, type DirectoryInfo} from "./DirectoryCard.tsx";
 import {ProjectCard, type ProjectInfo} from "./ProjectCard.tsx";
 import BuyMeCoffeeWidget from "../BuyMeCoffeeButton.tsx";
 import DirectoryTree from "./DirectoryTree.tsx";
-import {Arrow90degUp, Folder, Globe } from "react-bootstrap-icons";
+import {Arrow90degUp, Folder, Globe, PencilFill } from "react-bootstrap-icons";
 import { Link } from "@tanstack/react-router";
 import {AddDirectoryCard} from "./AddDirectoryCard.tsx";
 import { MAX_DIRECTORIES_PER_DIRECTORY, MAX_DIRECTORY_DEPTH, MAX_PROJECTS_PER_DIRECTORY, type DirectoryContentDTO,
@@ -23,6 +23,7 @@ import { Toast } from "react-bootstrap";
 import ConfirmationModal from "../modals/ConfirmationModal.tsx";
 import ShareModal from "../modals/ShareModal.tsx";
 import PublicModal from "../modals/PublicModal.tsx";
+import RenameModal from "../modals/RenameModal.tsx";
 
 type DirectoryExplorerProps = {
     isPublic: boolean;
@@ -40,6 +41,7 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
 
     const [subDirectories, setSubDirectories] = useState<DirectoryDTO[]>(directory.subDirectories);
     const [projects, setProjects] = useState<ProjectDTO[]>(directory.projects);
+    const [currentDirectoryName, setCurrentDirectoryName] = useState(directory.name);
     
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectInfo | null>(null);
@@ -47,12 +49,15 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [showPublicModal, setShowPublicModal] = useState(false);
+    const [showRenameModal, setShowRenameModal] = useState(false);
+    const [renamingCurrentDirectory, setRenamingCurrentDirectory] = useState(false);
 
     const [apiError, setApiError] = useState<string | null>(null);
     
     useEffect(() => {
         setSubDirectories(directory.subDirectories);
         setProjects(directory.projects);
+        setCurrentDirectoryName(directory.name);
     }, [directory]);
 
     useEffect(() => {
@@ -243,10 +248,56 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
         setShowPublicModal(true);
     }
 
+    const handleRenameDirectory = (directory: DirectoryInfo) => {
+        setSelectedDirectory(directory);
+        setRenamingCurrentDirectory(false);
+        setShowRenameModal(true);
+    }
+
+    const handleRenameCurrentDirectory = () => {
+        setSelectedDirectory(null);
+        setRenamingCurrentDirectory(true);
+        setShowRenameModal(true);
+    }
+
+    const handleRenameConfirm = (newName: string) => {
+        if (!auth) return;
+        const dirId = renamingCurrentDirectory ? directory.id : selectedDirectory?.id;
+        if (!dirId) return;
+
+        setShowRenameModal(false);
+        renameDirectory(auth, dirId, newName)
+        .then(() => {
+            if (renamingCurrentDirectory) {
+                setCurrentDirectoryName(newName);
+            } else if (selectedDirectory) {
+                setSubDirectories(prev => prev.map(dir => dir.id === selectedDirectory.id ? { ...dir, name: newName } : dir));
+            }
+        })
+        .catch(err => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Invalid name. Please try again.');
+            } else {
+                setApiError('An error occurred while renaming the directory. Please try again.');
+            }
+            console.error('Error renaming directory:', err);
+        })
+        .finally(() => {
+            setSelectedDirectory(null);
+            setRenamingCurrentDirectory(false);
+        });
+    }
+
+    const handleRenameCancel = () => {
+        setShowRenameModal(false);
+        setSelectedDirectory(null);
+        setRenamingCurrentDirectory(false);
+    }
+
     return (
         <>
             <BuyMeCoffeeWidget />
-            <DirectoryTree dirTree={directory.directoryTree} to={isPublic ? "view/directories" : "directories"}/>
+            <DirectoryTree dirTree={directory.directoryTree.map((item, index, arr) => index === arr.length - 1 ? { ...item, name: currentDirectoryName } : item)} to={isPublic ? "view/directories" : "directories"}/>
             <div className="mt-4 align-items-center px-2 px-md-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
                 <div className="d-flex justify-content-start">
                     <Link 
@@ -266,7 +317,16 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
                         padding: "2px",
                         zIndex: 1,
                     }}/>}
-                    <h3 className="mb-0 no-drag text-truncate" style={{ maxWidth: "100%", minWidth: 0 }} title={directory.name}>{directory.name}</h3>
+                    <h3 className="mb-0 no-drag text-truncate" style={{ maxWidth: "100%", minWidth: 0 }} title={currentDirectoryName}>{currentDirectoryName}</h3>
+                    {!isPublic && user?.id === directory.owner && directory.parentDirectoryId !== directory.id && (
+                        <button
+                            className="bg-transparent border-0 p-0 text-body-secondary flex-shrink-0"
+                            onClick={handleRenameCurrentDirectory}
+                            title="Rename directory"
+                        >
+                            <PencilFill size={14}/>
+                        </button>
+                    )}
                 </div>
                 {!isPublic && <div className="d-none d-sm-flex justify-content-end align-items-center">
                     <Link to={"/overview/$dir"} params={{ dir: directory.id }} className="text-nowrap text-body-secondary clickable-link">
@@ -287,6 +347,7 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
                                 changePublic={!isPublic ? handleChangeDirectoryPublic : undefined}
                                 deleteDirectory={!isPublic ? handleDeleteDirectory : undefined}
                                 shareDirectory={(!isPublic && user && directory.owner === user.id) ? handleShareDirectory : undefined}
+                                renameDirectory={(!isPublic && user && directory.owner === user.id) ? handleRenameDirectory : undefined}
                             />
                         )
                     })}
@@ -338,6 +399,12 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
                 isPublic={selectedDirectory?.public ?? selectedProject?.public ?? false}
                 onClose={handlePublicClose} 
                 updateStatus={handlePublicUpdate}
+            />
+            <RenameModal
+                show={showRenameModal}
+                currentName={renamingCurrentDirectory ? currentDirectoryName : (selectedDirectory?.name ?? "")}
+                onConfirm={handleRenameConfirm}
+                onCancel={handleRenameCancel}
             />
         </>
     );
