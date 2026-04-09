@@ -294,10 +294,15 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
         setRenamingCurrentDirectory(false);
     }
 
+    const isCurrentDirectoryRoot = directory.parentDirectoryId === directory.id;
+    const updatedDirectoryTree = directory.directoryTree.map((item, index, arr) =>
+        index === arr.length - 1 ? { ...item, name: currentDirectoryName } : item
+    );
+
     return (
         <>
             <BuyMeCoffeeWidget />
-            <DirectoryTree dirTree={directory.directoryTree.map((item, index, arr) => index === arr.length - 1 ? { ...item, name: currentDirectoryName } : item)} to={isPublic ? "view/directories" : "directories"}/>
+            <DirectoryTree dirTree={updatedDirectoryTree} to={isPublic ? "view/directories" : "directories"}/>
             <div className="mt-4 align-items-center px-2 px-md-4" style={{display: 'grid', gridTemplateColumns: '1fr auto 1fr'}}>
                 <div className="d-flex justify-content-start">
                     <Link 
@@ -318,7 +323,7 @@ export const DirectoryExplorer = ({ isPublic, user, totalCounts, auth, directory
                         zIndex: 1,
                     }}/>}
                     <h3 className="mb-0 no-drag text-truncate" style={{ maxWidth: "100%", minWidth: 0 }} title={currentDirectoryName}>{currentDirectoryName}</h3>
-                    {!isPublic && user?.id === directory.owner && directory.parentDirectoryId !== directory.id && (
+                    {!isPublic && user?.id === directory.owner && !isCurrentDirectoryRoot && (
                         <button
                             className="bg-transparent border-0 p-0 text-body-secondary flex-shrink-0"
                             onClick={handleRenameCurrentDirectory}
