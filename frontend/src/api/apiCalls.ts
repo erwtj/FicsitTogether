@@ -253,7 +253,7 @@ export async function updateDirectoryPublic(auth: Auth0ContextType, dirID: strin
 export async function renameDirectory(auth: Auth0ContextType, dirID: string, name: string): Promise<boolean> {
     const token = await auth.getAccessTokenSilently();
 
-    const response = await api.patch(`directories/${dirID}/name`, {
+    const response = await api.put(`directories/${dirID}/name`, {
         name: name
     }, {
         headers: {

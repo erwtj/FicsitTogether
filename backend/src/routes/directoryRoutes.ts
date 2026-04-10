@@ -34,7 +34,7 @@ router.get('/:directoryId', validate({ params: directoryIdParamSchema }), requir
 router.post('/', validate({ body: createDirectoryBodySchema }), requireCanEditDirectory, createDirectory);
 router.delete('/:directoryId', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, deleteDirectory);
 router.put('/:directoryId/public', validate({ params: directoryIdParamSchema, body: updatePublicStatusBodySchema }), requireCanEditDirectory, updateDirectoryPublic);
-router.patch('/:directoryId/name', validate({ params: directoryIdParamSchema, body: renameDirectoryBodySchema }), requireDirectoryOwner, renameDirectory);
+router.put('/:directoryId/name', validate({ params: directoryIdParamSchema, body: renameDirectoryBodySchema }), requireDirectoryOwner, renameDirectory);
 
 router.get('/:directoryId/owner/count', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, countTotalsForDirectoryOwner );
 

@@ -9,7 +9,7 @@ import {
     fetchSharedDirectories,
     createDirectory,
     deleteDirectory,
-    leaveDirectory, updateDirectoryPublic, fetchTotalCountsRoot
+    leaveDirectory, updateDirectoryPublic, fetchTotalCountsRoot, renameDirectory
 } from "../api/apiCalls.ts";
 import ConfirmationModal from "../components/modals/ConfirmationModal.tsx";
 import ShareModal from "../components/modals/ShareModal.tsx";
@@ -18,6 +18,7 @@ import BuyMeCoffeeWidget from "../components/BuyMeCoffeeButton.tsx";
 import { Toast } from "react-bootstrap";
 import { MAX_DIRECTORIES_PER_DIRECTORY } from "dtolib";
 import PublicModal from "../components/modals/PublicModal.tsx";
+import RenameModal from "../components/modals/RenameModal.tsx";
 
 export const Route = createFileRoute('/home')({
     component: HomePage,
@@ -88,6 +89,7 @@ function HomePage() {
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [showPublicModal, setShowPublicModal] = useState(false);
+    const [showRenameModal, setShowRenameModal] = useState(false);
     
     const [selectedDirectory, setSelectedDirectory] = useState<DirectoryInfo | null>(null);
     
@@ -206,6 +208,36 @@ function HomePage() {
         setUpdatePublicDirectoryType(type);
     }
 
+    const handleRenameDirectory = (directory: DirectoryInfo) => {
+        setSelectedDirectory(directory);
+        setShowRenameModal(true);
+    }
+
+    const handleRenameConfirm = (newName: string) => {
+        if (!selectedDirectory) return;
+        setShowRenameModal(false);
+        renameDirectory(auth, selectedDirectory.id, newName)
+        .then(() => {
+            setOwnedDirectories(prev => prev.map(dir => dir.id === selectedDirectory.id ? { ...dir, name: newName } : dir));
+        })
+        .catch(err => {
+            if (err.response?.status === 400) {
+                setApiError(err.response.data?.message || 'Invalid name. Please try again.');
+            } else {
+                setApiError('An error occurred while renaming the directory. Please try again.');
+            }
+            console.error('Error renaming directory:', err);
+        })
+        .finally(() => {
+            setSelectedDirectory(null);
+        });
+    }
+
+    const handleRenameCancel = () => {
+        setShowRenameModal(false);
+        setSelectedDirectory(null);
+    }
+
     return (
         <div className="container flex-grow-1 mw-100">
             <BuyMeCoffeeWidget />
@@ -223,6 +255,7 @@ function HomePage() {
                                 deleteDirectory={handleDeleteDirectory}
                                 shareDirectory={handleShareDirectory}
                                 changePublic={(dir) => handleChangePublic(dir, 'owned')}
+                                renameDirectory={handleRenameDirectory}
                             />
                         ))}
                         {ownedDirectories.length < MAX_DIRECTORIES_PER_DIRECTORY &&
@@ -285,6 +318,12 @@ function HomePage() {
                 isPublic={selectedDirectory?.public ?? false}
                 onClose={handlePublicClose}
                 updateStatus={handlePublicUpdate}
+            />
+            <RenameModal
+                show={showRenameModal}
+                currentName={selectedDirectory?.name ?? ""}
+                onConfirm={handleRenameConfirm}
+                onCancel={handleRenameCancel}
             />
         </div>
     );
