@@ -10,7 +10,7 @@ import {
     getSharedDirectories,
     getDirectorySharedWith, leaveDirectory,
     getChartsInDirectory, uploadProject,
-    updateDirectoryPublic, countTotalsForDirectoryOwner, countTotalsForRootOwner
+    updateDirectoryPublic, renameDirectory, countTotalsForDirectoryOwner, countTotalsForRootOwner
 } from "../controllers/directoryController.js";
 import {uploadSingleJson} from "../middlewares/upload.js";
 import { validate } from '../middlewares/validate.js';
@@ -19,7 +19,8 @@ import {
     directoryIdParamSchema,
     shareDirectoryBodySchema,
     unshareDirectoryBodySchema,
-    updatePublicStatusBodySchema
+    updatePublicStatusBodySchema,
+    renameDirectoryBodySchema
 } from '../validation/schemas.js';
 
 const router = Router();
@@ -33,6 +34,7 @@ router.get('/:directoryId', validate({ params: directoryIdParamSchema }), requir
 router.post('/', validate({ body: createDirectoryBodySchema }), requireCanEditDirectory, createDirectory);
 router.delete('/:directoryId', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, deleteDirectory);
 router.put('/:directoryId/public', validate({ params: directoryIdParamSchema, body: updatePublicStatusBodySchema }), requireCanEditDirectory, updateDirectoryPublic);
+router.put('/:directoryId/name', validate({ params: directoryIdParamSchema, body: renameDirectoryBodySchema }), requireDirectoryOwner, renameDirectory);
 
 router.get('/:directoryId/owner/count', validate({ params: directoryIdParamSchema }), requireCanEditDirectory, countTotalsForDirectoryOwner );
 

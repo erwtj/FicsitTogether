@@ -292,6 +292,26 @@ export async function updateDirectoryPublic(req: Request, res: Response, next: N
     }
 }
 
+export async function renameDirectory(req: Request, res: Response, next: NextFunction) {
+    try {
+        // Validated by Zod middleware
+        const id = req.params.directoryId as string;
+        const name = req.body.name as string;
+
+        if (id === req.user.root_directory) {
+            const error: AppError = new Error('Not allowed to rename root directory.');
+            error.status = 400;
+            return next(error);
+        }
+
+        await directoryRepository.renameDirectory(id, name);
+
+        res.sendStatus(200);
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function countTotalsForDirectoryOwner (req: Request, res: Response, next: NextFunction) {
     try {
         // Validated by Zod middleware

@@ -250,6 +250,20 @@ export async function updateDirectoryPublic(auth: Auth0ContextType, dirID: strin
     return response?.status === 200;
 }
 
+export async function renameDirectory(auth: Auth0ContextType, dirID: string, name: string): Promise<boolean> {
+    const token = await auth.getAccessTokenSilently();
+
+    const response = await api.put(`directories/${dirID}/name`, {
+        name: name
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response?.status === 200;
+}
+
 export async function fetchPublicProject(projID: string): Promise<PublicProjectDTO> {
     const response = await api.get(`public/projects/${projID}`);
 

@@ -20,13 +20,9 @@ export function DirectoriesPageContent() {
             
             <h3>Directory actions</h3>
             <p>
-                Directories can be created, shared, marked public and deleted. To create a new directory, type the directory name and click the create button in the explorer. 
-                To share, mark public or delete a directory, click on the three dots next to the directory name to open the directory actions menu and select the desired action.
-            </p>
-            
-            <p className="border-start border-3 ps-2 pb-1 text-muted">
-                Currently you can not rename directories or move projects between directories. 
-                We plan to add these features in the future, but for now you can create a new directory and move projects there by downloading and re-uploading them.
+                Directories can be created, shared, marked public, renamed and deleted. To create a new directory, type the directory name and click the create button in the explorer. 
+                To share, mark public, rename or delete a directory, click on the three dots next to the directory name to open the directory actions menu and select the desired action.
+                You can also rename the current directory by clicking the pencil icon next to the directory name at the top of the page.
             </p>
             
             <h3>Limits</h3>

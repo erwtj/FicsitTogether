@@ -50,6 +50,13 @@ export const updatePublicStatusBodySchema = z.object({
     })
 });
 
+// Rename directory
+export const renameDirectoryBodySchema = z.object({
+    name: z.string()
+        .min(1, 'Directory name is required')
+        .max(MAX_NAME_LENGTH, `Directory name must be at most ${MAX_NAME_LENGTH} characters`)
+});
+
 // Share directory with user
 export const shareDirectoryBodySchema = z.object({
     user: usernameSchema
@@ -109,6 +116,7 @@ export const uploadProjectBodySchema = z.object({
 export type CreateProjectBody = z.infer<typeof createProjectBodySchema>;
 export type CreateDirectoryBody = z.infer<typeof createDirectoryBodySchema>;
 export type UpdatePublicStatusBody = z.infer<typeof updatePublicStatusBodySchema>;
+export type RenameDirectoryBody = z.infer<typeof renameDirectoryBodySchema>;
 export type ShareDirectoryBody = z.infer<typeof shareDirectoryBodySchema>;
 export type UnshareDirectoryBody = z.infer<typeof unshareDirectoryBodySchema>;
 export type UploadProjectBody = z.infer<typeof uploadProjectBodySchema>;
