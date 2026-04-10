@@ -16,7 +16,7 @@
     "@tanstack/react-router-devtools": "^1.159.5",
     "@tanstack/router-devtools": "^1.159.5",
     "@xyflow/react": "^12.10.0",
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "dtolib": "*",
     "ficlib": "*",
     "react": "^19.2.0",
