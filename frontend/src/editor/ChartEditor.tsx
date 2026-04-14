@@ -1,6 +1,6 @@
 ﻿import {useCallback, useMemo, useRef } from "react";
 import * as Y from "yjs";
-import { Background, BackgroundVariant, ControlButton, Controls, MiniMap, Panel, ReactFlow } from "@xyflow/react";
+import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
 
@@ -161,11 +161,11 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     <Panel position={"top-left"} className={"h-100"} style={panelStyle}>
                         <OverviewSidePanel projectId={projectId}/>
                     </Panel>
-                    {clientSettings.showControls && <Controls position="bottom-right">
-                        <ControlButton onClick={handleDeleteControlClick} title="Delete selected nodes and edges">
-                            <Trash size={18} />
-                        </ControlButton>
-                    </Controls>}
+                    <Panel position={"bottom-right"} className="mb-4">
+                        <button className="btn btn-danger m-0 p-2" onClick={handleDeleteControlClick}>
+                            <Trash size={24}/>
+                        </button>
+                    </Panel>
                 </ReactFlow>
 
                 <div className="experimental-ribbon no-drag">

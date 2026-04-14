@@ -119,7 +119,7 @@ function RootComponent() {
                 key={details?.openPage}
             />
             <Outlet/>
-            <div className={`w-100 text-center mb-2 z-2 ${(isCanvasPage || isLoginPage) ? "position-absolute bottom-0" : "mt-auto"}`}>
+            <div className={`w-100 text-center mb-2 z-2 ${(isCanvasPage || isLoginPage) ? "position-absolute bottom-0" : "mt-auto"} ${isCanvasPage && "d-none d-sm-inline-block"}`}>
                 <span className={`text-body-tertiary ${(isCanvasPage || isLoginPage) ? "opacity-75" : "bg-body"} rounded-3 px-2 py-1`}>
                     © {currentYear} Ficsit Together | Satisfactory assets © Coffee Stain Studios AB | <Link to="/credits" className="clickable-link text-body-tertiary">Credits</Link>
                 </span>
