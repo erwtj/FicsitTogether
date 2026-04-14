@@ -1,4 +1,4 @@
-﻿import {useCallback, useMemo, useRef } from "react";
+import {useCallback, useMemo, useRef } from "react";
 import * as Y from "yjs";
 import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -30,6 +30,13 @@ const panelStyle = { placeContent: "center" as const };
 const defaultEdgeOptions = { style: { strokeWidth: 1.75 } };
 const deleteKeyCodes: string[] = ['Backspace', 'Delete'];
 const multiSelectionKeyCodes: string[] = ['Shift', 'Control'];
+const chartEditorContainerStyle = {
+    width: "100%",
+    height: "100dvh",
+    maxHeight: "100dvh",
+    overflow: "hidden",
+    overscrollBehavior: "none" as const,
+};
 
 interface ChartEditorProps {
     projectId: string;
@@ -131,7 +138,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
 
     return (
         <YjsContext.Provider value={ydocRef}>
-            <div style={{ width: "100%", height: "100vh" }}>
+            <div style={chartEditorContainerStyle}>
                 <ReactFlow
                     style={reactFlowStyle}
                     tabIndex={-1}
