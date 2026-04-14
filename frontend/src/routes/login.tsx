@@ -4,6 +4,7 @@ import Card from 'react-bootstrap/Card';
 import Alert from 'react-bootstrap/Alert';
 import './login.tsx.css'
 import {z} from 'zod';
+import {useEffect, useState} from 'react';
 
 const loginSearchSchema = z.object({
     error: z.string().optional(),
@@ -75,6 +76,16 @@ const random_img = `/media/login-backgrounds/${img_id}.webp`;
 
 function LoginComponent() {
     const { error, error_description } = Route.useSearch();
+    const [authNotice, setAuthNotice] = useState<string | null>(null);
+
+    useEffect(() => {
+        const notice = window.sessionStorage.getItem('auth_notice');
+        if (notice === 'session_expired') {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setAuthNotice('Your session expired. Please sign in again.');
+            window.sessionStorage.removeItem('auth_notice');
+        }
+    }, []);
 
     return (
         <main className="w-100 h-100 d-flex align-items-center justify-content-center bg-black">
@@ -84,9 +95,13 @@ function LoginComponent() {
                     <Card.Img className="mb-3" src='/media/Ficsit_logo.webp' alt="Ficsit Together logo"/>
                     <Card.Title id="login-title" className="fs-2" as="h1">Welcome to Ficsit Together</Card.Title>
                     <p>Don't know what it is? Check out the <Link to={"/about"} className="clickable-link default-purple">about</Link> page!</p>
-                    {error ? (
+                    {(error || authNotice) ? (
                         <Alert variant="warning" className="text-start mt-2 mb-3 py-2" role="alert">
-                            {error_description && <p className="mb-0 small">{decodeURIComponent(error_description)}</p>}
+                            {authNotice ? (
+                                <p className="mb-0 small">{authNotice}</p>
+                            ) : (
+                                error_description && <p className="mb-0 small">{decodeURIComponent(error_description)}</p>
+                            )}
                         </Alert>
                     ) : (
                         <Card.Text className="mb-4">
