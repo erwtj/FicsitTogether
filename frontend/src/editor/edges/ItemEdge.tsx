@@ -204,12 +204,18 @@ export const ItemEdge = memo(function ItemEdge({
         updateEdgeData(id, { movablePoints: next });
     }, [middlePoints, data?.movablePoints, id, updateEdgeData, convertToRelative]);
 
-    const handleDragStart = useCallback((e: React.MouseEvent, idx: number) => {
+    const handleDragStart = useCallback((e: React.PointerEvent<HTMLDivElement>, idx: number) => {
+        if (!e.isPrimary) return;
         e.stopPropagation();
         e.preventDefault();
 
+        const pointerId = e.pointerId;
+        const dragHandle = e.currentTarget;
+        dragHandle.setPointerCapture(pointerId);
+
         const startX = e.clientX;
         const startY = e.clientY;
+
         const origin = (data?.movablePoints ?? [])[idx];
         const base = [...(data?.movablePoints ?? [])];
         const { zoom } = reactFlow.getViewport();
@@ -224,7 +230,10 @@ export const ItemEdge = memo(function ItemEdge({
         // create a new closure / stale-closure problem with setState.
         const scratch = [...base];
 
-        function onMouseMove(moveEvent: MouseEvent) {
+        function onInputMove(moveEvent: PointerEvent) {
+            if (moveEvent.pointerId !== pointerId) return;
+            if (moveEvent.cancelable) moveEvent.preventDefault();
+
             const dx = (moveEvent.clientX - startX) / zoom;
             const dy = (moveEvent.clientY - startY) / zoom;
             const newAbsX = originAbsolute.x + dx;
@@ -235,22 +244,24 @@ export const ItemEdge = memo(function ItemEdge({
             setDragBuffer([...scratch]);
         }
         
-        function onMouseUp(upEvent: MouseEvent) {
+        function onInputUp(upEvent: PointerEvent) {
+            if (upEvent.pointerId !== pointerId) return;
             upEvent.stopPropagation();
-            window.removeEventListener("mousemove", onMouseMove);
-            window.removeEventListener("mouseup", onMouseUp, { capture: true });
-            // Suppress the pointerup and click that ReactFlow uses to deselect.
-            const suppress = (ev: Event) => ev.stopPropagation();
-            window.addEventListener("pointerup", suppress, { capture: true, once: true });
-            window.addEventListener("click", suppress, { capture: true, once: true });
+            window.removeEventListener("pointermove", onInputMove);
+            window.removeEventListener("pointerup", onInputUp, { capture: true });
+            window.removeEventListener("pointercancel", onInputUp, { capture: true });
+            if (dragHandle.hasPointerCapture(pointerId)) {
+                dragHandle.releasePointerCapture(pointerId);
+            }
             // Clear drag buffer first so render falls back to data prop after Yjs commit.
             setDragBuffer(null);
             // Commit to Yjs — data prop update will take over rendering.
             updateEdgeData(id, { movablePoints: scratch });
         }
 
-        window.addEventListener("mousemove", onMouseMove);
-        window.addEventListener("mouseup", onMouseUp, { capture: true });
+        window.addEventListener("pointermove", onInputMove, { passive: false });
+        window.addEventListener("pointerup", onInputUp, { capture: true });
+        window.addEventListener("pointercancel", onInputUp, { capture: true });
     }, [data?.movablePoints, reactFlow, id, updateEdgeData, convertToAbsolute, convertToRelative]);
 
     const DraggablePoints = useCallback(() => {
@@ -263,9 +274,11 @@ export const ItemEdge = memo(function ItemEdge({
                               pointerEvents: "all",
                               zIndex: 3,
                           }}
-                          className="add-handle"
-                          onClick={(e) => {
+                          className="add-handle nodrag nopan"
+                          onPointerDown={(e) => {
+                              if (!e.isPrimary) return;
                               e.stopPropagation();
+                              e.preventDefault();
                               addMovablePoint(idx);
                           }}/>
                 ))}
@@ -279,10 +292,9 @@ export const ItemEdge = memo(function ItemEdge({
                                 cursor: "move",
                                 zIndex: 3,
                             }}
-                            className="position-handle"
+                            className="position-handle nodrag nopan"
                             onClick={(e) => e.stopPropagation()}
-                            onPointerDown={(e) => e.stopPropagation()}
-                            onMouseDown={(e) => handleDragStart(e, idx)}
+                            onPointerDown={(e) => handleDragStart(e, idx)}
                         />
                     ))}
             </>
