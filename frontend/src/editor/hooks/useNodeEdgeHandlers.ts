@@ -52,11 +52,12 @@ export function useNodeEdgeHandlers(
             connectingInfo.current = null;
             if (!info) return;
 
-            const target = event.target as HTMLElement;
-            if (!target.classList.contains("react-flow__pane")) return;
-
             const clientX = "clientX" in event ? event.clientX : event.changedTouches[0].clientX;
             const clientY = "clientY" in event ? event.clientY : event.changedTouches[0].clientY;
+
+            const target = document.elementFromPoint(clientX, clientY);
+            if (!target || !target.classList.contains("react-flow__pane")) return;
+
             const position = reactFlow.screenToFlowPosition({ x: clientX, y: clientY });
 
             const allEdges = reactFlow.getEdges() as Edge<ItemEdgeData>[];
