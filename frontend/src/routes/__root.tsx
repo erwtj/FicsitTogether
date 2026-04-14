@@ -106,6 +106,7 @@ function RootComponent() {
     }, [state.matches]);
 
     const isCanvasPage = state.matches[1]?.pathname?.includes('edit/') || state.matches[1]?.pathname?.includes('view/projects/');
+    const isLoginPage = state.matches[1]?.pathname === '/login';
     const currentYear = new Date().getFullYear();
 
     return (
@@ -118,8 +119,8 @@ function RootComponent() {
                 key={details?.openPage}
             />
             <Outlet/>
-            <div className={`w-100 text-center mb-2 ${isCanvasPage ? "position-absolute bottom-0" : "mt-auto"}`}>
-                <span className={`text-body-tertiary ${isCanvasPage ? "opacity-75" : "bg-body"} rounded-3 px-2 py-1`}>
+            <div className={`w-100 text-center mb-2 z-2 ${(isCanvasPage || isLoginPage) ? "position-absolute bottom-0" : "mt-auto"}`}>
+                <span className={`text-body-tertiary ${(isCanvasPage || isLoginPage) ? "opacity-75" : "bg-body"} rounded-3 px-2 py-1`}>
                     © {currentYear} Ficsit Together | Satisfactory assets © Coffee Stain Studios AB | <Link to="/credits" className="clickable-link text-body-tertiary">Credits</Link>
                 </span>
             </div>
