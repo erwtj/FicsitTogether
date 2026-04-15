@@ -169,7 +169,13 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                         <OverviewSidePanel projectId={projectId}/>
                     </Panel>
                     <Panel position={"bottom-right"} className="mb-4">
-                        <button className="btn btn-danger m-0 p-2" onClick={handleDeleteControlClick}>
+                        <button
+                            type="button"
+                            className="btn btn-danger m-0 p-2"
+                            aria-label="Delete selected items"
+                            title="Delete selected items"
+                            onClick={handleDeleteControlClick}
+                        >
                             <Trash size={24}/>
                         </button>
                     </Panel>
