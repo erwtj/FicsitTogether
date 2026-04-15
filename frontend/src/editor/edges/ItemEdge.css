@@ -60,6 +60,7 @@ svg:has(g > path.elevated-edge) {
     width: 20px;
     height: 20px;
     cursor: cell;
+    touch-action: none;
 }
 
 .position-handle {
@@ -74,4 +75,5 @@ svg:has(g > path.elevated-edge) {
 
     width: 20px;
     height: 20px;
+    touch-action: none;
 }

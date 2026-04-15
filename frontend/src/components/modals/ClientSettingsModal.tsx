@@ -35,9 +35,6 @@ export const ClientSettingsModal = ({show, handleClose}: ClientSettingsModalProp
                     <Form.Check disabled={!clientSettings.minimapEnabled} type="checkbox" id={"check-minimap_colors"}
                                 label="Minimap colors" checked={clientSettings.minimapColors}
                                 onChange={(e) => updateClientSettings({minimapColors: e.target.checked})}/>
-                    <Form.Check type="checkbox" id={"check-showControls"} label="Show controls"
-                                checked={clientSettings.showControls}
-                                onChange={(e) => updateClientSettings({showControls: e.target.checked})}/>
                 </Form>
                 <hr/>
                 <Form onSubmit={handleSubmit}>

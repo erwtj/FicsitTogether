@@ -1,6 +1,6 @@
-﻿import {useCallback, useMemo, useRef } from "react";
+import {useCallback, useMemo, useRef } from "react";
 import * as Y from "yjs";
-import { Background, BackgroundVariant, ControlButton, Controls, MiniMap, Panel, ReactFlow } from "@xyflow/react";
+import { Background, BackgroundVariant, MiniMap, Panel, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./ChartEditor.css";
 
@@ -30,6 +30,13 @@ const panelStyle = { placeContent: "center" as const };
 const defaultEdgeOptions = { style: { strokeWidth: 1.75 } };
 const deleteKeyCodes: string[] = ['Backspace', 'Delete'];
 const multiSelectionKeyCodes: string[] = ['Shift', 'Control'];
+const chartEditorContainerStyle = {
+    width: "100%",
+    height: "100dvh",
+    maxHeight: "100dvh",
+    overflow: "hidden",
+    overscrollBehavior: "none" as const,
+};
 
 interface ChartEditorProps {
     projectId: string;
@@ -131,7 +138,7 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
 
     return (
         <YjsContext.Provider value={ydocRef}>
-            <div style={{ width: "100%", height: "100vh" }}>
+            <div style={chartEditorContainerStyle}>
                 <ReactFlow
                     style={reactFlowStyle}
                     tabIndex={-1}
@@ -161,11 +168,17 @@ function ChartEditorInner({ projectId }: ChartEditorProps) {
                     <Panel position={"top-left"} className={"h-100"} style={panelStyle}>
                         <OverviewSidePanel projectId={projectId}/>
                     </Panel>
-                    {clientSettings.showControls && <Controls position="bottom-right">
-                        <ControlButton onClick={handleDeleteControlClick} title="Delete selected nodes and edges">
-                            <Trash size={18} />
-                        </ControlButton>
-                    </Controls>}
+                    <Panel position={"bottom-right"} className="mb-4">
+                        <button
+                            type="button"
+                            className="btn btn-danger m-0 p-2"
+                            aria-label="Delete selected items"
+                            title="Delete selected items"
+                            onClick={handleDeleteControlClick}
+                        >
+                            <Trash size={24}/>
+                        </button>
+                    </Panel>
                 </ReactFlow>
 
                 <div className="experimental-ribbon no-drag">

@@ -116,7 +116,14 @@
     100% { opacity:1; }
 }
 
+@media (min-width: 768px) {
+    .experimental-ribbon {
+        display: block !important;
+    }
+}
+
 .experimental-ribbon {
+    display: none;
     position: absolute;
     top: 35px;
     left: -150px;
