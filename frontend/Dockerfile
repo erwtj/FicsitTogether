@@ -2,7 +2,7 @@
 #   docker build -f frontend/Dockerfile .
 
 # ── Stage 1: build Vite static site ──────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 
 WORKDIR /workspace
 
