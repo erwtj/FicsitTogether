@@ -2,7 +2,7 @@
 #   docker build -f backend/Dockerfile .
 
 # ── Stage 1: build deps ───────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 
 WORKDIR /workspace
 
@@ -28,7 +28,7 @@ RUN npm run build --workspace ficlib
 COPY backend/ ./backend/
 
 # ── Stage 2: lean runtime image ───────────────────────────────────────────────
-FROM node:20-alpine AS runtime
+FROM node:26-alpine AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app
